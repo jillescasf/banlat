@@ -27,8 +27,7 @@ def OrderConvergesTo {ι : Type v} [Preorder ι] (u : ι → X) (x : X) : Prop :
         ∀ k, ∀ᶠ i in Filter.atTop, |u i - x| ≤ r k
 
 /-- A constant net order converges to its constant value. -/
-theorem orderConvergesTo_const {ι : Type v} [Preorder ι] [IsDirected ι (· ≤ ·)]
-    [Nonempty ι] (x : X) :
+theorem orderConvergesTo_const {ι : Type v} [Preorder ι] (x : X) :
     OrderConvergesTo (fun _ : ι => x) x := by
   refine ⟨ULift.{u} PUnit, inferInstance, inferInstance, inferInstance,
     fun _ => 0, ?_, ?_, ?_, ?_⟩
@@ -205,7 +204,7 @@ theorem nonneg {ι : Type v} [Preorder ι] [IsDirected ι (· ≤ ·)] [Nonempty
   exact neg_nonpos.mp (hrglb.2 hlb)
 
 /-- Addition is order continuous. -/
-theorem add {ι : Type v} [Preorder ι] [IsDirected ι (· ≤ ·)] [Nonempty ι]
+theorem add {ι : Type v} [Preorder ι]
     {u v : ι → X} {x y : X} (hu : OrderConvergesTo u x)
     (hv : OrderConvergesTo v y) :
     OrderConvergesTo (fun i => u i + v i) (x + y) := by
@@ -235,7 +234,7 @@ theorem add {ι : Type v} [Preorder ι] [IsDirected ι (· ≤ ·)] [Nonempty ι
 
 omit [IsOrderedAddMonoid X] in
 /-- Negation is order continuous. -/
-theorem neg {ι : Type v} [Preorder ι] [IsDirected ι (· ≤ ·)] [Nonempty ι]
+theorem neg {ι : Type v} [Preorder ι]
     {u : ι → X} {x : X} (hu : OrderConvergesTo u x) :
     OrderConvergesTo (fun i => -u i) (-x) := by
   rcases hu with ⟨κ, hκpre, hκdir, hκnon, r, hranti, hrnn, hrglb, hrevent⟩
@@ -253,7 +252,7 @@ theorem neg {ι : Type v} [Preorder ι] [IsDirected ι (· ≤ ·)] [Nonempty ι
       _ ≤ r k := hi
 
 /-- Subtraction is order continuous. -/
-theorem sub {ι : Type v} [Preorder ι] [IsDirected ι (· ≤ ·)] [Nonempty ι]
+theorem sub {ι : Type v} [Preorder ι]
     {u v : ι → X} {x y : X} (hu : OrderConvergesTo u x)
     (hv : OrderConvergesTo v y) :
     OrderConvergesTo (fun i => u i - v i) (x - y) := by
@@ -283,8 +282,7 @@ theorem forall_le {ι : Type v} [Preorder ι] [IsDirected ι (· ≤ ·)] [Nonem
 
 /-- Scalar multiplication is order continuous. -/
 theorem smul [VectorLattice X] (a : ℝ) {ι : Type v} [Preorder ι]
-    [IsDirected ι (· ≤ ·)] [Nonempty ι] {u : ι → X} {x : X}
-    (hu : OrderConvergesTo u x) :
+    {u : ι → X} {x : X} (hu : OrderConvergesTo u x) :
     OrderConvergesTo (fun i => a • u i) (a • x) := by
   rcases hu with ⟨κ, hκpre, hκdir, hκnon, r, hranti, hrnn, hrglb, hrevent⟩
   letI : Preorder κ := hκpre
@@ -313,7 +311,7 @@ theorem smul [VectorLattice X] (a : ℝ) {ι : Type v} [Preorder ι]
         _ ≤ |a| • r k := smul_le_smul_of_nonneg_left hi (abs_nonneg a)
 
 /-- Supremum is order continuous. -/
-theorem sup {ι : Type v} [Preorder ι] [IsDirected ι (· ≤ ·)] [Nonempty ι]
+theorem sup {ι : Type v} [Preorder ι]
     {u v : ι → X} {x y : X} (hu : OrderConvergesTo u x)
     (hv : OrderConvergesTo v y) :
     OrderConvergesTo (fun i => u i ⊔ v i) (x ⊔ y) := by
@@ -337,14 +335,14 @@ theorem sup {ι : Type v} [Preorder ι] [IsDirected ι (· ≤ ·)] [Nonempty ι
       exact (abs_sup_sub_sup_le_add (u i) (v i) x y).trans (add_le_add hi.1 hi.2)
 
 /-- Infimum is order continuous. -/
-theorem inf {ι : Type v} [Preorder ι] [IsDirected ι (· ≤ ·)] [Nonempty ι]
+theorem inf {ι : Type v} [Preorder ι]
     {u v : ι → X} {x y : X} (hu : OrderConvergesTo u x)
     (hv : OrderConvergesTo v y) :
     OrderConvergesTo (fun i => u i ⊓ v i) (x ⊓ y) := by
   simpa [neg_sup] using (hu.neg.sup hv.neg).neg
 
 /-- Absolute value is order continuous. -/
-theorem abs {ι : Type v} [Preorder ι] [IsDirected ι (· ≤ ·)] [Nonempty ι]
+theorem abs {ι : Type v} [Preorder ι]
     {u : ι → X} {x : X} (hu : OrderConvergesTo u x) :
     OrderConvergesTo (fun i => |u i|) |x| := by
   change OrderConvergesTo (fun i ↦ u i ⊔ -u i) (x ⊔ -x)

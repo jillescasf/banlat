@@ -391,7 +391,7 @@ private lemma range_linearIsometry_standardGaussian {X : ℕ → Ω → ℝ}
 /-- For `p ≥ 1`, the closed linear span in `Lᵖ` of an independent sequence of standard
 real Gaussian random variables is linearly isometric to `ℓ²(ℕ, ℝ)`. -/
 theorem nonempty_linearIsometryEquiv_standardGaussian_closedSpan
-    {X : ℕ → Ω → ℝ} [IsProbabilityMeasure P]
+    {X : ℕ → Ω → ℝ}
     (hX : ∀ n, HasLaw (X n) (gaussianReal 0 1) P)
     (h_indep : iIndepFun X P) [Fact (1 ≤ (p : ℝ≥0∞))] :
     Nonempty
@@ -405,7 +405,7 @@ theorem nonempty_linearIsometryEquiv_standardGaussian_closedSpan
 /-- For `p > 0`, the normalized Gaussian map embeds `ℓ²(ℕ, ℝ)` linearly into
 `Lᵖ`, preserves the (quasi-)norm, and sends `eₙ` to `‖N(0, 1)‖ₚ⁻¹ · Xₙ`. -/
 theorem exists_linearMap_standardGaussian_preserving_quasiNorm
-    {X : ℕ → Ω → ℝ} [IsProbabilityMeasure P]
+    {X : ℕ → Ω → ℝ}
     (hX : ∀ n, HasLaw (X n) (gaussianReal 0 1) P)
     (h_indep : iIndepFun X P)
     (hp_pos : 0 < p) :

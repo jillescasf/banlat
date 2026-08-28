@@ -8,8 +8,7 @@ import BanLat.ALSpace.Add
 # The dual of an AL-space
 
 This file introduces the canonical unit functional on the norm dual of an
-AL-space and identifies the norm dual of a non-trivial AL-space as an AM-space
-with unit.
+AL-space and identifies the norm dual of an AL-space as an AM-space with unit.
 -/
 
 namespace ALSpace
@@ -123,16 +122,14 @@ theorem norm_eq_gaugeNorm_dualUnit (φ : StrongDual ℝ X) :
         have hunit : 0 ≤ (dualUnit X : StrongDual ℝ X) := dualUnit_nonneg (X := X)
         simpa [abs_of_nonneg hunit] using abs_le_norm_smul_dualUnit (X := X) φ)
 
-/-- The canonical dual unit is a strong order unit on the dual of a
-non-trivial AL-space. -/
-theorem dualUnit_strongOrderUnit [Nontrivial X] :
+/-- The canonical dual unit is a strong order unit on the dual of an AL-space. -/
+theorem dualUnit_strongOrderUnit :
     StrongOrderUnit (dualUnit X) := by
-  letI : Nontrivial X := inferInstance
   refine ⟨dualUnit_nonneg (X := X), fun φ => ?_⟩
   exact ⟨‖φ‖, norm_nonneg φ, abs_le_norm_smul_dualUnit (X := X) φ⟩
 
-/-- The norm dual of a non-trivial AL-space is an AM-space with unit. -/
-noncomputable instance StrongDual.instAMSpaceWithUnitOfALSpace [Nontrivial X] :
+/-- The norm dual of an AL-space is an AM-space with unit. -/
+noncomputable instance StrongDual.instAMSpaceWithUnitOfALSpace :
     AMSpaceWithUnit (StrongDual ℝ X) := by
   exact
     { unit := dualUnit X

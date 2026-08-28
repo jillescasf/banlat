@@ -529,10 +529,10 @@ theorem isMaximalDisjoint_iff_forall_eq_zero {Λ : Set X}
     exact hΛ'.1 (hy0 ▸ hy)
 
 /-- **Existence of a maximal disjoint family of positive vectors.** Every
-vector lattice admits a maximal disjoint family whose elements are all
-strictly positive. -/
+lattice-ordered additive group admits a maximal disjoint family whose elements
+are all strictly positive. -/
 theorem exists_isMaximalDisjoint_pos (X : Type*) [AddCommGroup X] [Lattice X]
-    [IsOrderedAddMonoid X] [VectorLattice X] :
+    [IsOrderedAddMonoid X] :
     ∃ Λ : Set X, IsMaximalDisjoint Λ ∧ ∀ x ∈ Λ, 0 < x := by
   let 𝒞 : Set (Set X) := {S | IsDisjointSet S ∧ ∀ x ∈ S, 0 < x}
   have hZorn : ∀ c ⊆ 𝒞, IsChain (· ⊆ ·) c → ∃ ub ∈ 𝒞, ∀ s ∈ c, s ⊆ ub := by

@@ -275,7 +275,7 @@ private lemma range_linearIsometry_standardQStable {X : ℕ → Ω → ℝ}
 /-- For `1 ≤ p < q < 2`, the closed linear span in `Lᵖ` of an independent sequence of
 standard symmetric `q`-stable random variables is linearly isometric to `ℓ^q(ℕ, ℝ)`. -/
 theorem nonempty_linearIsometryEquiv_standardQStable_closedSpan
-    {X : ℕ → Ω → ℝ} [IsProbabilityMeasure P]
+    {X : ℕ → Ω → ℝ}
     (hX : ∀ n, HasSymmetricStableLaw (X n) q 1 P)
     (h_indep : iIndepFun X P) (hq_lt_two : q < 2)
     [Fact (1 ≤ (p : ℝ≥0∞))] [Fact (1 ≤ ENNReal.ofReal q)]
@@ -293,7 +293,7 @@ theorem nonempty_linearIsometryEquiv_standardQStable_closedSpan
 /-- For `0 < p < q < 2`, the normalized stable map embeds `ℓ^q(ℕ, ℝ)` linearly
 into `Lᵖ`, preserves the (quasi-)norm, and sends `eₙ ↦ ‖X₀‖ₚ⁻¹ · Xₙ`. -/
 theorem exists_linearMap_standardQStable_preserving_quasiNorm
-    {X : ℕ → Ω → ℝ} [IsProbabilityMeasure P]
+    {X : ℕ → Ω → ℝ}
     (hX : ∀ n, HasSymmetricStableLaw (X n) q 1 P)
     (h_indep : iIndepFun X P) (hq_lt_two : q < 2)
     (hp_pos : 0 < p)

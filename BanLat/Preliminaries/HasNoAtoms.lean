@@ -50,10 +50,10 @@ def IsContinuous (μ : Measure α) : Prop :=
     ∀ ⦃r : ℝ≥0∞⦄, r ≤ μ s →
       ∃ t : Set α, MeasurableSet t ∧ t ⊆ s ∧ μ t = r
 
-/-- On a compact Hausdorff Borel space, a finite regular measure with no
+/-- On a Hausdorff Borel space, a finite regular measure with no
 singleton atoms has no atoms in the measure-theoretic sense. -/
 theorem hasNoAtoms_of_noAtoms_of_regular {K : Type*}
-    [TopologicalSpace K] [T2Space K] [CompactSpace K] [MeasurableSpace K] [BorelSpace K]
+    [TopologicalSpace K] [T2Space K] [MeasurableSpace K] [BorelSpace K]
     {μ : Measure K} [IsFiniteMeasure μ] [NullSingletonClass μ] (hμ : μ.Regular) :
     μ.HasNoAtoms := by
   classical
@@ -122,10 +122,10 @@ end Measure
 
 namespace SignedMeasure
 
-variable {K : Type*} [TopologicalSpace K] [T2Space K] [CompactSpace K]
+variable {K : Type*} [TopologicalSpace K] [T2Space K]
   [MeasurableSpace K] [BorelSpace K]
 
-/-- For a regular signed measure on a compact Hausdorff Borel space,
+/-- For a regular signed measure on a Hausdorff Borel space,
 singleton-null total variation implies measure-theoretic atomlessness of the
 total variation. -/
 theorem IsRegular.totalVariation_hasNoAtoms_of_noAtoms {s : SignedMeasure K}

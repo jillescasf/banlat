@@ -38,11 +38,10 @@ private lemma inf_nsmul_mem_principal {e x : X} (he : 0 ≤ e) (hx : 0 ≤ x) (n
   rw [abs_of_nonneg h_inf_nn, abs_of_nonneg he]
   exact inf_le_right
 
-/-- Membership in the closure of a principal ideal: in a Banach lattice, a
+/-- Membership in the closure of a principal ideal: in a normed vector lattice, a
 non-negative element `x` lies in the closure of the principal ideal of `e ≥ 0`
 iff the truncations `x ⊓ (n : ℝ) • e` converge to `x` in norm. -/
-theorem mem_closure_principal_iff_tendsto_inf [CompleteSpace X]
-    {e x : X} (he : 0 ≤ e) (hx : 0 ≤ x) :
+theorem mem_closure_principal_iff_tendsto_inf {e x : X} (he : 0 ≤ e) (hx : 0 ≤ x) :
     x ∈ closure ((OrderIdeal.principal e : Set X)) ↔
       Filter.Tendsto (fun n : ℕ => x ⊓ (n : ℝ) • e) Filter.atTop (nhds x) := by
   refine ⟨fun hxcl => ?_, fun htend => ?_⟩
@@ -93,9 +92,9 @@ theorem mem_closure_principal_iff_tendsto_inf [CompleteSpace X]
     refine mem_closure_of_tendsto htend ?_
     exact Filter.Eventually.of_forall fun n => inf_nsmul_mem_principal he hx n
 
-/-- A non-negative element `e` of a Banach lattice is a quasi-interior point
+/-- A non-negative element `e` of a normed vector lattice is a quasi-interior point
 iff `x ⊓ (n : ℝ) • e → x` in norm for every non-negative `x`. -/
-theorem quasiInteriorPoint_iff_tendsto_inf [CompleteSpace X] {e : X} :
+theorem quasiInteriorPoint_iff_tendsto_inf {e : X} :
     QuasiInteriorPoint e ↔
       0 ≤ e ∧ ∀ x : X, 0 ≤ x →
         Filter.Tendsto (fun n : ℕ => x ⊓ (n : ℝ) • e) Filter.atTop (nhds x) := by

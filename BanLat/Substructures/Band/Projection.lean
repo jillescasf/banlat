@@ -932,8 +932,7 @@ private lemma exists_decomposition_of_isLUB_pos {B : Band X}
 
 /-- For a projection band `B` and `x ∈ X₊`, the band projection of `x` is the
 supremum of `B ∩ [0, x]`. -/
-theorem isLUB_inter_Icc_bandProjection [IsVLArchimedean X]
-    (B : ProjectionBand X) {x : X} (hx : 0 ≤ x) :
+theorem isLUB_inter_Icc_bandProjection (B : ProjectionBand X) {x : X} (hx : 0 ≤ x) :
     IsLUB ((B : Set X) ∩ Set.Icc 0 x) (B.bandProjection x) := by
   have hBx_nn : 0 ≤ B.bandProjection x :=
     Positive.zero_le_iff.mp B.bandProjection_nonneg x hx
@@ -951,7 +950,7 @@ theorem isLUB_inter_Icc_bandProjection [IsVLArchimedean X]
 
 /-- A band `B` is a projection band iff for every `x ∈ X₊` the set
 `B ∩ [0, x]` admits a supremum. -/
-theorem projectionBand_iff_isLUB_inter_Icc [IsVLArchimedean X] (B : Band X) :
+theorem projectionBand_iff_isLUB_inter_Icc (B : Band X) :
     (∃ P : ProjectionBand X, (P : Set X) = (B : Set X))
       ↔ ∀ x : X, 0 ≤ x → ∃ s, IsLUB ((B : Set X) ∩ Set.Icc 0 x) s := by
   refine ⟨fun ⟨P, hPB⟩ x hx => ⟨P.bandProjection x, ?_⟩, fun hLUB => ?_⟩

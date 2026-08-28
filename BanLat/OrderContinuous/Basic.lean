@@ -53,7 +53,7 @@ norm convergence. -/
 theorem tendsto_of_orderConvergesTo_of_isOrderContinuousNorm.{u}
     {X : Type u} [NormedAddCommGroup X] [Lattice X] [IsOrderedAddMonoid X]
     [NormedVectorLattice X] [IsOrderContinuousNorm X]
-    {ι : Type u} [Preorder ι] [IsDirected ι (· ≤ ·)] [Nonempty ι]
+    {ι : Type u} [Preorder ι]
     {x : ι → X} {a : X} (hx : OrderConvergesTo x a) :
     Filter.Tendsto x Filter.atTop (nhds a) := by
   rcases hx with ⟨κ, hκpre, hκdir, hκnon, r, hranti, hrnn, hrglb, hrevent⟩
