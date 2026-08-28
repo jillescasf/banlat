@@ -155,13 +155,10 @@ private lemma StrongDual.norm_add_eq_of_nonneg_inf_eq_zero
 /-- The norm dual of an AM-space is an AL-space. -/
 noncomputable instance StrongDual.instALSpaceOfAMSpace :
     ALSpace (StrongDual ℝ X) where
-  norm_add_eq_of_inf_eq_zero {φ ψ} hφψ := by
-    have hφ : 0 ≤ φ := by
-      rw [← hφψ]
-      exact inf_le_left
-    have hψ : 0 ≤ ψ := by
-      rw [← hφψ]
-      exact inf_le_right
-    exact StrongDual.norm_add_eq_of_nonneg_inf_eq_zero hφ hψ hφψ
+  norm_add_rpow_eq_of_isVLDisjoint {φ ψ} hφψ := by
+    simp only [NNReal.coe_one, Real.rpow_one]
+    rw [← norm_abs_eq_norm (φ + ψ), abs_add_of_isVLDisjoint hφψ,
+      StrongDual.norm_add_eq_of_nonneg_inf_eq_zero (abs_nonneg φ) (abs_nonneg ψ) hφψ,
+      norm_abs_eq_norm, norm_abs_eq_norm]
 
 end AMSpace

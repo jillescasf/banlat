@@ -21,7 +21,8 @@ variable {X : Type*} [NormedAddCommGroup X] [Lattice X] [IsOrderedAddMonoid X]
 private def canonicalALSpace (hX' : ALSpace (StrongDual ℝ X)) :
     ALSpace (StrongDual ℝ X) :=
   { (StrongDual.instBanachLattice (X := X) : BanachLattice (StrongDual ℝ X)) with
-    norm_add_eq_of_inf_eq_zero := fun {_ _} h => hX'.norm_add_eq_of_inf_eq_zero h }
+    norm_add_rpow_eq_of_isVLDisjoint := fun {_ _} h =>
+      hX'.norm_add_rpow_eq_of_isVLDisjoint h }
 
 @[reducible]
 private def canonicalAMSpace (hX' : AMSpace (StrongDual ℝ X)) :
@@ -69,15 +70,16 @@ def amSpaceOfDualALSpace (hX' : ALSpace (StrongDual ℝ X)) : AMSpace X where
 is an AL-space. -/
 @[reducible]
 def alSpaceOfDualAMSpace (hX' : AMSpace (StrongDual ℝ X)) : ALSpace X where
-  norm_add_eq_of_inf_eq_zero {x y} hxy := by
+  norm_add_rpow_eq_of_isVLDisjoint {x y} hxy := by
     haveI : ALSpace (BidualSpace X) := bidual_alSpace_of_dual_amSpace (X := X) hX'
-    have hxy' :
-        @min (BidualSpace X) SemilatticeInf.toMin
-          (BidualSpace.inclusion x) (BidualSpace.inclusion y) = 0 := by
-      rw [← BidualSpace.inclusion_inf, hxy]
+    have hxy' : IsVLDisjoint (BidualSpace.inclusion x) (BidualSpace.inclusion y) := by
+      unfold IsVLDisjoint at hxy ⊢
+      rw [← BidualSpace.inclusion_abs, ← BidualSpace.inclusion_abs,
+        ← BidualSpace.inclusion_inf, hxy]
       exact (BidualSpace.inclusion (X := X)).map_zero
     have h :=
-      @ALSpace.norm_add_eq_of_inf_eq_zero (BidualSpace X)
+      @ALpSpace.norm_add_rpow_eq_of_isVLDisjoint (1 : NNReal) (BidualSpace X)
+        fact_one_le_one_nnreal
         ContinuousLinearMap.toNormedAddCommGroup inferInstance inferInstance inferInstance
         (BidualSpace.inclusion x) (BidualSpace.inclusion y) hxy'
     rw [← (BidualSpace.inclusion (X := X)).map_add,

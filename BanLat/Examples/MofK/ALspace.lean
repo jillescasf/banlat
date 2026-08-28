@@ -25,16 +25,15 @@ private theorem signedMeasure_norm_add_of_nonneg {s t : MeasureTheory.SignedMeas
 /-- `M(K)` is an AL-space. -/
 noncomputable instance instALSpace : ALSpace (MofK K) := by
   refine ⟨?_⟩
+  simp only [NNReal.coe_one, Real.rpow_one]
   intro x y hxy
-  have hx : 0 ≤ x := by
-    rw [← hxy]
-    exact inf_le_left
-  have hy : 0 ≤ y := by
-    rw [← hxy]
-    exact inf_le_right
-  change ‖(x : MeasureTheory.SignedMeasure K) + (y : MeasureTheory.SignedMeasure K)‖ =
-    ‖(x : MeasureTheory.SignedMeasure K)‖ + ‖(y : MeasureTheory.SignedMeasure K)‖
-  exact signedMeasure_norm_add_of_nonneg hx hy
+  rw [← norm_abs_eq_norm (x + y), abs_add_of_isVLDisjoint hxy,
+    ← norm_abs_eq_norm x, ← norm_abs_eq_norm y]
+  change ‖((|x| : MofK K) : MeasureTheory.SignedMeasure K) +
+      ((|y| : MofK K) : MeasureTheory.SignedMeasure K)‖ =
+    ‖((|x| : MofK K) : MeasureTheory.SignedMeasure K)‖ +
+      ‖((|y| : MofK K) : MeasureTheory.SignedMeasure K)‖
+  exact signedMeasure_norm_add_of_nonneg (abs_nonneg x) (abs_nonneg y)
 
 /-- The norm on `M(K)` is order continuous. -/
 instance instIsOrderContinuousNorm : IsOrderContinuousNorm (MofK K) := by

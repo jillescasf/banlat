@@ -1,4 +1,4 @@
-import BanLat.Normed
+import BanLat.ALpSpace.Basic
 
 /-!
 # AL-spaces
@@ -9,13 +9,12 @@ An **AL-space** is a Banach lattice whose norm satisfies the AL-axiom:
 
 /-! ### AL-spaces -/
 
-/-- An **AL-space** is a Banach lattice whose norm is additive on disjoint
-elements: for all `x` and `y` with `x ⊓ y = 0`,
-`‖x + y‖ = ‖x‖ + ‖y‖`. -/
-class ALSpace (X : Type*) [NormedAddCommGroup X] [Lattice X]
-    [IsOrderedAddMonoid X] extends BanachLattice X where
-  norm_add_eq_of_inf_eq_zero {x y : X} (hxy : x ⊓ y = 0) :
-    ‖x + y‖ = ‖x‖ + ‖y‖
+/-- The endpoint exponent `1` satisfies the lower bound for `ALpSpace`. -/
+instance fact_one_le_one_nnreal : Fact ((1 : NNReal) ≤ 1) := ⟨le_rfl⟩
+
+/-- An **AL-space** is an `ALₚ`-space with `p = 1`. -/
+abbrev ALSpace (X : Type*) [NormedAddCommGroup X] [Lattice X]
+    [IsOrderedAddMonoid X] := ALpSpace 1 X
 
 namespace ALSpace
 
@@ -23,6 +22,13 @@ variable {X : Type*} [NormedAddCommGroup X] [Lattice X]
   [IsOrderedAddMonoid X] [ALSpace X]
 
 /-! #### Basic norm identities -/
+
+/-- The norm is additive on positive disjoint elements. -/
+theorem norm_add_eq_of_inf_eq_zero {x y : X} (hxy : x ⊓ y = 0) :
+    ‖x + y‖ = ‖x‖ + ‖y‖ := by
+  simpa only [NNReal.coe_one, Real.rpow_one] using
+    ALpSpace.norm_add_rpow_eq_of_isVLDisjoint (p := (1 : NNReal))
+      (isVLDisjoint_of_inf_eq_zero hxy)
 
 /-- The norm of the positive part plus the norm of the negative part
 equals the norm: `‖x⁺‖ + ‖x⁻‖ = ‖x‖`. -/
@@ -39,7 +45,8 @@ noncomputable def completion {X : Type*} [NormedAddCommGroup X] [Lattice X]
     [IsOrderedAddMonoid X] [NormedVectorLattice X]
     (hAL : ∀ x y : X, x ⊓ y = 0 → ‖x + y‖ = ‖x‖ + ‖y‖) :
     ALSpace (Completion X) where
-  norm_add_eq_of_inf_eq_zero := by
+  norm_add_rpow_eq_of_isVLDisjoint := by
+    simp only [NNReal.coe_one, Real.rpow_one]
     have coe_pp : ∀ x : X, ((x⁺ : X) : Completion X) = ((x : Completion X))⁺ := fun x => by
       rw [posPart_def, posPart_def, coe_sup_completion, Completion.coe_zero]
     have coe_np : ∀ x : X, ((x⁻ : X) : Completion X) = ((x : Completion X))⁻ := fun x => by
@@ -57,14 +64,18 @@ noncomputable def completion {X : Type*} [NormedAddCommGroup X] [Lattice X]
         rw [← coe_pp, ← coe_np, Completion.norm_coe, Completion.norm_coe, Completion.norm_coe]
         exact hAL' x
       exact fun z => congrFun (Completion.denseRange_coe.equalizer continuous_norm hcont heq) z
+    have hnorm : ∀ {a b : Completion X}, a ⊓ b = 0 → ‖a + b‖ = ‖a‖ + ‖b‖ := by
+      intro a b hab
+      have hpp : (a - b)⁺ = a := by rw [← sub_inf_eq_posPart, hab, sub_zero]
+      have hnp : (a - b)⁻ = b := by
+        rw [negPart_def, neg_sub, ← posPart_def, ← sub_inf_eq_posPart, inf_comm, hab, sub_zero]
+      have habs : |a - b| = a + b := by rw [← posPart_add_negPart (a - b), hpp, hnp]
+      calc ‖a + b‖ = ‖|a - b|‖ := by rw [habs]
+        _ = ‖a - b‖ := norm_abs_eq_norm (a - b)
+        _ = ‖(a - b)⁺‖ + ‖(a - b)⁻‖ := hParts (a - b)
+        _ = ‖a‖ + ‖b‖ := by rw [hpp, hnp]
     intro a b hab
-    have hpp : (a - b)⁺ = a := by rw [← sub_inf_eq_posPart, hab, sub_zero]
-    have hnp : (a - b)⁻ = b := by
-      rw [negPart_def, neg_sub, ← posPart_def, ← sub_inf_eq_posPart, inf_comm, hab, sub_zero]
-    have habs : |a - b| = a + b := by rw [← posPart_add_negPart (a - b), hpp, hnp]
-    calc ‖a + b‖ = ‖|a - b|‖ := by rw [habs]
-      _ = ‖a - b‖ := norm_abs_eq_norm (a - b)
-      _ = ‖(a - b)⁺‖ + ‖(a - b)⁻‖ := hParts (a - b)
-      _ = ‖a‖ + ‖b‖ := by rw [hpp, hnp]
+    rw [← norm_abs_eq_norm (a + b), abs_add_of_isVLDisjoint hab,
+      hnorm hab, norm_abs_eq_norm, norm_abs_eq_norm]
 
 end ALSpace

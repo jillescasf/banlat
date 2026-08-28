@@ -71,10 +71,13 @@ noncomputable def ofClosedSublattice (Y : VectorSublattice X)
     toCompleteSpace := by
       haveI : IsClosed (Y.toSubmodule : Set X) := hclosed
       infer_instance
-    norm_add_eq_of_inf_eq_zero := by
+    norm_add_rpow_eq_of_isVLDisjoint := by
+      simp only [NNReal.coe_one, Real.rpow_one]
       intro x y hxy
       change ‖x.1 + y.1‖ = ‖x.1‖ + ‖y.1‖
-      exact ALSpace.norm_add_eq_of_inf_eq_zero (congrArg Subtype.val hxy)
+      simpa only [NNReal.coe_one, Real.rpow_one] using
+        ALpSpace.norm_add_rpow_eq_of_isVLDisjoint (p := (1 : NNReal))
+          (congrArg Subtype.val hxy)
   }
 
 end ALSpace
