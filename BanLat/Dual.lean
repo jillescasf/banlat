@@ -351,15 +351,22 @@ theorem isLUB_sSup (S : Set (StrongDual ℝ X)) (hbdd : BddAbove S)
       exact hu hv⟩
   have hLUB' := OrderDualSpace.isLUB_sSup
     (toOrderDualSpace '' S : Set (OrderDualSpace X)) hbdd' hne'
+  have hround : toOrderDualSpace
+      (ofOrderDualSpace (sSup (toOrderDualSpace '' S : Set (OrderDualSpace X)))) =
+        sSup (toOrderDualSpace '' S : Set (OrderDualSpace X)) := by
+    ext x
+    rfl
   constructor
   · intro a ha
     change toOrderDualSpace a ≤ toOrderDualSpace
       (ofOrderDualSpace (sSup (toOrderDualSpace '' S : Set (OrderDualSpace X))))
-    simpa using hLUB'.1 ⟨a, ha, rfl⟩
+    rw [hround]
+    exact hLUB'.1 ⟨a, ha, rfl⟩
   · intro u hu
     change toOrderDualSpace
       (ofOrderDualSpace (sSup (toOrderDualSpace '' S : Set (OrderDualSpace X)))) ≤
         toOrderDualSpace u
+    rw [hround]
     exact hLUB'.2 (by
       rintro _ ⟨a, ha, rfl⟩
       exact hu ha)

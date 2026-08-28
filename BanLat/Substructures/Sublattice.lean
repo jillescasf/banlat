@@ -134,7 +134,7 @@ namespace VectorSublattice
 
 instance : SetLike (VectorSublattice X) X where
   coe Y := Y.carrier
-  coe_injective' p q h := by
+  coe_injective p q h := by
     cases p; cases q; congr
     exact SetLike.ext' h
 
@@ -764,14 +764,37 @@ noncomputable def topologicalClosure (Y : VectorSublattice X) : VectorSublattice
     rw [← Submodule.topologicalClosure_coe] at hxy
     exact hxy
 
+end VectorSublattice
+
+end Normed
+
+section Banach
+
+variable {X : Type*} [NormedAddCommGroup X] [Lattice X] [IsOrderedAddMonoid X]
+  [BanachLattice X]
+
+namespace VectorSublattice
+
 /-- A norm-closed vector sublattice of a Banach lattice is itself a Banach
 lattice under the induced structures. -/
 @[reducible]
-noncomputable def banachLatticeSubtype [BanachLattice X]
-    (hclosed : IsClosed (Y : Set X)) : BanachLattice ↥Y.toSubmodule where
+noncomputable def banachLatticeSubtype (Y : VectorSublattice X)
+    (hclosed : IsClosed (Y : Set X)) :
+    BanachLattice ↥Y.toSubmodule where
   toCompleteSpace := by
     haveI : IsClosed (Y.toSubmodule : Set X) := hclosed
     infer_instance
+
+end VectorSublattice
+
+end Banach
+
+section Normed
+
+variable {X : Type*} [NormedAddCommGroup X] [Lattice X] [IsOrderedAddMonoid X]
+  [NormedVectorLattice X]
+
+namespace VectorSublattice
 
 omit [NormedAddCommGroup X] [Lattice X] [IsOrderedAddMonoid X] [NormedVectorLattice X] in
 /-- Finite subsets of a countable set form a countable set of finsets. -/

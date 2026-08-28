@@ -101,7 +101,7 @@ private lemma exists_finset_norming_span
       simpa [abs_mul, abs_inv, abs_of_nonneg (norm_nonneg y)] using hzf
     have := mul_lt_mul_of_pos_left hzf' hy_pos
     have hlt : ‖y‖ / 2 < ‖y f‖ := by
-      convert this using 1 <;> field_simp
+      simpa [div_eq_mul_inv, hy_pos.ne'] using this
     exact hlt.le
 
 private lemma exists_mem_norm_eval_sub_lt_of_mem_closure
@@ -125,7 +125,8 @@ private lemma exists_mem_norm_eval_sub_lt_of_mem_closure
   obtain ⟨a, ha, rfl⟩ := hy_image
   refine ⟨a, ha, fun f hf ↦ ?_⟩
   rw [norm_sub_rev]
-  simpa using hyU f hf
+  change ‖NormedSpace.inclusionInDoubleDualWeak ℝ X a f - z f‖ < ε
+  exact hyU f hf
 
 private lemma exists_next_state
     {s : Set (WeakSpace ℝ X)} {z : WeakDual ℝ (StrongDual ℝ X)}
@@ -135,7 +136,7 @@ private lemma exists_next_state
       q'.points = q.points ++ [a] ∧
       q.functionals ⊆ q'.functionals ∧
       (∀ y ∈ Submodule.span ℝ
-          (Set.insert (WeakDual.toStrongDual z)
+          (insert (WeakDual.toStrongDual z)
             ((fun b ↦
               WeakDual.toStrongDual z - NormedSpace.inclusionInDoubleDual ℝ X
                 ((toWeakSpace ℝ X).symm b)) '' {b | b ∈ q.points})),
@@ -167,7 +168,7 @@ private lemma exists_next_state
     obtain ⟨f, hfh, hfy⟩ := hh y (by
       simpa only [v, Finset.coe_insert, Finset.coe_image, List.coe_toFinset] using hy)
     exact ⟨f, Finset.mem_union_right _ hfh, hfy⟩
-  · simpa only [q'] using ha_approx
+  · simpa only [q', WeakDual.toStrongDual_apply] using ha_approx
 
 private lemma isCompact_of_isSeqCompact [CompleteSpace X]
     {s : Set (WeakSpace ℝ X)} (hs : IsSeqCompact s) : IsCompact s := by
@@ -238,8 +239,10 @@ private lemma isCompact_of_isSeqCompact [CompleteSpace X]
           rw [hq_succ] at hk
           exact (hnext_approx (q (φ k)) (φ k) f hk).le)
       have hinv : Tendsto (fun k ↦ (φ k + 1 : ℝ)⁻¹) atTop (nhds 0) := by
-        simpa [one_div] using
+        have h :=
           (tendsto_one_div_add_atTop_nhds_zero_nat (𝕜 := ℝ)).comp hφ.tendsto_atTop
+        exact h.congr' <| Eventually.of_forall fun k ↦ by
+          simp only [Function.comp_apply, one_div]
       have h_to_z : Tendsto
           (fun k ↦ f ((toWeakSpace ℝ X).symm (u (φ k)))) atTop
           (nhds (WeakDual.toStrongDual z f)) := by
@@ -247,8 +250,15 @@ private lemma isCompact_of_isSeqCompact [CompleteSpace X]
         exact squeeze_zero' (Eventually.of_forall fun _ ↦ norm_nonneg _) hbound hinv
       have h_to_x : Tendsto
           (fun k ↦ f ((toWeakSpace ℝ X).symm (u (φ k)))) atTop (nhds (f x)) := by
-        simpa only [x] using
+        have heval (w : WeakSpace ℝ X) :
+            ((topDualPairing ℝ X).flip w) f = f ((toWeakSpace ℝ X).symm w) := rfl
+        have h :=
           ((WeakBilin.eval_continuous (topDualPairing ℝ X).flip f).tendsto xw).comp hφ_lim
+        have h' : Tendsto (fun k ↦ f ((toWeakSpace ℝ X).symm (u (φ k)))) atTop
+            (nhds (((topDualPairing ℝ X).flip xw) f)) :=
+          h.congr' <| Eventually.of_forall fun k ↦ by
+            simp only [Function.comp_apply, heval]
+        simpa only [x, heval] using h'
       exact tendsto_nhds_unique h_to_z h_to_x
     have hx_span : x ∈ closure (Submodule.span ℝ (Set.range fun n ↦
         (toWeakSpace ℝ X).symm (u n)) : Set X) := by
@@ -306,11 +316,11 @@ private lemma isCompact_of_isSeqCompact [CompleteSpace X]
       have hyf : y f = 0 := by
         rw [hy_def]
         dsimp only [J]
-        rw [ContinuousLinearMap.sub_apply, NormedSpace.dual_def,
+        rw [sub_apply, NormedSpace.dual_def,
           hcanonical_eval (n + 1) f hfq, sub_self]
       have hwf_le : ‖w f‖ ≤ ‖w - y‖ := by
         calc
-          ‖w f‖ = ‖(w - y) f‖ := by rw [ContinuousLinearMap.sub_apply, hyf, sub_zero]
+          ‖w f‖ = ‖(w - y) f‖ := by rw [sub_apply, hyf, sub_zero]
           _ ≤ ‖w - y‖ * ‖f‖ := (w - y).le_opNorm f
           _ ≤ ‖w - y‖ * 1 := mul_le_mul_of_nonneg_left
             ((q (n + 1)).norm_functionals f hfq).le (norm_nonneg _)
@@ -326,11 +336,20 @@ private lemma isCompact_of_isSeqCompact [CompleteSpace X]
       have hyw_norm : ‖y - w‖ = ‖w - y‖ := norm_sub_rev _ _
       nlinarith [hy_tri, hy_norm, hyw_norm]
     refine ⟨xw, hxw, ?_⟩
-    apply WeakDual.toStrongDual.injective
     have hzx : WeakDual.toStrongDual z = J x := by
       rw [hy_def] at hy_zero
       exact sub_eq_zero.mp hy_zero
-    simpa only [e, x, J, LinearEquiv.apply_symm_apply] using hzx.symm
+    apply DFunLike.ext _ _
+    intro f
+    dsimp only [e]
+    calc
+      NormedSpace.inclusionInDoubleDualWeak ℝ X xw f =
+          f ((toWeakSpace ℝ X).symm xw) :=
+        NormedSpace.inclusionInDoubleDualWeak_apply_apply ℝ X xw f
+      _ = f x := rfl
+      _ = z f := by
+        simpa only [J, NormedSpace.dual_def, WeakDual.toStrongDual_apply] using
+          DFunLike.congr_fun hzx.symm f
   have hs_closed : IsClosed s := by
     have := he_closed.preimage e.continuous
     rw [Set.preimage_image_eq _
@@ -398,10 +417,10 @@ private lemma isSeqCompact_of_isCompact [CompleteSpace X]
         ← map_sub]
       exact ((f n).le_opNorm _).trans (mul_le_of_le_one_left (norm_nonneg _) (hf n).1)
     have hdist : ‖(TopologicalSpace.denseSeq Y n : X) - d‖ < ‖d‖ / 4 := by
-      simpa only [dist_eq_norm, norm_sub_rev] using hn
+      simpa only [dist_eq_norm, norm_sub_rev, Submodule.coe_norm, Submodule.coe_sub] using hn
     have hd_tri : ‖d‖ ≤ ‖d - TopologicalSpace.denseSeq Y n‖ +
         ‖(TopologicalSpace.denseSeq Y n : X)‖ := by
-      simpa only [sub_add_cancel] using
+      simpa only [sub_add_cancel, Submodule.coe_norm, Submodule.coe_sub] using
         norm_add_le (d - TopologicalSpace.denseSeq Y n) (TopologicalSpace.denseSeq Y n)
     have hsub_norm : ‖d - TopologicalSpace.denseSeq Y n‖ =
         ‖(TopologicalSpace.denseSeq Y n : X) - d‖ := by

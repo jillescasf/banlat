@@ -3,7 +3,7 @@ Authors: David Muñoz-Lahoz
 -/
 
 import Mathlib.MeasureTheory.Constructions.Polish.Basic
-import Mathlib.MeasureTheory.Measure.Typeclasses.NoAtoms
+import Mathlib.MeasureTheory.Measure.Typeclasses.NullSingletonClass
 import Mathlib.Analysis.SpecificLimits.Basic
 import Mathlib.Order.Zorn
 import BanLat.Preliminaries.Regularity
@@ -16,11 +16,10 @@ This file develops the standard continuity property of atomless measures:
 inside any measurable set `s`, one can find a measurable subset of any
 prescribed measure between `0` and `μ s`.
 
-Mathlib's typeclass `MeasureTheory.NoAtoms μ` means that every singleton has
-measure zero. That is not the measure-theoretic notion used here: an atom is a
-positive measurable set with no measurable subset of strictly intermediate
-measure. We therefore introduce `Measure.HasNoAtoms` for the measure-theoretic
-notion.
+Mathlib's typeclass `MeasureTheory.NullSingletonClass μ` means that every singleton
+has measure zero. That is not the measure-theoretic notion used here: an atom is
+a positive measurable set with no measurable subset of strictly intermediate
+measure. We therefore introduce `Measure.HasNoAtoms` for the measure-theoretic notion.
 -/
 
 open scoped ENNReal
@@ -55,7 +54,7 @@ def IsContinuous (μ : Measure α) : Prop :=
 singleton atoms has no atoms in the measure-theoretic sense. -/
 theorem hasNoAtoms_of_noAtoms_of_regular {K : Type*}
     [TopologicalSpace K] [T2Space K] [CompactSpace K] [MeasurableSpace K] [BorelSpace K]
-    {μ : Measure K} [IsFiniteMeasure μ] [NoAtoms μ] (hμ : μ.Regular) :
+    {μ : Measure K} [IsFiniteMeasure μ] [NullSingletonClass μ] (hμ : μ.Regular) :
     μ.HasNoAtoms := by
   classical
   haveI : μ.Regular := hμ
@@ -130,7 +129,7 @@ variable {K : Type*} [TopologicalSpace K] [T2Space K] [CompactSpace K]
 singleton-null total variation implies measure-theoretic atomlessness of the
 total variation. -/
 theorem IsRegular.totalVariation_hasNoAtoms_of_noAtoms {s : SignedMeasure K}
-    (hs : s.IsRegular) [NoAtoms s.totalVariation] :
+    (hs : s.IsRegular) [NullSingletonClass s.totalVariation] :
     s.totalVariation.HasNoAtoms :=
   Measure.hasNoAtoms_of_noAtoms_of_regular hs
 
@@ -182,10 +181,10 @@ private theorem exists_pos_measurable_subset_measure_le_half
   by_cases hu_le : μ u ≤ μ s / 2
   · exact ⟨u, hu_meas, hus, hu_pos, hu_le⟩
   · have hu_ne_top : μ u ≠ ∞ := ne_top_of_le_ne_top hs_ne_top (measure_mono hus)
-    refine ⟨s \ u, hs.diff hu_meas, diff_subset, ?_, ?_⟩
-    · rw [measure_diff hus hu_meas.nullMeasurableSet hu_ne_top]
+    refine ⟨s \ u, hs.diff hu_meas, sdiff_subset, ?_, ?_⟩
+    · rw [measure_sdiff hus hu_meas.nullMeasurableSet hu_ne_top]
       exact tsub_pos_iff_lt.2 hu_lt
-    · rw [measure_diff hus hu_meas.nullMeasurableSet hu_ne_top]
+    · rw [measure_sdiff hus hu_meas.nullMeasurableSet hu_ne_top]
       have hhalf_lt : μ s / 2 < μ u := lt_of_not_ge hu_le
       rw [tsub_le_iff_left]
       calc
@@ -464,7 +463,7 @@ private theorem chain_iUnion_ae_dominates
   by_cases ht_below : ∃ n, aeSubset μ t (u n)
   · rcases ht_below with ⟨n, htn⟩
     refine aeSubset_trans htn ?_
-    rw [aeSubset, diff_eq_empty.2 (subset_iUnion u n)]
+    rw [aeSubset, sdiff_eq_empty.2 (subset_iUnion u n)]
     simp
   · have hu_le_t : ∀ n, aeSubset μ (u n) t := by
       intro n
@@ -610,7 +609,7 @@ private theorem remaining_measure_pos_of_measure_lt
   by_contra hzero
   rw [not_lt, nonpos_iff_eq_zero] at hzero
   have hs_eq : μ s = μ m := by
-    rw [← union_diff_cancel hms, measure_union' disjoint_sdiff_right hm, hzero, add_zero]
+    rw [← union_sdiff_cancel hms, measure_union' disjoint_sdiff_right hm, hzero, add_zero]
   exact hm_lt.not_ge (hr.trans_eq hs_eq)
 
 /-- The positive gap between the target and the current measure. -/
@@ -670,7 +669,7 @@ private theorem positive_piece_contradicts_ae_maximal
   have ht_adm : m ∪ n ∈ admissibleSubsets μ s r :=
     union_admissible_of_piece_le_gap (μ := μ) hm hms hn hns hm_le hn_le_gap
   have hm_diff_union : μ (m \ (m ∪ n)) = 0 := by
-    rw [diff_eq_empty.2 subset_union_left]
+    rw [sdiff_eq_empty.2 subset_union_left]
     simp
   have h_union_diff_null : μ ((m ∪ n) \ m) = 0 :=
     hm_max ht_adm.1 ht_adm.2.1 ht_adm.2.2 hm_diff_union

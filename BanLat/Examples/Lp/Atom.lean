@@ -334,7 +334,7 @@ theorem Measure.isAtom_of_isVLAtom_indicatorConstLp
   have hμt_finite : μ t < ∞ := lt_of_le_of_lt (measure_mono hts) hμs
   let u := s \ t
   have hu : MeasurableSet u := hs.diff ht
-  have hus : u ⊆ s := Set.diff_subset
+  have hus : u ⊆ s := Set.sdiff_subset
   have hμu_finite : μ u < ∞ := lt_of_le_of_lt (measure_mono hus) hμs
   let x := indicatorConstLp (p : ENNReal) ht hμt_finite.ne c
   let y := indicatorConstLp (p : ENNReal) hu hμu_finite.ne c
@@ -354,7 +354,7 @@ theorem Measure.isAtom_of_isVLAtom_indicatorConstLp
       apply nonpos_iff_eq_zero.mp
       exact le_of_not_gt fun hμu_pos ↦
         ((indicatorConstLp_pos_iff hu hμu_finite hc).2 hμu_pos).ne' hy
-    have hdiff := measure_diff hts ht.nullMeasurableSet hμt_finite.ne
+    have hdiff := measure_sdiff hts ht.nullMeasurableSet hμt_finite.ne
     have hst : μ s ≤ μ t := tsub_eq_zero_iff_le.mp (hdiff ▸ hμu)
     exact le_antisymm (measure_mono hts) hst
 

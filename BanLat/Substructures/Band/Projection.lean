@@ -37,7 +37,7 @@ namespace ProjectionBand
 
 instance : SetLike (ProjectionBand X) X where
   coe B := B.carrier
-  coe_injective' p q h := by
+  coe_injective p q h := by
     cases p; cases q; congr
     exact SetLike.ext' h
 

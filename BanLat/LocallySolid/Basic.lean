@@ -99,7 +99,14 @@ omit [IsOrderedAddMonoid E] [VectorLattice E] [ContinuousSMul ℝ E] in
 private lemma uniformContinuous_abs_of_sup
     (hsup : UniformContinuous (fun p : E × E => p.1 ⊔ p.2)) :
     UniformContinuous (|·| : E → E) := by
-  simpa [abs] using hsup.comp (UniformContinuous.prodMk uniformContinuous_id uniformContinuous_neg)
+  have hcomp := hsup.comp
+    (UniformContinuous.prodMk uniformContinuous_id uniformContinuous_neg)
+  have hfun : ((fun p : E × E => p.1 ⊔ p.2) ∘ fun x : E => (x, -x)) =
+      (|·| : E → E) := by
+    funext x
+    simp only [Function.comp_apply, abs]
+  rw [← hfun]
+  exact hcomp
 
 omit [VectorLattice E] [ContinuousSMul ℝ E] in
 private lemma uniformContinuous_inf_of_sup
@@ -200,8 +207,8 @@ private lemma locallySolid_of_uniformContinuous_sup
   let A : Set E := A₀ ∩ {x | -x ∈ A₀}
   have hA : A ∈ 𝓝 (0 : E) := by
     refine Filter.inter_mem (hA₀open.mem_nhds hA₀zero) ?_
-    simpa [A] using
-      (continuous_neg.tendsto (0 : E)) (hA₀open.mem_nhds (by simpa using hA₀zero))
+    exact (continuous_neg.tendsto (0 : E))
+      (hA₀open.mem_nhds (by simpa using hA₀zero))
   rcases exists_nhds_zero_forall_inf_sub_inf_mem hinf hA with ⟨B, hB, hBU⟩
   have hBabs : (|·| : E → E) ⁻¹' B ∈ 𝓝 (0 : E) := by
     simpa using habs.continuous.tendsto' 0 0 (by simp) hB
@@ -355,9 +362,12 @@ theorem VectorSublattice.exists_coe_eq_closure (Y : VectorSublattice E) :
         have hy' : y ∈ _root_.closure (Y.toSubmodule : Set E) := by
           rw [← Submodule.topologicalClosure_coe]
           exact hy
+        have hcont_uncurry :
+            Continuous (Function.uncurry fun a b : E => a ⊔ b) :=
+          hcont_sup.congr fun _ => rfl
         have hxy : x ⊔ y ∈ _root_.closure (Y.toSubmodule : Set E) :=
           map_mem_closure₂ (f := fun a b : E => a ⊔ b)
-            (by simpa [Function.uncurry] using hcont_sup) hx' hy'
+            hcont_uncurry hx' hy'
             (fun _ ha _ hb => Y.sup_mem ha hb)
         rwa [← Submodule.topologicalClosure_coe] at hxy }
   refine ⟨Z, ?_⟩
@@ -432,8 +442,9 @@ theorem isClosed_nonneg_cone_of_t2_locallySolidVectorLattice :
   have hcont_sup : Continuous (fun p : E × E => p.1 ⊔ p.2) :=
     ((isLocallySolidVectorLattice_iff_uniformContinuous_sup (E := E)).mp inferInstance).continuous
   have hcont_negPart : Continuous (fun x : E => x⁻) := by
-    simpa [negPart_def] using
-      hcont_sup.comp (Continuous.prodMk continuous_neg continuous_const)
+    have hzero : Continuous (fun _ : E => (0 : E)) := continuous_const
+    exact (hcont_sup.comp (Continuous.prodMk continuous_neg hzero)).congr
+      fun _ => by simp only [Function.comp_apply, negPart_def]
   rw [show {x : E | 0 ≤ x} = (fun x : E => x⁻) ⁻¹' ({0} : Set E) by
     ext x
     simp [negPart_eq_zero]]

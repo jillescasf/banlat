@@ -61,7 +61,7 @@ lemma integrable_iff (hX : HasSymmetricStableLaw X q c P) :
   rw [← memLp_one_iff_integrable]
   by_cases hc : c = 0
   · have hX_one : MemLp X 1 P := by
-      simpa only [ENNReal.ofReal_one] using hX.memLp_of_scale_eq_zero hc 1
+      simpa only [ENNReal.coe_one] using hX.memLp_of_scale_eq_zero hc 1
     simp [hc, hX_one]
   have hc_pos : 0 < c := pos_iff_ne_zero.mpr hc
   by_cases hq : q = 2
@@ -202,9 +202,15 @@ lemma lpNorm_finset_sum_mul_of_hasSymmetricStableLaw
     rw [← toReal_eLpNorm hident.aemeasurable_snd.aestronglyMeasurable]
     rw [hident.eLpNorm_eq p]
   rw [hlpNorm]
-  convert lpNorm_const_smul ((↑(∑ i ∈ s, ‖a i‖₊ ^ q) : ℝ) ^ q⁻¹) Z Q using 1
-  rw [coe_nnnorm, Real.norm_of_nonneg]
-  positivity
+  let r := (↑(∑ i ∈ s, ‖a i‖₊ ^ q) : ℝ) ^ q⁻¹
+  calc
+    lpNorm (fun ω ↦ r * Z ω) p Q = lpNorm (r • Z) p Q := by
+      congr 1
+    _ = ‖r‖₊ * lpNorm Z p Q := lpNorm_const_smul r Z Q
+    _ = r * lpNorm Z p Q := by
+      rw [coe_nnnorm, Real.norm_of_nonneg]
+      dsimp only [r]
+      positivity
 
 /-- For `p > 0` with `q = 2` or `p < q`, let `(X i)` be independent symmetric `q`-stable
 random variables with common scale `c`, and let `Z` have the same law. Then:

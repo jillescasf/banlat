@@ -347,7 +347,8 @@ theorem inf {ι : Type v} [Preorder ι] [IsDirected ι (· ≤ ·)] [Nonempty ι
 theorem abs {ι : Type v} [Preorder ι] [IsDirected ι (· ≤ ·)] [Nonempty ι]
     {u : ι → X} {x : X} (hu : OrderConvergesTo u x) :
     OrderConvergesTo (fun i => |u i|) |x| := by
-  simpa [abs] using hu.sup hu.neg
+  change OrderConvergesTo (fun i ↦ u i ⊔ -u i) (x ⊔ -x)
+  exact hu.sup hu.neg
 
 end OrderConvergesTo
 

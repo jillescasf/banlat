@@ -79,7 +79,7 @@ theorem abs_le_norm_smul_dualUnit (φ : StrongDual ℝ X) :
   intro x hx
   change (|StrongDual.toOrderDualSpace φ| : OrderDualSpace X) x ≤
     (‖φ‖ • dualUnit X) x
-  rw [ContinuousLinearMap.smul_apply, smul_eq_mul, dualUnit_apply_of_nonneg hx]
+  rw [smul_apply, smul_eq_mul, dualUnit_apply_of_nonneg hx]
   refine (OrderDualSpace.isLUB_abs_apply
     (φ := StrongDual.toOrderDualSpace φ) hx).2 ?_
   rintro r ⟨y, hyx, rfl⟩
@@ -115,7 +115,7 @@ theorem norm_eq_gaugeNorm_dualUnit (φ : StrongDual ℝ X) :
         StrongDual.toOrderDualSpace (c • dualUnit X) at hle
       exact OrderDualSpace.le_iff.mp hle |x| (abs_nonneg x)
     rw [Real.norm_eq_abs]
-    rw [ContinuousLinearMap.smul_apply, smul_eq_mul,
+    rw [smul_apply, smul_eq_mul,
       dualUnit_apply_of_nonneg (abs_nonneg x), norm_abs_eq_norm] at h_eval
     exact h_abs_apply.trans h_eval
   · exact OrderIdeal.gaugeNorm_le_of_abs_le (dualUnit X) (norm_nonneg φ)

@@ -75,7 +75,8 @@ private lemma coeFn_smul_standardGaussianToLp {X : Ω → ℝ}
   have hmem : MemLp X p P :=
     hX.hasGaussianLaw.memLp ENNReal.coe_ne_top
   rw [standardGaussianToLp, ← hmem.toLp_const_smul]
-  simpa [Pi.smul_apply, smul_eq_mul] using MemLp.coeFn_toLp (hmem.const_smul a)
+  exact (MemLp.coeFn_toLp (hmem.const_smul a)).trans <|
+    Filter.Eventually.of_forall fun ω ↦ by simp only [Pi.smul_apply, smul_eq_mul]
 
 /-- A finite sum of Gaussian `Lᵖ` classes is represented almost
 everywhere by the corresponding pointwise finite Gaussian sum. -/
@@ -86,7 +87,9 @@ private lemma coeFn_sum_standardGaussianToLp {X : ℕ → Ω → ℝ}
   classical
   induction s using Finset.induction_on with
   | empty =>
-      simpa only [Finset.sum_empty] using (Lp.coeFn_zero ℝ p P)
+      simp only [Finset.sum_empty]
+      exact (Lp.coeFn_zero ℝ p P).trans <|
+        Filter.Eventually.of_forall fun ω ↦ by simp only [Pi.zero_apply]
   | @insert i s hi ih =>
       simp only [Finset.sum_insert hi]
       filter_upwards [Lp.coeFn_add (a i • standardGaussianToLp p (hX i))
@@ -362,7 +365,8 @@ private lemma range_linearIsometry_standardGaussian {X : ℕ → Ω → ℝ}
   · rintro _ ⟨x, rfl⟩
     have hx := lp.hasSum_single (p := (2 : ℝ≥0∞)) (by norm_num) x
     have hTx : HasSum (fun n ↦ T (lp.single 2 n (x n))) (T x) := by
-      simpa only [Function.comp_apply] using hx.map T T.continuous
+      exact (hx.map T T.continuous).congr' <| Filter.Eventually.of_forall fun n ↦ by
+        simp only [Function.comp_apply]
     refine (Submodule.isClosed_topologicalClosure _).mem_of_tendsto hTx ?_
     filter_upwards with s
     apply Submodule.sum_mem

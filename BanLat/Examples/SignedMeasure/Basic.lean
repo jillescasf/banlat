@@ -79,9 +79,9 @@ private theorem self_le_posPart (s : SignedMeasure α) : s ≤ s.posPart := by
   intro i hi
   have h := posPart_sub_negPart s
   have hi' : (s.posPart - s.negPart) i = s i := by rw [h]
-  rw [VectorMeasure.sub_apply] at hi'
+  rw [sub_apply] at hi'
   have hn : (0 : SignedMeasure α) i ≤ s.negPart i := zero_le_negPart s i hi
-  rw [VectorMeasure.zero_apply] at hn
+  rw [zero_apply] at hn
   linarith
 
 /-- Universal property of the positive part: `s.posPart` is the least
@@ -102,11 +102,11 @@ theorem posPart_isLeast (s : SignedMeasure α) :
     Set.disjoint_sdiff_right.mono_left Set.inter_subset_left
   have huni : (P ∩ i) ∪ (i \ P) = i := by
     rw [Set.inter_comm]
-    exact Set.inter_union_diff i P
+    exact Set.inter_union_sdiff i P
   have h2 : u (P ∩ i) + u (i \ P) = u i := by
     rw [← VectorMeasure.of_union hdisj (hP.inter hi) (hi.diff hP), huni]
   have h3 : (0 : SignedMeasure α) (i \ P) ≤ u (i \ P) := hu0 _ (hi.diff hP)
-  rw [VectorMeasure.zero_apply] at h3
+  rw [zero_apply] at h3
   linarith
 
 /-! ### Lattice structure -/
@@ -136,64 +136,64 @@ noncomputable instance instLattice : Lattice (SignedMeasure α) where
   le_sup_left s t := by
     intro i hi
     have h := self_le_posPart (s - t) i hi
-    rw [VectorMeasure.sub_apply] at h
+    rw [sub_apply] at h
     change s i ≤ (t + (s - t).posPart) i
-    rw [VectorMeasure.add_apply]
+    rw [add_apply]
     linarith
   le_sup_right s t := by
     intro i hi
     have h := zero_le_posPart (s - t) i hi
-    rw [VectorMeasure.zero_apply] at h
+    rw [zero_apply] at h
     change t i ≤ (t + (s - t).posPart) i
-    rw [VectorMeasure.add_apply]
+    rw [add_apply]
     linarith
   sup_le s t u hsu htu := by
     have h0 : (0 : SignedMeasure α) ≤ u - t := by
       intro i hi
-      rw [VectorMeasure.zero_apply, VectorMeasure.sub_apply]
+      rw [zero_apply, sub_apply]
       linarith [htu i hi]
     have h1 : s - t ≤ u - t := by
       intro i hi
-      rw [VectorMeasure.sub_apply, VectorMeasure.sub_apply]
+      rw [sub_apply, sub_apply]
       linarith [hsu i hi]
     have h2 : (s - t).posPart ≤ u - t :=
       (posPart_isLeast (s - t)).2 ⟨h0, h1⟩
     intro i hi
     change (t + (s - t).posPart) i ≤ u i
     have := h2 i hi
-    rw [VectorMeasure.sub_apply] at this
-    rw [VectorMeasure.add_apply]
+    rw [sub_apply] at this
+    rw [add_apply]
     linarith
   inf_le_left s t := by
     intro i hi
     have h := zero_le_posPart (s - t) i hi
-    rw [VectorMeasure.zero_apply] at h
+    rw [zero_apply] at h
     change (s - (s - t).posPart) i ≤ s i
-    rw [VectorMeasure.sub_apply]
+    rw [sub_apply]
     linarith
   inf_le_right s t := by
     intro i hi
     have h := self_le_posPart (s - t) i hi
-    rw [VectorMeasure.sub_apply] at h
+    rw [sub_apply] at h
     change (s - (s - t).posPart) i ≤ t i
-    rw [VectorMeasure.sub_apply]
+    rw [sub_apply]
     linarith
   le_inf u s t hus hut := by
     have h0 : (0 : SignedMeasure α) ≤ s - u := by
       intro i hi
-      rw [VectorMeasure.zero_apply, VectorMeasure.sub_apply]
+      rw [zero_apply, sub_apply]
       linarith [hus i hi]
     have h1 : s - t ≤ s - u := by
       intro i hi
-      rw [VectorMeasure.sub_apply, VectorMeasure.sub_apply]
+      rw [sub_apply, sub_apply]
       linarith [hut i hi]
     have h2 : (s - t).posPart ≤ s - u :=
       (posPart_isLeast (s - t)).2 ⟨h0, h1⟩
     intro i hi
     change u i ≤ (s - (s - t).posPart) i
     have := h2 i hi
-    rw [VectorMeasure.sub_apply] at this
-    rw [VectorMeasure.sub_apply]
+    rw [sub_apply] at this
+    rw [sub_apply]
     linarith
 
 /-- Translation invariance of the order: the addition on `SignedMeasure α` is
@@ -201,14 +201,14 @@ set-wise, hence preserves the set-wise order. -/
 instance instIsOrderedAddMonoid : IsOrderedAddMonoid (SignedMeasure α) where
   add_le_add_left a b h c := by
     intro i hi
-    rw [VectorMeasure.add_apply, VectorMeasure.add_apply]
+    rw [add_apply, add_apply]
     linarith [h i hi]
 
 /-- Multiplication by a non-negative real preserves the order: `(c • s) i =
 c • s i`, and `c • _` is monotone on `ℝ` for `0 ≤ c`. -/
 instance instPosSMulMono : PosSMulMono ℝ (SignedMeasure α) where
   smul_le_smul_of_nonneg_left := fun _ hc _ _ h i hi => by
-    rw [VectorMeasure.smul_apply, VectorMeasure.smul_apply]
+    rw [smul_apply, smul_apply]
     exact mul_le_mul_of_nonneg_left (h i hi) hc
 
 /-- Finite signed measures form a real vector lattice. -/
@@ -245,7 +245,7 @@ measure of `s` on that set. -/
 theorem abs_apply_eq_totalVariation (s : SignedMeasure α) (i : Set α)
     (hi : MeasurableSet i) :
     (|s| : SignedMeasure α) i = (s.totalVariation i).toReal := by
-  rw [abs_eq_posPart_add_negPart, VectorMeasure.add_apply]
+  rw [abs_eq_posPart_add_negPart, add_apply]
   change s.toJordanDecomposition.posPart.toSignedMeasure i +
       s.toJordanDecomposition.negPart.toSignedMeasure i = _
   rw [Measure.toSignedMeasure_apply_measurable hi,
@@ -379,7 +379,7 @@ theorem continuous_apply {E : Set α} (hE : MeasurableSet E) :
   refine Metric.continuous_iff.mpr fun ν ε hε => ⟨ε, hε, fun ν' hν' => ?_⟩
   rw [Real.dist_eq]
   have hsub : ν' E - ν E = (ν' - ν) E := by
-    rw [VectorMeasure.sub_apply]
+    rw [sub_apply]
   rw [hsub]
   calc
     |(ν' - ν) E| ≤ ‖ν' - ν‖ := abs_apply_le_norm _ hE

@@ -129,7 +129,7 @@ private lemma toReal_posPart_sub_le_norm_of_signed {u v : SignedMeasure K}
     rw [max_def, sub_zero, zero_add]
   rw [← h_u_eval, ← h_v_eval,
     show u.posPart E - v.posPart E = (u.posPart - v.posPart) E from
-      (VectorMeasure.sub_apply _ _ _).symm]
+      (sub_apply _ _ _).symm]
   calc
     |(u.posPart - v.posPart) E|
       ≤ ((u.posPart - v.posPart).totalVariation Set.univ).toReal :=

@@ -23,6 +23,11 @@ variable {X Y : Type*} [AddCommGroup X] [AddCommGroup Y]
   [IsOrderedAddMonoid Y] [VectorLattice X]
   [VectorLattice Y]
 
+private lemma obZero_apply (x : X) : (0 : OrderBoundedHom X Y) x = (0 : Y) := rfl
+
+private lemma obToLinearMap_apply (f : OrderBoundedHom X Y) (x : X) :
+    f.toLinearMap x = f x := rfl
+
 /-! ### Positive part construction for the Riesz-Kantorovich theorem -/
 
 private def ppSet (f : OrderBoundedHom X Y) (x : X) : Set Y :=
@@ -146,10 +151,13 @@ private noncomputable def obPosPart
     (f : OrderBoundedHom X Y) : OrderBoundedHom X Y :=
   ⟨ppOp f, Positive.isOrderBounded (ppOp_positive f)⟩
 
+private lemma obPosPart_apply (f : OrderBoundedHom X Y) (x : X) :
+    obPosPart f x = ppOp f x := rfl
+
 private lemma obPosPart_nonneg (f : OrderBoundedHom X Y) :
     (0 : OrderBoundedHom X Y) ≤ obPosPart f :=
   le_iff.mpr fun x hx => by
-    convert ppOp_positive f x hx using 1
+    simpa only [obZero_apply, obPosPart_apply] using ppOp_positive f x hx
 
 private lemma le_obPosPart (f : OrderBoundedHom X Y) :
     f ≤ obPosPart f :=
@@ -160,7 +168,8 @@ private lemma obPosPart_le {f g : OrderBoundedHom X Y}
     obPosPart f ≤ g :=
   le_iff.mpr fun x hx => by
     apply ppOp_le f g _ _ hx
-    · intro y hy; convert le_iff.mp hg0 y hy using 1
+    · intro y hy
+      simpa only [obZero_apply] using le_iff.mp hg0 y hy
     · intro y hy; exact le_iff.mp hgf y hy
 
 private noncomputable def obSup
@@ -280,7 +289,7 @@ private lemma posPart_apply_eq_ppFun
     {f : OrderBoundedHom X Y} {x : X} (hx : 0 ≤ x) :
     f⁺ x = ppFun f x := by
   rw [posPart_def, sup_zero_eq_obPosPart]
-  convert ppOp_apply_nonneg f hx using 1
+  simpa only [obPosPart_apply] using ppOp_apply_nonneg f hx
 
 /-- The positive part at a positive element is the supremum over
 the order interval `[0, x]`. -/
@@ -407,7 +416,7 @@ private lemma isGLB_inf_apply_disjoint_zero
   have hg0 : (0 : OrderBoundedHom X Y) ≤ g := by
     simpa [hfg0] using (inf_le_right : f ⊓ g ≤ g)
   have hS : IsGLB S 0 := by
-    simpa [S, hfg0] using (isGLB_inf_apply (f := f) (g := g) hx)
+    simpa only [S, hfg0, obZero_apply] using (isGLB_inf_apply (f := f) (g := g) hx)
   refine ⟨?_, ?_⟩
   · intro w hw
     rcases hw with ⟨y, z, hdisj, hyz, rfl⟩
@@ -626,12 +635,14 @@ elements disjoint from `x₀`. Concretely we set
 private lemma f_mono_of_nonneg {f : OrderBoundedHom X Y}
     (hf : (0 : OrderBoundedHom X Y) ≤ f) : Monotone f.toLinearMap :=
   Positive.monotone_iff.mpr fun y hy => by
-    have := le_iff.mp hf y hy; simpa using this
+    have := le_iff.mp hf y hy
+    simpa only [obZero_apply, obToLinearMap_apply] using this
 
 
 private lemma f_apply_nonneg {f : OrderBoundedHom X Y}
     (hf : (0 : OrderBoundedHom X Y) ≤ f) {y : X} (hy : 0 ≤ y) : 0 ≤ f y := by
-  have := le_iff.mp hf y hy; simpa using this
+  have := le_iff.mp hf y hy
+  simpa only [obZero_apply] using this
 
 /-- The value of the witness operator on the positive cone:
 `witFun f x₀ y = sup_n f (y ⊓ n • x₀)`. Defaults to `0` outside the regime where
@@ -774,13 +785,17 @@ private noncomputable def witOp {f : OrderBoundedHom X Y}
     OrderBoundedHom X Y :=
   ⟨witLin hf hx₀, Positive.isOrderBounded (witLin_positive hf hx₀)⟩
 
+private lemma witOp_apply {f : OrderBoundedHom X Y}
+    (hf : (0 : OrderBoundedHom X Y) ≤ f) {x₀ : X} (hx₀ : 0 ≤ x₀) (y : X) :
+    witOp hf hx₀ y = witLin hf hx₀ y := rfl
+
 private lemma witOp_nonneg {f : OrderBoundedHom X Y}
     (hf : (0 : OrderBoundedHom X Y) ≤ f) {x₀ : X} (hx₀ : 0 ≤ x₀) :
     (0 : OrderBoundedHom X Y) ≤ witOp hf hx₀ :=
   le_iff.mpr fun y hy => by
     have h := witLin_positive hf hx₀ y hy
     change (0 : Y) ≤ witLin hf hx₀ y at h
-    simpa using h
+    simpa only [obZero_apply, witOp_apply] using h
 
 private lemma witOp_le_f {f : OrderBoundedHom X Y}
     (hf : (0 : OrderBoundedHom X Y) ≤ f) {x₀ : X} (hx₀ : 0 ≤ x₀) :
@@ -929,7 +944,6 @@ theorem isGLB_apply_inf {f : OrderBoundedHom X Y}
   have hsym : ∀ w ∈ S, c - w ∈ S := by
     rintro _ ⟨g, hg0, hgf, rfl⟩
     refine ⟨f - g, sub_nonneg.mpr hgf, sub_le_self f hg0, ?_⟩
-    change c - (g x + (f - g) y) = (f - g) x + (f - (f - g)) y
     rw [sub_sub_cancel, sub_apply, sub_apply]
     change f x + f y - (g x + (f y - g y)) = (f x - g x) + g y
     abel
@@ -1339,7 +1353,13 @@ theorem IsOrderBounded.isRegularOp
   let F : OrderBoundedHom X Y := ⟨f, hf⟩
   refine ⟨F⁺.toLinearMap, F⁻.toLinearMap, ?_, ?_, ?_⟩
   · intro x hx
-    convert OrderBoundedHom.le_iff.mp (posPart_nonneg F) x hx using 1
+    change (0 : Y) ≤ F⁺ x
+    have h := OrderBoundedHom.le_iff.mp (posPart_nonneg F) x hx
+    change (0 : Y) ≤ F⁺ x at h
+    exact h
   · intro x hx
-    convert OrderBoundedHom.le_iff.mp (negPart_nonneg F) x hx using 1
+    change (0 : Y) ≤ F⁻ x
+    have h := OrderBoundedHom.le_iff.mp (negPart_nonneg F) x hx
+    change (0 : Y) ≤ F⁻ x at h
+    exact h
   · exact (congrArg OrderBoundedHom.toLinearMap (posPart_sub_negPart F)).symm

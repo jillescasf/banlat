@@ -82,6 +82,8 @@ lemma hasSymmetricStableLaw_finset_sum_mul {X : ι → Ω → ℝ} {c : ι → �
     (X := fun i ω ↦ a i * X i ω) (c := fun i ↦ c i * ‖a i‖₊ ^ q)
     (fun i ↦ (hX i).const_mul (a i)) _ hq_pos hq_le_two s
   convert h_indep.comp (fun i x ↦ a i * x) (fun _ ↦ by fun_prop) using 1
+  ext i ω
+  rfl
 
 /-- Let `Xₖ, k ∈ s` be a fnite set of independent symmetric `q`-stable random variables with
 common scale index `c` and `aₖ ∈ ℝ, k ∈ s`. Then `∑ k ∈ s, aₖXₖ` has the same distribution as

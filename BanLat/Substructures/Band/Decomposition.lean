@@ -88,8 +88,11 @@ theorem isLUB_principalBandProjection_of_isMaximalDisjoint
         have hmono :=
           (VecLatHom.ofIsVecLatHom B.bandProjection B.bandProjection_isVecLatHom).monotone
             hPx_le_y
+        have happly (z : X) :
+            VecLatHom.ofIsVecLatHom B.bandProjection B.bandProjection_isVecLatHom z =
+              B.bandProjection z := rfl
         have hmono' : B.bandProjection (B.bandProjection x) ≤ B.bandProjection y := by
-          simpa [VecLatHom.ofIsVecLatHom] using hmono
+          simpa only [happly] using hmono
         rwa [show B.bandProjection (B.bandProjection x) = B.bandProjection x from
           congrArg (fun T : X →ₗ[ℝ] X => T x) B.bandProjection_sq] at hmono'
       have hinf_eq : B.bandProjection x ⊓ B.bandProjection y = B.bandProjection x :=

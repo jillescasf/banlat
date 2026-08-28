@@ -413,9 +413,9 @@ private theorem continuous_inf_completion :
 
 private theorem continuous_abs_completion :
     Continuous (|·| : Completion X → Completion X) := by
-  simpa [abs] using
-    (Completion.continuous_map₂ continuous_id continuous_neg :
-      Continuous fun z : Completion X => z ⊔ -z)
+  change Continuous fun x : Completion X ↦ x ⊔ -x
+  exact (continuous_sup_completion.comp (continuous_id.prodMk continuous_neg)).congr fun x ↦ by
+    rw [Function.comp_apply, id_eq]
 
 omit [Lattice X] [IsOrderedAddMonoid X] [NormedVectorLattice X] in
 private lemma exists_seq_coe_tendsto (a : Completion X) :

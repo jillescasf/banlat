@@ -24,7 +24,7 @@ private theorem signedMeasure_norm_add_of_nonneg {s t : MeasureTheory.SignedMeas
   rw [MeasureTheory.SignedMeasure.norm_of_nonneg (add_nonneg hs ht),
     MeasureTheory.SignedMeasure.norm_of_nonneg hs,
     MeasureTheory.SignedMeasure.norm_of_nonneg ht,
-    MeasureTheory.VectorMeasure.add_apply]
+    add_apply]
 
 /-- `M(K)` is an AL-space. -/
 noncomputable instance instALSpace : ALSpace (MofK K) := by

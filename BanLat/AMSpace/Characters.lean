@@ -33,7 +33,7 @@ variable {X}
 functions `X → ℝ`. -/
 noncomputable instance instFunLike : FunLike (LatticeCharacter X) X ℝ where
   coe φ := fun x => φ.toVecLatHom x
-  coe_injective' := by
+  coe_injective := by
     intro φ ψ h
     cases φ
     cases ψ

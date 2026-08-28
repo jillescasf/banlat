@@ -50,7 +50,7 @@ namespace VecLatHom
 /-- The canonical `FunLike` instance, making `VecLatHom X Y` a type of functions `X → Y`. -/
 instance instFunLike : FunLike (VecLatHom X Y) X Y where
   coe f := f.toFun
-  coe_injective' f g h := by
+  coe_injective f g h := by
     dsimp at h
     cases f
     cases g
@@ -299,7 +299,7 @@ namespace VecLatEquiv
 /-- The canonical `FunLike` instance, making `VecLatEquiv X Y` a type of functions `X → Y`. -/
 instance instFunLike : FunLike (VecLatEquiv X Y) X Y where
   coe e := e.toFun
-  coe_injective' := by
+  coe_injective := by
     intro f g h
     cases f; cases g
     congr 1
@@ -479,7 +479,7 @@ variable {X Y : Type*}
 functions `X → Y`. -/
 instance instFunLike : FunLike (BanachLatEquiv X Y) X Y where
   coe e := e.toFun
-  coe_injective' := by
+  coe_injective := by
     intro f g h
     cases f; cases g
     congr 1

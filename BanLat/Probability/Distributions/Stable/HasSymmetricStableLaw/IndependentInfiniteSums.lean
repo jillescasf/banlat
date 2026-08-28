@@ -89,14 +89,21 @@ lemma exists_tendstoInMeasure_sum_range_mul_of_hasSymmetricStableLaw
     simpa only [u] using ha.hasSum.tendsto_sum_nat
   have hcontR : Continuous (fun x : ℝ≥0 ↦ (∑' i, u i) - x) := by fun_prop
   have hR : Filter.Tendsto R Filter.atTop (nhds 0) := by
-    simpa only [R, tsub_self] using hcontR.continuousAt.tendsto.comp hsum
+    have h := hcontR.continuousAt.tendsto.comp hsum
+    have h' : Filter.Tendsto R Filter.atTop (nhds ((∑' i, u i) - ∑' i, u i)) :=
+      h.congr' <| Filter.Eventually.of_forall fun N ↦ by
+        simp only [R, Function.comp_apply]
+    simpa only [tsub_self] using h'
   let b : ℕ → ℝ := fun N ↦ (R N : ℝ) ^ q⁻¹
   have hq_inv_pos : 0 < q⁻¹ := inv_pos.mpr (hX 0).isSymmetricStable_map.index_pos
   have hb : Filter.Tendsto b Filter.atTop (nhds 0) := by
     have hcoe := NNReal.continuous_coe.continuousAt.tendsto.comp hR
     have hrpow :=
       (Real.continuous_rpow_const hq_inv_pos.le).continuousAt.tendsto.comp hcoe
-    simpa only [Function.comp_apply, b, NNReal.coe_zero, Real.zero_rpow hq_inv_pos.ne'] using hrpow
+    have hrpow' : Filter.Tendsto b Filter.atTop (nhds ((0 : ℝ) ^ q⁻¹)) :=
+      hrpow.congr' <| Filter.Eventually.of_forall fun N ↦ by
+        simp only [b, Function.comp_apply]
+    simpa only [Real.zero_rpow hq_inv_pos.ne'] using hrpow'
   have hscaled : TendstoInMeasure P (fun N ω ↦ b N * X 0 ω) Filter.atTop 0 := by
     apply tendstoInMeasure_of_tendsto_ae
     · exact fun N ↦ ((hX 0).aemeasurable.const_mul (b N)).aestronglyMeasurable

@@ -60,6 +60,26 @@ private theorem norm_principal_eq_gauge {X : Type*} [AddCommGroup X] [Lattice X]
   letI := OrderIdeal.principalNormedAddCommGroup e
   rfl
 
+private theorem dist_principal_eq_gauge {X : Type*} [AddCommGroup X] [Lattice X]
+    [IsOrderedAddMonoid X] [VectorLattice X] [IsVLArchimedean X]
+    {e : X} (x y : ↥(OrderIdeal.principalSubmodule e)) :
+    letI := OrderIdeal.principalNormedAddCommGroup e
+    letI : PseudoMetricSpace ↥(OrderIdeal.principalSubmodule e) :=
+      @SeminormedAddCommGroup.toPseudoMetricSpace _
+        (@NormedAddCommGroup.toSeminormedAddCommGroup _
+          (OrderIdeal.principalNormedAddCommGroup e))
+    dist x y = OrderIdeal.gaugeNorm e ((x : X) - (y : X)) := by
+  letI := OrderIdeal.principalNormedAddCommGroup e
+  letI : PseudoMetricSpace ↥(OrderIdeal.principalSubmodule e) :=
+    @SeminormedAddCommGroup.toPseudoMetricSpace _
+      (@NormedAddCommGroup.toSeminormedAddCommGroup _
+        (OrderIdeal.principalNormedAddCommGroup e))
+  calc
+    dist x y = ‖x - y‖ := @dist_eq_norm _
+      (@NormedAddCommGroup.toSeminormedAddCommGroup _
+        (OrderIdeal.principalNormedAddCommGroup e)) x y
+    _ = OrderIdeal.gaugeNorm e ((x : X) - (y : X)) := norm_principal_eq_gauge (x - y)
+
 private theorem completeSpace_principal_of_banachLattice {X : Type*}
     [NormedAddCommGroup X] [Lattice X] [IsOrderedAddMonoid X]
     [BanachLattice X] (e : X) (he : 0 < e) :
@@ -83,11 +103,15 @@ private theorem completeSpace_principal_of_banachLattice {X : Type*}
     refine ⟨N, fun n hn m hm => ?_⟩
     have hdist := hN n hn m hm
     have hdist_gauge : OrderIdeal.gaugeNorm e ((u n : X) - (u m : X)) < ε / ‖e‖ := by
-      simpa [dist_eq_norm] using hdist
+      have heq : dist (u n) (u m) =
+          OrderIdeal.gaugeNorm e ((u n : X) - (u m : X)) := by
+        simpa only using (dist_principal_eq_gauge (u n) (u m))
+      rw [heq] at hdist
+      exact hdist
     rw [dist_eq_norm]
     have hle : ‖(u n : X) - (u m : X)‖ ≤
         ‖e‖ * OrderIdeal.gaugeNorm e ((u n : X) - (u m : X)) := by
-      simpa using norm_coe_le_norm_generator_mul_gauge (e := e) (u n - u m)
+      exact norm_coe_le_norm_generator_mul_gauge (e := e) (u n - u m)
     have hmul : ‖e‖ * OrderIdeal.gaugeNorm e ((u n : X) - (u m : X)) <
         ‖e‖ * (ε / ‖e‖) :=
       mul_lt_mul_of_pos_left hdist_gauge hnorme_pos
@@ -103,7 +127,11 @@ private theorem completeSpace_principal_of_banachLattice {X : Type*}
       filter_upwards [Filter.eventually_atTop.mpr ⟨N, fun n hn => hn⟩] with n hn
       have hdist := hN n hn N le_rfl
       exact abs_sub_le_of_gauge_le he.le (u n).2 (u N).2 (le_of_lt (by
-        simpa [dist_eq_norm] using hdist))
+        have heq : dist (u n) (u N) =
+            OrderIdeal.gaugeNorm e ((u n : X) - (u N : X)) := by
+          simpa only using (dist_principal_eq_gauge (u n) (u N))
+        rw [heq] at hdist
+        exact hdist))
     have hlim :
         |x - (u N : X)| ≤ (1 : ℝ) • e := by
       have hdiff_tend :
@@ -135,7 +163,11 @@ private theorem completeSpace_principal_of_banachLattice {X : Type*}
       filter_upwards [Filter.eventually_atTop.mpr ⟨N, fun m hm => hm⟩] with m hm
       have hdist := hN m hm n hn
       exact abs_sub_le_of_gauge_le he.le (u m).2 (u n).2 (le_of_lt (by
-        simpa [dist_eq_norm] using hdist))
+        have heq : dist (u m) (u n) =
+            OrderIdeal.gaugeNorm e ((u m : X) - (u n : X)) := by
+          simpa only using (dist_principal_eq_gauge (u m) (u n))
+        rw [heq] at hdist
+        exact hdist))
     have hdiff_tend :
         Filter.Tendsto (fun m => (u m : X) - (u n : X)) Filter.atTop
           (nhds (x - (u n : X))) :=
@@ -151,7 +183,11 @@ private theorem completeSpace_principal_of_banachLattice {X : Type*}
       simpa [abs_of_nonneg he.le] using horder)
   have hgauge_lt : OrderIdeal.gaugeNorm e ((u n : X) - x) < ε := by
     linarith
-  simpa [dist_eq_norm] using hgauge_lt
+  have heq : dist (u n) ⟨x, hx_mem⟩ =
+      OrderIdeal.gaugeNorm e ((u n : X) - x) := by
+    simpa only using (dist_principal_eq_gauge (u n) ⟨x, hx_mem⟩)
+  rw [heq]
+  exact hgauge_lt
 
 private theorem completeSpace_principal_of_sigmaConditionallyCompleteLattice {X : Type*}
     [AddCommGroup X] [SigmaConditionallyCompleteLattice X]
@@ -186,7 +222,11 @@ private theorem completeSpace_principal_of_sigmaConditionallyCompleteLattice {X 
     intro n
     have hdist := hu n n (n + 1) le_rfl (Nat.le_succ n)
     exact abs_sub_le_of_gauge_le he.le (u n).2 (u (n + 1)).2 (le_of_lt (by
-        simpa [dist_eq_norm] using hdist))
+        have heq : dist (u n) (u (n + 1)) =
+            OrderIdeal.gaugeNorm e ((u n : X) - (u (n + 1) : X)) := by
+          simpa only using (dist_principal_eq_gauge (u n) (u (n + 1)))
+        rw [heq] at hdist
+        exact hdist))
   have hv_mono : Monotone v := by
     refine monotone_nat_of_le_succ fun n => ?_
     have hdiff : (u n : X) - (u (n + 1) : X) ≤ b n • e :=
@@ -284,7 +324,11 @@ private theorem completeSpace_principal_of_sigmaConditionallyCompleteLattice {X 
       simpa [abs_of_nonneg he.le] using hdist_order n)
   have hgauge_lt : OrderIdeal.gaugeNorm e ((u n : X) - x) < ε :=
     hgauge.trans_lt hr_lt
-  simpa [dist_eq_norm] using hgauge_lt
+  have heq : dist (u n) ⟨x, hx_mem⟩ =
+      OrderIdeal.gaugeNorm e ((u n : X) - x) := by
+    simpa only using (dist_principal_eq_gauge (u n) ⟨x, hx_mem⟩)
+  rw [heq]
+  exact hgauge_lt
 
 /-- Every σ-order complete vector lattice is uniformly complete. -/
 theorem isUniformlyCompleteVectorLattice_of_sigmaConditionallyCompleteLattice

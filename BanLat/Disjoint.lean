@@ -619,7 +619,10 @@ theorem eq_zero_of_pairwise_isVLDisjoint_tendsto {Y : Type*}
   have hrhs_zero : Tendsto (fun n => ‖u n - x‖) atTop (𝓝 0) := by
     have h1 : Tendsto (fun n => u n - x) atTop (𝓝 0) := by
       simpa using hlim.sub_const x
-    simpa using (continuous_norm.tendsto (0 : Y)).comp h1
+    have h := (continuous_norm.tendsto (0 : Y)).comp h1
+    have h' : Tendsto (fun n => ‖u n - x‖) atTop (𝓝 ‖(0 : Y)‖) :=
+      h.congr' <| Eventually.of_forall fun n ↦ by simp only [Function.comp_apply]
+    simpa only [norm_zero] using h'
   have hxnn : ‖x‖ ≤ 0 :=
     le_of_tendsto_of_tendsto' hlhs_tendsto hrhs_zero hnorm_limit
   exact norm_le_zero_iff.mp hxnn

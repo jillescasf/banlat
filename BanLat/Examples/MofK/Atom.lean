@@ -52,7 +52,7 @@ private theorem signedDirac_ne_zero [MeasurableSingletonClass K] (x : K) :
   intro h
   have h₁ : signedDirac x ({x} : Set K) = 1 :=
     signedDirac_apply_of_mem (measurableSet_singleton x) (Set.mem_singleton x)
-  rw [h, VectorMeasure.zero_apply] at h₁
+  rw [h, zero_apply] at h₁
   exact one_ne_zero h₁.symm
 
 omit [TopologicalSpace K] [T2Space K] [CompactSpace K] [BorelSpace K] in
@@ -61,7 +61,7 @@ private theorem apply_eq_zero_of_notMem_of_le_signedDirac [MeasurableSingletonCl
     (hA : MeasurableSet A) (hx : x ∉ A) :
     y A = 0 := by
   have h1 : (0 : SignedMeasure K) A ≤ y A := hy0 _ hA
-  rw [VectorMeasure.zero_apply] at h1
+  rw [zero_apply] at h1
   have h2 : y A ≤ signedDirac x A := hyd _ hA
   rw [signedDirac_apply_of_notMem hA hx] at h2
   linarith
@@ -74,7 +74,7 @@ private theorem apply_eq_singleton_of_mem_of_le_signedDirac [MeasurableSingleton
   have hx_set : MeasurableSet ({x} : Set K) := measurableSet_singleton x
   have h_subset : ({x} : Set K) ⊆ A := Set.singleton_subset_iff.mpr hx
   have h_split : y ({x} : Set K) + y (A \ {x}) = y A :=
-    VectorMeasure.of_add_of_diff hx_set hA h_subset
+    VectorMeasure.of_add_of_sdiff hx_set hA h_subset
   have h_diff_zero : y (A \ {x}) = 0 :=
     apply_eq_zero_of_notMem_of_le_signedDirac hy0 hyd (hA.diff hx_set) (by simp)
   rw [h_diff_zero, add_zero] at h_split
@@ -87,7 +87,7 @@ private theorem isVLAtom_signedDirac [MeasurableSingletonClass K] (x : K) :
   intro y hy0 hyd
   refine ⟨y ({x} : Set K), ?_⟩
   ext A hA
-  rw [VectorMeasure.smul_apply, smul_eq_mul]
+  rw [smul_apply, smul_eq_mul]
   by_cases hx : x ∈ A
   · rw [signedDirac_apply_of_mem hA hx, mul_one]
     exact apply_eq_singleton_of_mem_of_le_signedDirac hy0 hyd hA hx
@@ -178,13 +178,13 @@ theorem signedMeasure_inf_dirac_eq_zero_iff
   have hxset : MeasurableSet ({x} : Set K) := measurableSet_singleton x
   have hsx_nn : 0 ≤ s ({x} : Set K) := by
     have := hs _ hxset
-    rwa [VectorMeasure.zero_apply] at this
+    rwa [zero_apply] at this
   refine ⟨fun h => ?_, fun h => ?_⟩
   · set c : ℝ := min (s ({x} : Set K)) 1 with hc_def
     have hc_nn : 0 ≤ c := le_min hsx_nn (by norm_num)
     have hcd_le_s : c • ((dirac x : MofK K) : SignedMeasure K) ≤ s := by
       intro B hB
-      rw [VectorMeasure.smul_apply, smul_eq_mul]
+      rw [smul_apply, smul_eq_mul]
       by_cases hxB : x ∈ B
       · rw [dirac_apply_of_mem hB hxB, mul_one]
         calc
@@ -193,11 +193,11 @@ theorem signedMeasure_inf_dirac_eq_zero_iff
               (Set.singleton_subset_iff.mpr hxB)
       · rw [dirac_apply_of_notMem hB hxB, mul_zero]
         have := hs _ hB
-        rwa [VectorMeasure.zero_apply] at this
+        rwa [zero_apply] at this
     have hcd_le_d : c • ((dirac x : MofK K) : SignedMeasure K) ≤
         ((dirac x : MofK K) : SignedMeasure K) := by
       intro B hB
-      rw [VectorMeasure.smul_apply, smul_eq_mul]
+      rw [smul_apply, smul_eq_mul]
       by_cases hxB : x ∈ B
       · rw [dirac_apply_of_mem hB hxB, mul_one]
         exact min_le_right _ _
@@ -206,9 +206,9 @@ theorem signedMeasure_inf_dirac_eq_zero_iff
         s ⊓ ((dirac x : MofK K) : SignedMeasure K) := le_inf hcd_le_s hcd_le_d
     rw [h] at hcd_le_inf
     have h_at_x := hcd_le_inf {x} hxset
-    rw [VectorMeasure.smul_apply, smul_eq_mul,
+    rw [smul_apply, smul_eq_mul,
       dirac_apply_of_mem hxset (Set.mem_singleton x), mul_one,
-      VectorMeasure.zero_apply] at h_at_x
+      zero_apply] at h_at_x
     have hc_zero : c = 0 := le_antisymm h_at_x hc_nn
     rw [hc_def] at hc_zero
     rcases min_eq_iff.mp hc_zero with ⟨h1, _⟩ | ⟨h1, _⟩
@@ -216,7 +216,7 @@ theorem signedMeasure_inf_dirac_eq_zero_iff
     · exfalso
       linarith
   · refine VectorMeasure.ext fun B hB => ?_
-    rw [VectorMeasure.zero_apply]
+    rw [zero_apply]
     have hdirac_nonneg : (0 : SignedMeasure K) ≤ ((dirac x : MofK K) : SignedMeasure K) :=
       zero_le_dirac x
     have hinf_nn : (0 : SignedMeasure K) ≤ s ⊓ ((dirac x : MofK K) : SignedMeasure K) :=
@@ -230,7 +230,7 @@ theorem signedMeasure_inf_dirac_eq_zero_iff
       apply Set.disjoint_left.mpr
       rintro a ⟨_, ha⟩ ⟨_, ha'⟩
       exact ha' ha
-    have h_cup : (B ∩ {x}) ∪ (B \ {x}) = B := Set.inter_union_diff B {x}
+    have h_cup : (B ∩ {x}) ∪ (B \ {x}) = B := Set.inter_union_sdiff B {x}
     have h_split : (s ⊓ ((dirac x : MofK K) : SignedMeasure K)) (B ∩ {x}) +
         (s ⊓ ((dirac x : MofK K) : SignedMeasure K)) (B \ {x}) =
           (s ⊓ ((dirac x : MofK K) : SignedMeasure K)) B := by
@@ -240,7 +240,7 @@ theorem signedMeasure_inf_dirac_eq_zero_iff
       have hxnotMem : x ∉ B \ {x} := by simp
       rw [dirac_apply_of_notMem hBdiff hxnotMem] at h_ub
       have h_lb := hinf_nn _ hBdiff
-      rw [VectorMeasure.zero_apply] at h_lb
+      rw [zero_apply] at h_lb
       linarith
     have h_int_zero : (s ⊓ ((dirac x : MofK K) : SignedMeasure K)) (B ∩ {x}) = 0 := by
       by_cases hxB : x ∈ B
@@ -253,7 +253,7 @@ theorem signedMeasure_inf_dirac_eq_zero_iff
         have h_ub := hinf_le_s _ hxset
         rw [h] at h_ub
         have h_lb := hinf_nn _ hxset
-        rw [VectorMeasure.zero_apply] at h_lb
+        rw [zero_apply] at h_lb
         linarith
       · have h_eq : B ∩ {x} = ∅ := by
           ext y
@@ -318,9 +318,10 @@ private theorem exists_singleton_of_isVLAtom (s : MofK K) (hs : IsVLAtom s) :
             Measure.restrict_apply hA, Set.inter_self]
         have h_right : (fun u : MofK K => (u : SignedMeasure K) A) (d • s) = d * s.1 A := by
           change ((d • s.1 : SignedMeasure K) A) = d * s.1 A
-          rw [VectorMeasure.smul_apply, smul_eq_mul]
-        rw [h_left, h_right, hd0, zero_mul] at h_eval'
-        exact h_eval'
+          rw [smul_apply, smul_eq_mul]
+        have h_eval'' := h_left.symm.trans (h_eval'.trans h_right)
+        rw [hd0, zero_mul] at h_eval''
+        exact h_eval''
       rcases (ENNReal.toReal_eq_zero_iff (μ A)).mp h_eval with hA0 | hA0
       · exact hA0
       · exact False.elim ((measure_ne_top _ _) hA0)
@@ -335,9 +336,8 @@ private theorem exists_singleton_of_isVLAtom (s : MofK K) (hs : IsVLAtom s) :
             ENNReal.toReal_zero]
         have h_right : (fun u : MofK K => (u : SignedMeasure K) Aᶜ) (d • s) = d * s.1 Aᶜ := by
           change ((d • s.1 : SignedMeasure K) Aᶜ) = d * s.1 Aᶜ
-          rw [VectorMeasure.smul_apply, smul_eq_mul]
-        rw [h_left, h_right] at h_eval'
-        exact h_eval'
+          rw [smul_apply, smul_eq_mul]
+        exact h_left.symm.trans (h_eval'.trans h_right)
       have hsAcompl_zero : s.1 Aᶜ = 0 := by
         have hm : d = 0 ∨ s.1 Aᶜ = 0 := mul_eq_zero.mp h_eval.symm
         exact hm.resolve_left hd0
@@ -397,7 +397,7 @@ private theorem exists_singleton_of_isVLAtom (s : MofK K) (hs : IsVLAtom s) :
   rw [hs_eval]
   change (μ A).toReal =
     (((μ Set.univ).toReal • ((dirac x : MofK K) : SignedMeasure K)) A)
-  rw [VectorMeasure.smul_apply, smul_eq_mul]
+  rw [smul_apply, smul_eq_mul]
   by_cases hxA : x ∈ A
   · have hA_full : μ A = μ Set.univ := by
       refine le_antisymm (measure_mono (Set.subset_univ A)) ?_

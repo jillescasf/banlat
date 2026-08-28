@@ -250,7 +250,8 @@ private lemma range_linearIsometry_standardQStable {X : ℕ → Ω → ℝ}
     have hx := lp.hasSum_single (p := ENNReal.ofReal q) ENNReal.ofReal_ne_top x
     have hTx : HasSum
         (fun n ↦ T (lp.single (ENNReal.ofReal q) n (x n))) (T x) := by
-      simpa only [Function.comp_apply] using hx.map T T.continuous
+      exact (hx.map T T.continuous).congr' <| Filter.Eventually.of_forall fun n ↦ by
+        simp only [Function.comp_apply]
     refine (Submodule.isClosed_topologicalClosure _).mem_of_tendsto hTx ?_
     filter_upwards with s
     apply Submodule.sum_mem

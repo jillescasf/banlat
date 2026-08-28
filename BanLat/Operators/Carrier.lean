@@ -21,12 +21,18 @@ variable {X : Type u} {Y : Type v} [AddCommGroup X] [AddCommGroup Y]
   [Lattice X] [ConditionallyCompleteLattice Y] [IsOrderedAddMonoid X]
   [IsOrderedAddMonoid Y] [VectorLattice X] [VectorLattice Y]
 
+private lemma obZero_apply (x : X) : (0 : OrderBoundedHom X Y) x = (0 : Y) := rfl
+
+private lemma obToLinearMap_apply (T : OrderBoundedHom X Y) (x : X) :
+    T.toLinearMap x = T x := rfl
+
 private noncomputable def nullSet (T : OrderBoundedHom X Y) : Set X :=
   {x | (|T| : OrderBoundedHom X Y) |x| = 0}
 
 private lemma modulus_positive (T : OrderBoundedHom X Y) :
     Positive (|T| : OrderBoundedHom X Y).toLinearMap := fun x hx => by
-  convert OrderBoundedHom.le_iff.mp (abs_nonneg T) x hx using 1
+  simpa only [obZero_apply, obToLinearMap_apply] using
+    OrderBoundedHom.le_iff.mp (abs_nonneg T) x hx
 
 private lemma modulus_monotone (T : OrderBoundedHom X Y) :
     Monotone (|T| : OrderBoundedHom X Y).toLinearMap :=
@@ -303,7 +309,7 @@ private lemma exists_decomposition_lt_of_disjoint_positive {f g : OrderBoundedHo
   let S : Set ℝ :=
     {w | ∃ y z : X, 0 ≤ y ∧ 0 ≤ z ∧ y + z = x ∧ w = f y + g z}
   have hglb : IsGLB S 0 := by
-    simpa [S, hfg_inf] using (isGLB_inf_apply (f := f) (g := g) hx)
+    simpa only [S, hfg_inf, obZero_apply] using (isGLB_inf_apply (f := f) (g := g) hx)
   have hex : ∃ w ∈ S, w < ε := by
     by_contra hnone
     push Not at hnone
@@ -338,7 +344,7 @@ private lemma apply_eq_zero_of_mem_carrier_of_disjoint_positive
       rw [← ha]
       exact hz_nn n
     set v : X := w⁺ with hv_def
-    have hv_nn : 0 ≤ v := by simpa [v] using posPart_nonneg w
+    have hv_nn : 0 ≤ v := by simp [v]
     have hv_le_z : ∀ n, v ≤ z n := fun n => by
       rw [hv_def]
       exact sup_le (hw ⟨n, rfl⟩) (hz_nn n)

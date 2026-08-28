@@ -76,8 +76,8 @@ private def linftyPartialSum
   ∑ n ∈ Finset.range N, a n • x n
 
 private def linftyPositiveSeries
-    {X : Type*} [AddCommGroup X] [Lattice X] [IsOrderedAddMonoid X]
-    [VectorLattice X] [SigmaConditionallyCompleteLattice X]
+    {X : Type*} [AddCommGroup X] [SigmaConditionallyCompleteLattice X]
+    [IsOrderedAddMonoid X] [VectorLattice X]
     (x : ℕ → X) (a : ℓ^∞(ℕ, ℝ)) : X :=
   sSup (Set.range (linftyPartialSum x a))
 
@@ -412,12 +412,17 @@ private theorem containsLatticeCopy_linf_of_disjoint
       sup_mem' := by
         rintro _ _ ⟨a, rfl⟩ ⟨b, rfl⟩
         exact ⟨a ⊔ b, map_sup T a b⟩ }
+  have hrange : (T.toLinearMap.range : Set X) = Set.range Tc := by
+    ext y
+    constructor <;> rintro ⟨a, rfl⟩ <;> exact ⟨a, rfl⟩
   letI : Lattice ↥Z.toSubmodule := VectorSublattice.instLatticeSubtype Z
   letI : IsOrderedAddMonoid ↥Z.toSubmodule :=
     VectorSublattice.instIsOrderedAddMonoidSubtype Z
   letI : VectorLattice ↥Z.toSubmodule := VectorSublattice.instVectorLatticeSubtype Z
   have hZ_closed : IsClosed (Z : Set X) := by
-    simpa [Z, Tc] using hclosed_range
+    change IsClosed (T.toLinearMap.range : Set X)
+    rw [hrange]
+    exact hclosed_range
   let Tr : ℓ^∞(ℕ, ℝ) →ₗ[ℝ] ↥Z.toSubmodule := T.toLinearMap.rangeRestrict
   have hTr_bij : Function.Bijective Tr := by
     constructor

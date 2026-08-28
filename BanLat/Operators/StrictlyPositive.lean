@@ -423,9 +423,18 @@ private lemma exists_apply_pos_of_isMaximalDisjoint_dual
       ((OrderBoundedHom.nakano_theorem
         (StrongDual.toOrderDualSpace g) Tφ hg_oc hTφ_oc).out 1 0).mp hcarrier_subset_null
     unfold IsVLDisjoint at hdisj_order ⊢
-    ext y
-    have hy := congrArg (fun T : OrderBoundedHom X ℝ => T y) hdisj_order
-    simpa [Tφ] using hy
+    apply StrongDual.equivOrderDualSpace.injective
+    change StrongDual.toOrderDualSpace (|g| ⊓ |φ|) =
+      StrongDual.toOrderDualSpace (0 : StrongDual ℝ X)
+    have hinf : StrongDual.toOrderDualSpace (|g| ⊓ |φ|) =
+        |StrongDual.toOrderDualSpace g| ⊓ |StrongDual.toOrderDualSpace φ| := by
+      ext y
+      rfl
+    have hzero : StrongDual.toOrderDualSpace (0 : StrongDual ℝ X) = 0 := by
+      ext y
+      rfl
+    rw [hinf, hzero]
+    simpa [Tφ] using hdisj_order
   have hforall_zero :=
     (isMaximalDisjoint_iff_forall_eq_zero hΛ_pos hΛ.1).mp hΛ
   exact hg_ne (hforall_zero g hg_disj)
@@ -468,7 +477,6 @@ private lemma countable_of_isDisjointSet_dual_of_weakOrderUnit
   have hu_ne : ∀ φ : Λ, u φ ≠ 0 := by
     intro φ hu_zero
     have hcomp_dc : e - u φ ∈ (OrderBoundedHom.carrier (T φ) : Set X)ᵈ := by
-      change e - u φ ∈ (OrderBoundedHom.carrier (T φ) : Set X)ᵈ
       rw [← hP_coe φ]
       exact (P φ).id_sub_bandProjection_mem e
     have hcomp_null : e - u φ ∈ OrderBoundedHom.null (T φ) := by
@@ -500,6 +508,16 @@ private lemma countable_of_isDisjointSet_dual_of_weakOrderUnit
         hΛ_disj.2 φ.2 ψ.2 (fun h => hφψ (Subtype.ext h))
       unfold IsVLDisjoint at hstrong ⊢
       have h := congrArg StrongDual.toOrderDualSpace hstrong
+      have hinf : StrongDual.toOrderDualSpace
+          (|(φ : StrongDual ℝ X)| ⊓ |(ψ : StrongDual ℝ X)|) =
+          |StrongDual.toOrderDualSpace (φ : StrongDual ℝ X)| ⊓
+            |StrongDual.toOrderDualSpace (ψ : StrongDual ℝ X)| := by
+        ext x
+        rfl
+      have hzero : StrongDual.toOrderDualSpace (0 : StrongDual ℝ X) = 0 := by
+        ext x
+        rfl
+      rw [hinf, hzero] at h
       simpa [T] using h
     have hcarrier_sub_dc :
         (OrderBoundedHom.carrier (T φ) : Set X) ⊆
@@ -583,7 +601,7 @@ theorem exists_strictlyPositiveFunctional_of_orderContinuousNorm_of_exists_weakO
     smul_nonneg (hc_pos φ).le (hΛ_pos φ φ.2).le
   have hterm_pos : 0 < F ψΛ x := by
     change 0 < (c ψΛ • (ψΛ : StrongDual ℝ X)) x
-    rw [ContinuousLinearMap.smul_apply, smul_eq_mul]
+    rw [smul_apply, smul_eq_mul]
     exact mul_pos (hc_pos ψΛ) hψx_pos
   have hterm_le_sum : F ψΛ ≤ ∑' φ, F φ := by
     simpa using

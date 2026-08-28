@@ -99,11 +99,14 @@ private lemma tendsto_zero_of_ae_tendsto_of_abs_le
         exact (lintegral_rpow_enorm_lt_top_of_eLpNorm_lt_top
           hp_ne_zero hp_ne_top
           (Lp.eLpNorm_ne_top g).lt_top).ne
-      convert hfin' using 1
+      simpa only [hpreal] using hfin'
     have hlim : ∀ᵐ x ∂μ, Tendsto (fun n ↦ ‖u n x‖ₑ ^ (p : ℝ)) atTop (nhds 0) := by
       filter_upwards [hu] with x hx
       have henorm : Tendsto (fun n ↦ ‖u n x‖ₑ) atTop (nhds 0) := by
-        simpa using (continuous_enorm.tendsto 0).comp hx
+        have h := (continuous_enorm.tendsto 0).comp hx
+        have h' : Tendsto (fun n ↦ ‖u n x‖ₑ) atTop (nhds ‖(0 : ℝ)‖ₑ) :=
+          h.congr' <| Eventually.of_forall fun n ↦ by simp only [Function.comp_apply]
+        simpa only [enorm_zero] using h'
       rw [← ENNReal.zero_rpow_of_pos hp_real_pos]
       exact ((@ENNReal.continuous_rpow_const (p : ℝ)).tendsto 0).comp henorm
     simpa using

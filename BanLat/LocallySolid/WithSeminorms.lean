@@ -98,10 +98,16 @@ private noncomputable def convexSolidNhdGaugeLatticeSeminorm (s : ConvexSolidNhd
 
 private lemma continuous_convexSolidNhdGaugeLatticeSeminorm (s : ConvexSolidNhd (E := E)) :
     Continuous (convexSolidNhdGaugeLatticeSeminorm s).toSeminorm := by
-  simpa [convexSolidNhdGaugeLatticeSeminorm, gaugeSeminorm_toFun] using
-    continuous_gauge s.2.2.1 s.2.1
+  exact (continuous_gauge s.2.2.1 s.2.1).congr fun _ => rfl
 
-private theorem with_convexSolidNhdGaugeSeminormFamily [IsLocallyConvexSolidVectorLattice E] :
+end IsLocallyConvexSolidVectorLattice
+
+namespace IsLocallyConvexSolidVectorLattice
+
+variable {E : Type u} [AddCommGroup E] [Lattice E] [IsOrderedAddMonoid E]
+  [VectorLattice E] [TopologicalSpace E] [IsLocallyConvexSolidVectorLattice E]
+
+private theorem with_convexSolidNhdGaugeSeminormFamily :
     WithSeminorms
       (LatticeSeminorm.toSeminormFamily
         (convexSolidNhdGaugeLatticeSeminorm (E := E))) := by
@@ -118,7 +124,7 @@ private theorem with_convexSolidNhdGaugeSeminormFamily [IsLocallyConvexSolidVect
       change x ∈ (p S).toSeminorm.ball 0 1 at hx
       change x ∈ U
       rw [Seminorm.mem_ball_zero] at hx
-      apply gauge_lt_one_subset_self hU_convex (mem_of_mem_nhds hU_nhds)
+      apply setOf_gauge_lt_one_subset_self hU_convex (mem_of_mem_nhds hU_nhds)
         (absorbent_nhds_zero hU_nhds)
       simpa [p, S, convexSolidNhdGaugeLatticeSeminorm, gaugeSeminorm_toFun] using hx
   · intro U hU
