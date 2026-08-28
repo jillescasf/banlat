@@ -1,4 +1,5 @@
 import BanLat.Operators.Positive
+import BanLat.Substructures.Sublattice
 import BanLat.LLexpr
 import Mathlib.Analysis.Normed.Operator.LinearIsometry
 
@@ -438,6 +439,15 @@ noncomputable def toContinuousLinearEquiv (e : VecLatEquiv X Y) : X ≃L[ℝ] Y 
     (Positive.continuous (Positive.monotone_iff.mp e.symm.toVecLatHom.monotone))
 
 end VecLatEquiv
+
+/-- A Banach lattice contains a lattice copy of another Banach lattice if it has a
+closed vector sublattice that is vector-lattice isomorphic to it. -/
+def ContainsLatticeCopy (X Y : Type*)
+    [NormedAddCommGroup X] [NormedAddCommGroup Y]
+    [Lattice X] [Lattice Y] [IsOrderedAddMonoid X] [IsOrderedAddMonoid Y]
+    [BanachLattice X] [BanachLattice Y] : Prop :=
+  ∃ Z : VectorSublattice X,
+    IsClosed (Z : Set X) ∧ Nonempty (VecLatEquiv Y ↥Z.toSubmodule)
 
 /-! ## Banach lattice isometries -/
 

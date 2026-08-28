@@ -62,6 +62,7 @@ import BanLat.OrderComplete
 import BanLat.OrderContinuous.Ando
 import BanLat.OrderContinuous.Basic
 import BanLat.OrderContinuous.Decomposition
+import BanLat.OrderContinuous.Linf
 import BanLat.OrderContinuous.MeyerNieberg
 import BanLat.OrderContinuous.Nakano
 import BanLat.OrderDense
