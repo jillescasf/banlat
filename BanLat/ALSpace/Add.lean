@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.ALSpace.Basic
 import BanLat.AMSpace.Basic
 import BanLat.AMSpace.Max

@@ -1,3 +1,7 @@
+/-
+Authors: Jesús Illescas-Fiorito
+-/
+
 import BanLat.Probability.ConvergenceInMeasure
 import BanLat.Probability.Distributions.Stable.HasSymmetricStableLaw.IndependentFinSums
 import Mathlib.MeasureTheory.Function.ConvergenceInDistribution

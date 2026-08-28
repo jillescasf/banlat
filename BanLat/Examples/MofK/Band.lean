@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Examples.MofK.ALspace
 import BanLat.Examples.Lp.Basic
 import Mathlib.MeasureTheory.Function.SimpleFuncDenseLp

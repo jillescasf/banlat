@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Operators.Regular
 import BanLat.Operators.RieszKantorovich
 import Mathlib.Analysis.Convex.Cone.Dual

@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.ALSpace.Dual
 import BanLat.ALSpace.OrderContinuous
 import BanLat.AMSpace.Kakutani

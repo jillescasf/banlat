@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Substructures.Ideal
 import BanLat.Operators.Hom
 import Mathlib.LinearAlgebra.Quotient.Defs

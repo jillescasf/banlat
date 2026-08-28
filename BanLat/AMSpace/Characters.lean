@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.AMSpace.Maximal
 import BanLat.Operators.Hom
 import BanLat.RieszDec

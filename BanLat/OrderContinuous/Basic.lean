@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Convergences.Order
 import BanLat.Normed
 import BanLat.OrderComplete

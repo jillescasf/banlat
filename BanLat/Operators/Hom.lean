@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Operators.Positive
 import BanLat.LLexpr
 import Mathlib.Analysis.Normed.Operator.LinearIsometry

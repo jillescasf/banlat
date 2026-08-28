@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Free.FVL
 import BanLat.Examples.CofK.Basic
 import BanLat.Tactic.LLexpr

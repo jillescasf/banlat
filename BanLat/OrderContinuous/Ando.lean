@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.OrderContinuous.MeyerNieberg
 import BanLat.OrderContinuous.Decomposition
 

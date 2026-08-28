@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Disjoint
 import BanLat.Substructures.Band.Basic
 

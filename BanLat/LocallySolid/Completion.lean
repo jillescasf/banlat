@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.LocallySolid.Basic
 import BanLat.Operators.Hom
 import Mathlib.Algebra.Order.Group.Cone

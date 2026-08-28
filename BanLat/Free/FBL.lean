@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Dual
 import BanLat.Free.FVLv
 import BanLat.Substructures.Sublattice

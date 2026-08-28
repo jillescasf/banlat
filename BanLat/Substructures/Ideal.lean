@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Substructures.Sublattice
 import BanLat.Normed
 import BanLat.OrderUnit

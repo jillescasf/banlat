@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Normed
 import Mathlib.Analysis.Normed.Lp.PiLp
 

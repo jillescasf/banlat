@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Substructures.Band.PPP
 import BanLat.Pi
 import BanLat.OrderDense

@@ -1,3 +1,7 @@
+/-
+Authors: Jesús Illescas-Fiorito
+-/
+
 import BanLat.Probability.Distributions.Stable.GaussianCompatibility
 import BanLat.Probability.Distributions.Stable.HasSymmetricStableLaw.IndependentInfiniteSums
 import BanLat.Probability.Distributions.Stable.Moments

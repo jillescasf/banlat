@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Substructures.Band.DisjointComplement
 import BanLat.Substructures.Band.Lattice
 import BanLat.Substructures.Band.Generated

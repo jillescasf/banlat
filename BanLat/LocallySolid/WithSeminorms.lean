@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.LocallySolid.LocallyConvexSolid
 import Mathlib.Analysis.Convex.Gauge
 import Mathlib.Analysis.LocallyConvex.WithSeminorms

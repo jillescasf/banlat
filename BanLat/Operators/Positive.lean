@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Normed
 import Mathlib.Algebra.Order.Module.Basic
 import Mathlib.Topology.Algebra.Module.Equiv

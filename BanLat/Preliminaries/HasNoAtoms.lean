@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import Mathlib.MeasureTheory.Constructions.Polish.Basic
 import Mathlib.MeasureTheory.Measure.Typeclasses.NoAtoms
 import Mathlib.Analysis.SpecificLimits.Basic

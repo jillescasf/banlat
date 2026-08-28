@@ -1,3 +1,7 @@
+/-
+Authors: Jesús Illescas-Fiorito
+-/
+
 import BanLat.Examples.Ellp.Basic
 import BanLat.Examples.Lp.Basic
 import Mathlib.MeasureTheory.Function.LpSeminorm.Count

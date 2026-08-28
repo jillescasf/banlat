@@ -1,3 +1,7 @@
+/-
+Authors: Jesús Illescas-Fiorito
+-/
+
 import BanLat.Probability.Distributions.FractionalAbsMoments
 import BanLat.Probability.Distributions.Stable.Basic
 

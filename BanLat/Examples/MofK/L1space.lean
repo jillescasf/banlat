@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Examples.MofK.Band
 import BanLat.OrderContinuous.Decomposition
 

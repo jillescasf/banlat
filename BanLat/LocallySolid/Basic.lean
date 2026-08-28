@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Substructures.Band.Generated
 import Mathlib.Algebra.Order.Module.Basic
 import Mathlib.Analysis.LocallyConvex.Bounded

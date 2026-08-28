@@ -1,3 +1,7 @@
+/-
+Authors: Jesús Illescas-Fiorito
+-/
+
 import BanLat.Examples.Lp.Basic
 import BanLat.OrderContinuous.MeyerNieberg
 import Mathlib.MeasureTheory.Integral.Lebesgue.DominatedConvergence
