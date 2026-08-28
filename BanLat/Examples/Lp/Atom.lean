@@ -1,3 +1,7 @@
+/-
+Authors: Jesús Illescas-Fiorito
+-/
+
 import BanLat.Atom
 import BanLat.Examples.Lp.Basic
 import BanLat.Preliminaries.HasNoAtoms

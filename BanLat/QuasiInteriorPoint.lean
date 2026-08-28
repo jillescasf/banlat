@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Substructures.Ideal
 import BanLat.OrderUnit
 import BanLat.OrderContinuous.Ando

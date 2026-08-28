@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Preliminaries.Regularity
 import BanLat.Examples.SignedMeasure.Basic
 import BanLat.Substructures.Sublattice

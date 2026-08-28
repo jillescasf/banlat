@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.ALSpace.Basic
 import BanLat.ALpSpace.Basic
 import BanLat.Normed

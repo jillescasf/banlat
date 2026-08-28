@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Operators.OrderBounded
 import BanLat.Operators.Regular
 import BanLat.OrderComplete

@@ -1,3 +1,7 @@
+/-
+Authors: Jesús Illescas-Fiorito
+-/
+
 import BanLat.Normed
 import BanLat.Operators.Hom
 import Mathlib.Analysis.Normed.Lp.lpSpace

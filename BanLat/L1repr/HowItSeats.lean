@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.ALSpace.OrderContinuous
 import BanLat.Examples.Lp.Basic
 import BanLat.L1repr.Basic

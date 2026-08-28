@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import Mathlib.MeasureTheory.Measure.Regular
 import Mathlib.MeasureTheory.VectorMeasure.Decomposition.JordanSub
 

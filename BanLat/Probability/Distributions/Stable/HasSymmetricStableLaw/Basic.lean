@@ -1,3 +1,7 @@
+/-
+Authors: Jesús Illescas-Fiorito
+-/
+
 import BanLat.Probability.Distributions.Stable.Basic
 import BanLat.Probability.Distributions.Stable.HasSymmetricStableLaw.Def
 import Mathlib.Probability.HasLaw

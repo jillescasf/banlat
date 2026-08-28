@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Basic
 import Mathlib.Analysis.Convex.Combination
 import Mathlib.Analysis.LocallyConvex.WeakSpace

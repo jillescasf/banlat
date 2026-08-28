@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Dual
 import BanLat.Operators.Hom
 import BanLat.Examples.CofK.Basic

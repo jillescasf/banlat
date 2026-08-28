@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.LLexpr
 import Mathlib.Data.Fin.VecNotation
 import Mathlib.Tactic

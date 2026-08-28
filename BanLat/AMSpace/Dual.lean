@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.AMSpace.Basic
 import BanLat.ALSpace.Basic
 import BanLat.Dual

@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.OrderContinuous.Nakano
 import BanLat.Disjoint
 

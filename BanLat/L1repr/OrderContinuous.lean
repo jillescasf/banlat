@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.L1repr.HowItSeats
 import BanLat.OrderUnit
 

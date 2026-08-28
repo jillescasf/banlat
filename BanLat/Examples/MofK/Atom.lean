@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Atom
 import BanLat.Examples.MofK.Basic
 

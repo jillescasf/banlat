@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.AMSpace.Dual
 import BanLat.Bidual
 import BanLat.Substructures.Band.PPP

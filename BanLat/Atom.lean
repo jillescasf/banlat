@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz, Jesús Illescas-Fiorito
+-/
+
 import BanLat.Substructures.Band.Projection
 import BanLat.OrderDense
 import BanLat.Pi

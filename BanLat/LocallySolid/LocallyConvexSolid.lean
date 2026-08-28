@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.LocallySolid.Basic
 import BanLat.RieszDec
 import Mathlib.Topology.Algebra.Module.LocallyConvex

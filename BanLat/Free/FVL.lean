@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Pi
 import BanLat.LLexpr
 import BanLat.Operators.Hom

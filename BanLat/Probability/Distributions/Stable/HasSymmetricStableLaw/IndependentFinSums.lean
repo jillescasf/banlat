@@ -1,3 +1,7 @@
+/-
+Authors: Jesús Illescas-Fiorito
+-/
+
 import BanLat.Probability.Distributions.Stable.HasSymmetricStableLaw.Basic
 import Mathlib.Probability.Independence.CharacteristicFunction
 import Mathlib.Probability.IdentDistrib

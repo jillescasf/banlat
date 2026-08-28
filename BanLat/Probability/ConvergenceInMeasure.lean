@@ -1,3 +1,7 @@
+/-
+Authors: Jesús Illescas-Fiorito
+-/
+
 import Mathlib.MeasureTheory.Function.ConvergenceInMeasure
 
 /-!

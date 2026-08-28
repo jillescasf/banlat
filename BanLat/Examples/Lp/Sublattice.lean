@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Examples.Lp.Basic
 import BanLat.Operators.Hom
 import BanLat.Substructures.Sublattice

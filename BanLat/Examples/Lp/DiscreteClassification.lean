@@ -1,3 +1,7 @@
+/-
+Authors: Jesús Illescas-Fiorito
+-/
+
 import BanLat.Examples.Ellp.Basic
 import BanLat.Atom
 import BanLat.Examples.Lp.OrderContinuous
