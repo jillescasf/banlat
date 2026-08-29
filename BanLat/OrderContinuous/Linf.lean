@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Examples.Ellp.Basic
 import BanLat.OrderContinuous.MeyerNieberg
 
