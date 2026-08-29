@@ -75,7 +75,7 @@ theorem exists_ae_pos_iff_sigmaFinite (μ : Measure α) :
     have hμsc : μ sᶜ = 0 := by
       have h := ae_iff.mp hempty
       simpa [Measure.restrict_apply, hs.compl] using h
-    have haes : ∀ᵐ x ∂μ, x ∈ s := ae_iff.mpr (by simpa using hμsc)
+    have haes : ∀ᵐ x ∂μ, x ∈ s := ae_iff.mpr (by simpa [← Set.compl_def] using hμsc)
     rwa [Measure.restrict_eq_self_of_ae_mem haes] at hσ
   · intro hμ
     letI : SigmaFinite μ := hμ
