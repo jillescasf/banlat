@@ -1,14 +1,10 @@
-/-
-Authors: Jesús Illescas-Fiorito
--/
-
 import BanLat.Examples.Ellp.Basic
 import BanLat.Atom
 import BanLat.Examples.Lp.OrderContinuous
 import BanLat.OrderContinuous.Decomposition
 
 /-!
-# Classification of discrete `L^p` spaces
+# Classification of atomic `L^p` spaces
 
 For `1 ≤ p < ∞`, every atomic `L^p(α, μ)` space is lattice isometric to
 `ℓ^p(A, ℝ)`, where `A` is the set of its normalized atoms.
@@ -208,7 +204,7 @@ private lemma coordinateMap_surjective
     intro a ha
     exact coordinateMap_smul_normalizedAtom_eq_single a (f a)
 
-/-! ### Discrete classification -/
+/-! ### Atomic classification -/
 
 /-- The atomic coordinate map is a lattice isometry from an atomic
 `L^p(α, μ)` space onto `ℓ^p(A, ℝ)`, where `A` is the set of normalized atoms. -/
