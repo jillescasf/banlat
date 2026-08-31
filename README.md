@@ -5,7 +5,7 @@ lattices, built on [Mathlib](https://github.com/leanprover-community/mathlib4). 
 goal is to provide a reusable foundation for systematically formalizing contemporary
 research in Banach lattice theory and nearby areas of functional analysis.
 
-The [companion paper] gives the full motivation, explains the
+The [companion paper](https://arxiv.org/abs/2608.07388) gives the full motivation, explains the
 development process, presents research-level case studies, and provides a
 module-by-module account of version [v0.1.0] of the library.
 
