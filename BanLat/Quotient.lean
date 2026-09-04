@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Substructures.Ideal
 import BanLat.Operators.Hom
 import Mathlib.LinearAlgebra.Quotient.Defs
@@ -241,9 +245,9 @@ theorem lift_between {x z : X} (hxz : x ≤ z)
   change J.mkQ ((x ⊔ a) ⊓ z) = J.mkQ a
   rw [J.mkQ_inf, J.mkQ_sup]
   have h1 : J.mkQ x ⊔ J.mkQ a = J.mkQ a := sup_eq_right.mpr
-    (by convert hx)
+    (by simpa only [Submodule.mkQ_apply] using hx)
   have h2 : J.mkQ a ⊓ J.mkQ z = J.mkQ a := inf_eq_left.mpr
-    (by convert hz)
+    (by simpa only [Submodule.mkQ_apply] using hz)
   rw [h1, h2]
 
 /-- If `0 ≤ y` and `Q(y) = |φ|`, there exists `x ∈ φ` with

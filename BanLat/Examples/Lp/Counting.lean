@@ -1,3 +1,7 @@
+/-
+Authors: Jesús Illescas-Fiorito
+-/
+
 import BanLat.Examples.Ellp.Basic
 import BanLat.Examples.Lp.Basic
 import Mathlib.MeasureTheory.Function.LpSeminorm.Count
@@ -145,7 +149,15 @@ lemma lpCountEquiv_symm_apply
       Lp ℝ p (Measure.count : Measure α)) x = f x := by
   have h := congrArg (fun g : ℓ^p(α, ℝ) => g x)
     ((lpCountEquiv (α := α) (p := p)).toLinearIsometryEquiv.apply_symm_apply f)
-  simpa only [lpCountEquiv_apply] using h
+  have happly (g : Lp ℝ p (Measure.count : Measure α)) :
+      (lpCountEquiv (α := α) (p := p)).toLinearIsometryEquiv g = lpCountEquiv g := rfl
+  simp only [happly, lpCountEquiv_apply] at h
+  have hsymm :
+      (lpCountEquiv (α := α) (p := p)).toLinearIsometryEquiv.symm f =
+        (lpCountEquiv (α := α) (p := p)).symm f := by
+    rfl
+  rw [hsymm] at h
+  exact h
 
 end Lp
 

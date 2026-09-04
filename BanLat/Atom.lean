@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz, Jesús Illescas-Fiorito
+-/
+
 import BanLat.Substructures.Band.Projection
 import BanLat.OrderDense
 import BanLat.Pi
@@ -244,7 +248,7 @@ private lemma exists_smul_of_le_smul_atom
 
 /-- Characterisation: a positive element `a` is an atom iff its principal
 ideal is the line spanned by `a`. -/
-theorem isVLAtom_iff_principal_eq_span [IsVLArchimedean X] {a : X} :
+theorem isVLAtom_iff_principal_eq_span {a : X} :
     IsVLAtom a ↔
       0 < a ∧ ∀ x : X, x ∈ OrderIdeal.principal a → ∃ c : ℝ, x = c • a := by
   refine ⟨fun ha => ⟨ha.1, fun x hx => ?_⟩, fun ⟨hpos, hspan⟩ => ⟨hpos, fun x hx0 hxa => ?_⟩⟩
@@ -265,7 +269,7 @@ theorem isVLAtom_iff_principal_eq_span [IsVLArchimedean X] {a : X} :
     exact hxa
 
 /-- Any two atoms are either disjoint or scalar multiples of each other. -/
-theorem isVLDisjoint_or_smul_of_isVLAtom [IsVLArchimedean X]
+theorem isVLDisjoint_or_smul_of_isVLAtom
     {a b : X} (ha : IsVLAtom a) (hb : IsVLAtom b) :
     IsVLDisjoint a b ∨ ∃ c : ℝ, b = c • a := by
   by_cases hd : IsVLDisjoint a b

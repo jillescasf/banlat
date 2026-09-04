@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Substructures.Sublattice
 import BanLat.Normed
 import BanLat.OrderUnit
@@ -26,7 +30,7 @@ namespace OrderIdeal
 
 instance : SetLike (OrderIdeal X) X where
   coe J := J.carrier
-  coe_injective' p q h := by
+  coe_injective p q h := by
     cases p; cases q; congr
     exact SetLike.ext' h
 
@@ -954,7 +958,7 @@ variable {X : Type*} [NormedAddCommGroup X] [Lattice X] [IsOrderedAddMonoid X]
 
 instance : SetLike (ClosedOrderIdeal X) X where
   coe J := J.toOrderIdeal
-  coe_injective' p q h := by
+  coe_injective p q h := by
     cases p; cases q; congr
     exact SetLike.coe_injective h
 

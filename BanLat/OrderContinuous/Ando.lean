@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.OrderContinuous.MeyerNieberg
 import BanLat.OrderContinuous.Decomposition
 
@@ -195,7 +199,10 @@ theorem isOrderContinuousNorm_of_isClosed_ideal_isBand
     exact P.bandProjection_mem w
   have hp_closure : p ∈ closure (G.toSubmodule : Set X) := by
     have hpJ' : p ∈ ((G.toSubmodule.topologicalClosure : Submodule ℝ X) : Set X) := by
-      simpa [J, OrderIdeal.topologicalClosure_toSubmodule] using hpJ
+      change p ∈ J.toSubmodule at hpJ
+      dsimp only [J] at hpJ
+      rw [OrderIdeal.topologicalClosure_toSubmodule] at hpJ
+      exact hpJ
     rwa [Submodule.topologicalClosure_coe] at hpJ'
   have hv_mem_J : ∀ n, v n ∈ (J : Set X) := by
     intro n

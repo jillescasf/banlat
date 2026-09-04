@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Examples.MofK.ALspace
 import BanLat.Examples.Lp.Basic
 import Mathlib.MeasureTheory.Function.SimpleFuncDenseLp
@@ -39,12 +43,12 @@ private def absolutelyContinuousOrderIdeal {μ : MofK K} (hμ : 0 ≤ μ) :
     refine MeasureTheory.SignedMeasure.abs_le_of_absolutelyContinuous hμ hsub ?_
     rw [abs_of_nonneg (MeasureTheory.SignedMeasure.zero_le_posPart _)]
     intro E hE
-    rw [MeasureTheory.SignedMeasure.abs_eq_posPart_add_negPart, VectorMeasure.add_apply]
+    rw [MeasureTheory.SignedMeasure.abs_eq_posPart_add_negPart, add_apply]
     have h2 : (0 : MeasureTheory.SignedMeasure K) E ≤
         ((ν₁ : MeasureTheory.SignedMeasure K) -
           (ν₂ : MeasureTheory.SignedMeasure K)).negPart E :=
       MeasureTheory.SignedMeasure.zero_le_negPart _ E hE
-    rw [VectorMeasure.zero_apply] at h2
+    rw [zero_apply] at h2
     linarith
   solid' := fun {ν₁ ν₂} hν₁ h₀ν₂ hν₂le => by
     change (ν₂ : MeasureTheory.SignedMeasure K) ≪ᵥ (μ : MeasureTheory.SignedMeasure K)
@@ -213,7 +217,7 @@ private theorem withDensityᵥ_indicator_mem_generated
   have h_eq : μm.withDensityᵥ (A.indicator (fun _ : K => c)) =
       c • (μm.restrict A).toSignedMeasure := by
     ext E hE
-    rw [withDensityᵥ_apply hint hE, VectorMeasure.smul_apply, smul_eq_mul,
+    rw [withDensityᵥ_apply hint hE, smul_apply, smul_eq_mul,
       Measure.toSignedMeasure_apply_measurable hE, setIntegral_indicator hA,
       setIntegral_const, smul_eq_mul, measureReal_restrict_apply hE]
     ring
@@ -483,8 +487,6 @@ private theorem bandGeneratedToLp_leftInv (μ : MofK K)
     lpToBandGenerated μ (bandGeneratedToLp μ v) = v := by
   apply Subtype.ext
   apply Subtype.ext
-  change ((lpToBandGenerated μ (bandGeneratedToLp μ v)).val :
-      MeasureTheory.SignedMeasure K) = (v.val : MeasureTheory.SignedMeasure K)
   rw [lpToBandGenerated_val_eq_withDensityᵥ]
   exact (WithDensityᵥEq.congr_ae (bandGeneratedToLp_ae_eq_rnDeriv μ v)).trans
     (MeasureTheory.SignedMeasure.withDensityᵥ_rnDeriv_eq

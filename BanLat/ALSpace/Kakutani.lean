@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.ALSpace.Dual
 import BanLat.ALSpace.OrderContinuous
 import BanLat.AMSpace.Kakutani
@@ -305,6 +309,9 @@ private lemma intoMofK_norm [ALSpace X] [Nontrivial X] (a : X) :
       (((dualKakutaniEquiv
         (X := X)).toLinearIsometryEquiv.symm).toLinearIsometry.toContinuousLinearMap)‖ =
       ‖a‖
+  let e := (dualKakutaniEquiv (X := X)).toLinearIsometryEquiv.symm
+  change ‖(BidualSpace.inclusion a).comp
+      (e : C(CharacterSpace X, ℝ) →L[ℝ] StrongDual ℝ X)‖ = ‖a‖
   rw [ContinuousLinearMap.opNorm_comp_linearIsometryEquiv,
     BidualSpace.norm_inclusion]
 

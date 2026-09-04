@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Examples.MofK.Atom
 import BanLat.Examples.MofK.ALspace
 import BanLat.Substructures.Band.PPP
@@ -24,7 +28,7 @@ namespace MeasureTheory.SignedMeasure
 
 /-- A signed measure has no atoms when its total variation has no atoms. -/
 abbrev NoAtoms (s : SignedMeasure K) : Prop :=
-  MeasureTheory.NoAtoms s.totalVariation
+  MeasureTheory.NullSingletonClass s.totalVariation
 
 end MeasureTheory.SignedMeasure
 
@@ -87,7 +91,7 @@ private noncomputable def evalCLM (A : Set K) (hA : MeasurableSet A) : MofK K �
   LinearMap.mkContinuous
     { toFun := fun μ => (μ : SignedMeasure K) A
       map_add' := by intro μ ν; simp
-      map_smul' := by intro c μ; simp [VectorMeasure.smul_apply, smul_eq_mul] }
+      map_smul' := by intro c μ; simp [smul_eq_mul] }
     1
     (by
       intro μ
@@ -120,6 +124,7 @@ private theorem finite_sum_smul_dirac_mem_atomicPart {s : Set K} (c : s → ℝ)
     have ha_mem : c a • dirac a.1 ∈ atomicPart (MofK K) := by
       exact (atomicPart (MofK K)).toOrderIdeal.toSubmodule.smul_mem _ <|
         isVLAtom.mem_atomicPart (X := MofK K) (isVLAtom_dirac a.1)
+    change _ ∈ (atomicPart (MofK K)).toOrderIdeal.toSubmodule
     simpa [Finset.sum_insert, ha] using
       (atomicPart (MofK K)).toOrderIdeal.toSubmodule.add_mem ha_mem ht
 
@@ -143,8 +148,8 @@ private theorem tsum_smul_dirac_apply {s : Set K} {c : s → ℝ}
   congr with x
   dsimp [evalCLM_apply, indicatorSubtype]
   by_cases hxA : x.1 ∈ A
-  · rw [if_pos hxA, dirac_apply_of_mem hA hxA, mul_one]
-  · rw [if_neg hxA, dirac_apply_of_notMem hA hxA, mul_zero]
+  · rw [if_pos hxA, smul_apply, dirac_apply_of_mem hA hxA, smul_eq_mul, mul_one]
+  · rw [if_neg hxA, smul_apply, dirac_apply_of_notMem hA hxA, smul_eq_mul, mul_zero]
 
 omit [CompactSpace K] in
 private theorem tsum_indicator_singletons_le_measure (m : Measure K) [SFinite m]
@@ -327,7 +332,7 @@ theorem exists_nonneg_sum_dirac_of_mem_atomicPart {μ : MofK K}
   have hν_singleton : ∀ x : K, (ν : SignedMeasure K) ({x} : Set K) = 0 := by
     intro x
     rw [show (ν : SignedMeasure K) = (μ : SignedMeasure K) - (((∑' x : s, f x : MofK K) :
-      MofK K) : SignedMeasure K) by rfl, VectorMeasure.sub_apply, hσ_singleton x,
+      MofK K) : SignedMeasure K) by rfl, sub_apply, hσ_singleton x,
       ← hm_signed, Measure.toSignedMeasure_apply_measurable (measurableSet_singleton x),
       measureReal_def, sub_self]
   have hν_cont : MeasureTheory.SignedMeasure.NoAtoms (ν : SignedMeasure K) :=
@@ -363,7 +368,7 @@ theorem exists_sum_dirac_of_mem_atomicPart {μ : MofK K}
       Summable (fun i : ιp ⊕ ιn =>
         (Sum.elim cp (fun i => -cn i) i) • dirac ((Sum.elim xp xn) i)) := by
     refine Summable.sum _ ?_ ?_
-    · simpa using hsp
+    · exact hsp.congr fun _ => rfl
     · change Summable (fun i : ιn => (-cn i) • dirac (xn i))
       exact hsn'
   have hsum_eq :
@@ -371,7 +376,7 @@ theorem exists_sum_dirac_of_mem_atomicPart {μ : MofK K}
         (Sum.elim cp (fun i => -cn i) i) • dirac ((Sum.elim xp xn) i))
         ((∑' i : ιp, cp i • dirac (xp i)) + ∑' i : ιn, (-cn i) • dirac (xn i)) := by
     refine HasSum.sum ?_ ?_
-    · simpa using hsp.hasSum
+    · exact hsp.hasSum.congr' <| Filter.Eventually.of_forall fun _ => rfl
     · change HasSum (fun i : ιn => (-cn i) • dirac (xn i)) _
       exact hsn'.hasSum
   refine ⟨ιp ⊕ ιn, inferInstance, Sum.elim cp (fun i => -cn i), Sum.elim xp xn, hsum, ?_⟩

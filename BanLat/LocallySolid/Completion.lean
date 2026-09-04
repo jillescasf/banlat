@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.LocallySolid.Basic
 import BanLat.Operators.Hom
 import Mathlib.Algebra.Order.Group.Cone
@@ -31,14 +35,28 @@ local instance : UniformContinuousConstSMul ℝ E :=
 omit [T2Space E] in
 private lemma uniformContinuous₂_sup :
     UniformContinuous₂ (fun x y : E => x ⊔ y) := by
-  simpa [UniformContinuous₂, Function.uncurry] using
-    ((isLocallySolidVectorLattice_iff_uniformContinuous_sup (E := E)).mp inferInstance)
+  unfold UniformContinuous₂
+  have h := (isLocallySolidVectorLattice_iff_uniformContinuous_sup (E := E)).mp
+    inferInstance
+  have hfun : Function.uncurry (fun x y : E => x ⊔ y) =
+      (fun p : E × E => p.1 ⊔ p.2) := by
+    funext p
+    rfl
+  rw [hfun]
+  exact h
 
 omit [T2Space E] in
 private lemma uniformContinuous₂_inf :
     UniformContinuous₂ (fun x y : E => x ⊓ y) := by
-  simpa [UniformContinuous₂, Function.uncurry] using
-    ((isLocallySolidVectorLattice_iff_uniformContinuous_inf (E := E)).mp inferInstance)
+  unfold UniformContinuous₂
+  have h := (isLocallySolidVectorLattice_iff_uniformContinuous_inf (E := E)).mp
+    inferInstance
+  have hfun : Function.uncurry (fun x y : E => x ⊓ y) =
+      (fun p : E × E => p.1 ⊓ p.2) := by
+    funext p
+    rfl
+  rw [hfun]
+  exact h
 
 /-- The topological completion of a Hausdorff locally solid vector lattice is a lattice. -/
 noncomputable instance instLatticeCompletion : Lattice (Completion E) := by
@@ -187,6 +205,10 @@ theorem toCompletionVecLatHom_injective :
     Function.Injective (toCompletionVecLatHom : E → Completion E) :=
   Completion.coe_injective E
 
+omit [T2Space E] in
+private lemma completion_sup_eq_map₂ (x y : Completion E) :
+    x ⊔ y = Completion.map₂ (fun a b : E => a ⊔ b) x y := rfl
+
 /-- The topological completion of a Hausdorff locally solid vector lattice is Hausdorff. -/
 instance instT2SpaceCompletion : T2Space (Completion E) := by
   infer_instance
@@ -198,9 +220,11 @@ theorem nonneg_completion_eq_closure_image_nonneg :
       = closure (((↑) : E → Completion E) '' (AddGroupCone.nonneg E : Set E)) := by
   have _ : T2Space E := inferInstance
   have hcont_negPart : Continuous (fun x : Completion E => x⁻) := by
-    simpa [negPart_def] using
-      (Completion.continuous_map₂ continuous_neg continuous_const :
-        Continuous fun x : Completion E => (-x) ⊔ 0)
+    have h : Continuous (fun x : Completion E =>
+        Completion.map₂ (fun a b : E => a ⊔ b) (-x) 0) :=
+      Completion.continuous_map₂ continuous_neg continuous_const
+    exact h.congr fun x => by
+      rw [negPart_def, completion_sup_eq_map₂]
   have hclosed : IsClosed (AddGroupCone.nonneg (Completion E) : Set (Completion E)) := by
     rw [show (AddGroupCone.nonneg (Completion E) : Set (Completion E)) =
         (fun x : Completion E => x⁻) ⁻¹' ({0} : Set (Completion E)) by
@@ -212,9 +236,11 @@ theorem nonneg_completion_eq_closure_image_nonneg :
   · intro x hx
     change 0 ≤ x at hx
     have hcont_posPart : Continuous (fun x : Completion E => x⁺) := by
-      simpa [posPart_def] using
-        (Completion.continuous_map₂ continuous_id continuous_const :
-          Continuous fun x : Completion E => x ⊔ 0)
+      have h : Continuous (fun z : Completion E =>
+          Completion.map₂ (fun a b : E => a ⊔ b) z 0) :=
+        Completion.continuous_map₂ continuous_id continuous_const
+      exact h.congr fun z => by
+        rw [posPart_def, completion_sup_eq_map₂]
     have hxrange : x ∈ closure (Set.range ((↑) : E → Completion E)) := by
       rw [(Completion.denseRange_coe (α := E)).closure_range]
       trivial
@@ -286,9 +312,11 @@ theorem isSolid_closure_image_coe {s : Set E}
   let C : Set (Completion E) := closure (((↑) : E → Completion E) '' s)
   let f : Completion E → Completion E := fun z => (y ⊔ -|z|) ⊓ |z|
   have hcont_abs : Continuous (|·| : Completion E → Completion E) := by
-    simpa [abs] using
-      (Completion.continuous_map₂ continuous_id continuous_neg :
-        Continuous fun z : Completion E => z ⊔ -z)
+    have h : Continuous (fun z : Completion E =>
+        Completion.map₂ (fun a b : E => a ⊔ b) z (-z)) :=
+      Completion.continuous_map₂ continuous_id continuous_neg
+    exact h.congr fun z => by
+      rw [abs, completion_sup_eq_map₂]
   have hcont : Continuous f := by
     exact Completion.continuous_map₂
       (Completion.continuous_map₂ continuous_const (continuous_neg.comp hcont_abs)) hcont_abs
@@ -367,7 +395,9 @@ private lemma tendsto_completion_smul_left_zero (m : Completion E) :
     completion_hasBasis_solid_closure.mem_iff.mpr ⟨W, hW, subset_rfl⟩
   have hpre : {z : Completion E | m - z ∈ D} ∈ 𝓝 m := by
     have hD' : D ∈ 𝓝 (m - m) := by simpa [sub_self] using hD
-    simpa using ((continuous_const.sub continuous_id).tendsto m) hD'
+    have hcont : Continuous (fun z : Completion E => m - z) :=
+      (continuous_const.sub continuous_id).congr fun _ => rfl
+    exact (hcont.tendsto m) hD'
   obtain ⟨a, ha⟩ := (Completion.denseRange_coe (α := E)).mem_nhds hpre
   have haD : {r : ℝ | r • (a : Completion E) ∈ D} ∈ 𝓝 (0 : ℝ) := by
     have hcont : Continuous fun r : ℝ => r • a := continuous_id.smul continuous_const
@@ -400,8 +430,14 @@ vector lattice. -/
 noncomputable instance instIsLocallySolidVectorLatticeCompletion :
     IsLocallySolidVectorLattice (Completion E) := by
   have hsup : UniformContinuous (fun p : Completion E × Completion E => p.1 ⊔ p.2) := by
-    simpa [UniformContinuous₂, Function.uncurry] using
-      (Completion.uniformContinuous_map₂ (fun x y : E => x ⊔ y))
+    have h := Completion.uniformContinuous_map₂ (fun x y : E => x ⊔ y)
+    have hfun : Function.uncurry (Completion.map₂ fun x y : E => x ⊔ y) =
+        (fun p : Completion E × Completion E => p.1 ⊔ p.2) := by
+      funext p
+      change Completion.map₂ (fun x y : E => x ⊔ y) p.1 p.2 = p.1 ⊔ p.2
+      rw [completion_sup_eq_map₂]
+    rw [← hfun]
+    exact h
   exact (isLocallySolidVectorLattice_iff_uniformContinuous_sup (E := Completion E)).mpr hsup
 
 end Completion

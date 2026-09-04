@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Dual
 import BanLat.Operators.Hom
 import BanLat.Examples.CofK.Basic
@@ -158,7 +162,7 @@ private theorem signedMeasureFunctional_add (μ ν : SignedMeasure K) :
     signedMeasureFunctional (μ + ν) =
       signedMeasureFunctional μ + signedMeasureFunctional ν := by
   ext f
-  simp only [signedMeasureFunctional_apply, ContinuousLinearMap.add_apply]
+  simp only [signedMeasureFunctional_apply, add_apply]
   have hsum : (μ + ν : SignedMeasure K) =
       (μ.toJordanDecomposition.posPart + ν.toJordanDecomposition.posPart).toSignedMeasure
       - (μ.toJordanDecomposition.negPart + ν.toJordanDecomposition.negPart).toSignedMeasure := by
@@ -196,7 +200,7 @@ omit [T2Space K] in
 private theorem signedMeasureFunctional_smul (c : ℝ) (μ : SignedMeasure K) :
     signedMeasureFunctional (c • μ) = c • signedMeasureFunctional μ := by
   ext f
-  simp only [signedMeasureFunctional_apply, ContinuousLinearMap.smul_apply, smul_eq_mul]
+  simp only [signedMeasureFunctional_apply, smul_apply, smul_eq_mul]
   exact signedMeasureIntegral_smul c μ f
 
 omit [T2Space K] in
@@ -304,6 +308,12 @@ end MofK
 
 namespace StrongDual
 
+omit [MeasurableSpace K] [BorelSpace K] [T2Space K] in
+private theorem toOrderDualSpace_zero_CofK :
+    StrongDual.toOrderDualSpace (0 : StrongDual ℝ C(K, ℝ)) = 0 := by
+  ext f
+  rfl
+
 /-- A non-negative functional on `C(K, ℝ)`, viewed as a positive linear map on
 compactly supported continuous functions. Since `K` is compact, these spaces
 agree. -/
@@ -322,7 +332,8 @@ private noncomputable def toPositiveCompactlySupportedMap
     (fun f hf => by
       have hφ' : 0 ≤ StrongDual.toOrderDualSpace φ := by
         change StrongDual.toOrderDualSpace 0 ≤ StrongDual.toOrderDualSpace φ at hφ
-        simpa using hφ
+        rw [toOrderDualSpace_zero_CofK] at hφ
+        exact hφ
       rw [OrderDualSpace.nonneg_iff] at hφ'
       change 0 ≤ φ f.toContinuousMap
       exact hφ' f.toContinuousMap (by
@@ -354,7 +365,17 @@ theorem integral_measureOfNonneg (φ : StrongDual ℝ C(K, ℝ)) (hφ : 0 ≤ φ
     ∫ x, f x ∂measureOfNonneg φ hφ = φ f := by
   have h := RealRMK.integral_rieszMeasure (toPositiveCompactlySupportedMap φ hφ)
     (CompactlySupportedContinuousMap.continuousMapEquiv (β := ℝ) f)
-  simpa [measureOfNonneg, CompactlySupportedContinuousMap.continuousMapEquiv] using h
+  change ∫ x, f x ∂RealRMK.rieszMeasure (toPositiveCompactlySupportedMap φ hφ) = φ f
+  have hintegrand :
+      (fun x => CompactlySupportedContinuousMap.continuousMapEquiv (β := ℝ) f x) =
+        (fun x => f x) := by
+    funext x
+    rfl
+  rw [hintegrand] at h
+  have happly : toPositiveCompactlySupportedMap φ hφ
+      (CompactlySupportedContinuousMap.continuousMapEquiv (β := ℝ) f) = φ f := rfl
+  rw [happly] at h
+  exact h
 
 /-- The regular finite signed Borel measure corresponding to a continuous
 functional on `C(K, ℝ)`. -/
@@ -499,7 +520,9 @@ private theorem signedMeasureFunctional_le_iff
   · intro h
     have h' : StrongDual.toOrderDualSpace (signedMeasureFunctional μ) ≤
         StrongDual.toOrderDualSpace (signedMeasureFunctional ν) := by
-      simpa using h
+      change StrongDual.toOrderDualSpace (signedMeasureFunctional μ) ≤
+        StrongDual.toOrderDualSpace (signedMeasureFunctional ν) at h
+      exact h
     rw [OrderDualSpace.le_iff] at h'
     have hnonneg_fun : 0 ≤ signedMeasureFunctional (ν - μ) := by
       change 0 ≤ StrongDual.toOrderDualSpace (signedMeasureFunctional (ν - μ))
@@ -507,7 +530,7 @@ private theorem signedMeasureFunctional_le_iff
       intro f hf
       have hfg := h' f hf
       rw [StrongDual.toOrderDualSpace_apply, signedMeasureFunctional_sub,
-        ContinuousLinearMap.sub_apply]
+        sub_apply]
       exact sub_nonneg.mpr (by simpa [StrongDual.toOrderDualSpace_apply] using hfg)
     have hnonneg_meas : 0 ≤ ν - μ :=
       (signedMeasureFunctional_nonneg_iff (SignedMeasure.IsRegular.sub hν hμ)).mp hnonneg_fun
@@ -520,12 +543,18 @@ private theorem signedMeasureFunctional_le_iff
     rw [OrderDualSpace.le_iff]
     intro f hf
     have hfun' : 0 ≤ StrongDual.toOrderDualSpace (signedMeasureFunctional (ν - μ)) := by
-      simpa using hnonneg_fun
+      change StrongDual.toOrderDualSpace 0 ≤
+        StrongDual.toOrderDualSpace (signedMeasureFunctional (ν - μ)) at hnonneg_fun
+      have hzero : StrongDual.toOrderDualSpace (0 : StrongDual ℝ C(K, ℝ)) = 0 := by
+        ext g
+        rfl
+      rw [hzero] at hnonneg_fun
+      exact hnonneg_fun
     rw [OrderDualSpace.nonneg_iff] at hfun'
     have hfg := hfun' f hf
     have hfg' : 0 ≤ (signedMeasureFunctional ν) f - (signedMeasureFunctional μ) f := by
       simpa [StrongDual.toOrderDualSpace_apply, signedMeasureFunctional_sub,
-        ContinuousLinearMap.sub_apply] using hfg
+        sub_apply] using hfg
     exact sub_nonneg.mp hfg'
 
 /-- The positive part of a regular signed measure is regular. -/
@@ -580,7 +609,6 @@ private theorem signedMeasureFunctional_sup
     have h1 : μ ≤ σ := (signedMeasureFunctional_le_iff hμ hσ_reg).mp (by rw [hSσ]; exact hle_left)
     have h2 : ν ≤ σ := (signedMeasureFunctional_le_iff hν hσ_reg).mp (by rw [hSσ]; exact hle_right)
     have hsup : μ ⊔ ν ≤ σ := by
-      change μ ⊔ ν ≤ σ
       exact (sup_le_iff.mpr ⟨h1, h2⟩)
     have h4 := (signedMeasureFunctional_le_iff (isRegular_sup hμ hν) hσ_reg).mpr
       hsup
@@ -594,10 +622,14 @@ private theorem signedMeasureFunctional_sup
     change StrongDual.toOrderDualSpace
         (signedMeasureFunctional μ ⊔ signedMeasureFunctional ν) ≤
       StrongDual.toOrderDualSpace (signedMeasureFunctional (μ ⊔ ν))
+    change StrongDual.toOrderDualSpace (signedMeasureFunctional μ) ≤
+      StrongDual.toOrderDualSpace (signedMeasureFunctional (μ ⊔ ν)) at hleft
+    change StrongDual.toOrderDualSpace (signedMeasureFunctional ν) ≤
+      StrongDual.toOrderDualSpace (signedMeasureFunctional (μ ⊔ ν)) at hright
     change (StrongDual.toOrderDualSpace (signedMeasureFunctional μ) ⊔
         StrongDual.toOrderDualSpace (signedMeasureFunctional ν)) ≤
       StrongDual.toOrderDualSpace (signedMeasureFunctional (μ ⊔ ν))
-    exact sup_le (by simpa using hleft) (by simpa using hright)
+    exact sup_le hleft hright
 
 /-- The signed measure functional preserves infima on regular signed measures. -/
 private theorem signedMeasureFunctional_inf
@@ -720,10 +752,16 @@ noncomputable def dualEquiv :
     simpa [MofK.toDual] using norm_signedMeasureFunctional μ.property
   map_sup' := by
     intro μ ν
-    simpa [MofK.toDual] using signedMeasureFunctional_sup μ.property ν.property
+    change signedMeasureFunctional (((μ ⊔ ν : MofK K) : SignedMeasure K)) =
+      signedMeasureFunctional μ.1 ⊔ signedMeasureFunctional ν.1
+    rw [show ((μ ⊔ ν : MofK K) : SignedMeasure K) = μ.1 ⊔ ν.1 from rfl]
+    exact signedMeasureFunctional_sup μ.property ν.property
   map_inf' := by
     intro μ ν
-    simpa [MofK.toDual] using signedMeasureFunctional_inf μ.property ν.property
+    change signedMeasureFunctional (((μ ⊓ ν : MofK K) : SignedMeasure K)) =
+      signedMeasureFunctional μ.1 ⊓ signedMeasureFunctional ν.1
+    rw [show ((μ ⊓ ν : MofK K) : SignedMeasure K) = μ.1 ⊓ ν.1 from rfl]
+    exact signedMeasureFunctional_inf μ.property ν.property
 
 @[simp]
 theorem dualEquiv_apply (μ : MofK K) :

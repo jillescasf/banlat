@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.OrderContinuous.Nakano
 import BanLat.Substructures.Band.Decomposition
 
@@ -51,7 +55,8 @@ private lemma principalBand_subset_disjointComplement
     (B := Band.disjointComplement (Band.generated ({b} : Set X) : Set X))
     (by intro y hy; rw [Set.mem_singleton_iff] at hy; subst hy; exact ha_mem)
 
-private lemma principalBandProjection_isVLDisjoint
+/-- Principal-band projections onto disjoint generators are disjoint. -/
+theorem principalBandProjection_isVLDisjoint
     [HasPrincipalProjectionProperty X]
     {a b : X} (hab : IsVLDisjoint a b) (x : X) :
     IsVLDisjoint (Band.principalBandProjection a x) (Band.principalBandProjection b x) := by

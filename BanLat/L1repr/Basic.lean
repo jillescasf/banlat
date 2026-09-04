@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.ALSpace.Kakutani
 import BanLat.Operators.StrictlyPositive
 

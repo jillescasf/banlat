@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import Mathlib.MeasureTheory.Measure.Regular
 import Mathlib.MeasureTheory.VectorMeasure.Decomposition.JordanSub
 
@@ -67,10 +71,10 @@ private lemma MeasureTheory.Measure.Regular.sub {K : Type*} [TopologicalSpace K]
   haveI : ((μ - ν) + ν.restrict sᶜ).Regular := h_eq ▸ this
   exact Measure.Regular.of_add_right this
 
-/-- If a finite non-negative measure can be uniformly approximated by regular finite
-measures up to arbitrary precision, then it is itself regular. -/
+/-- If a finite non-negative measure can be uniformly approximated by regular
+finite measures up to arbitrary precision, then it is itself regular. -/
 lemma MeasureTheory.Measure.Regular.of_uniform_approx {K : Type*}
-    [TopologicalSpace K] [T2Space K] [CompactSpace K] [MeasurableSpace K] [BorelSpace K]
+    [TopologicalSpace K] [T2Space K] [MeasurableSpace K] [BorelSpace K]
     {μ : Measure K} [IsFiniteMeasure μ]
     (h : ∀ ε : ℝ, 0 < ε → ∃ ν : Measure K,
       IsFiniteMeasure ν ∧ ν.Regular ∧

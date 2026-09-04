@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Substructures.Band.DisjointComplement
 import BanLat.Substructures.Band.Lattice
 
@@ -439,12 +443,25 @@ theorem isClosed_coe : IsClosed ((B : Set X)) := by
 closed. -/
 theorem isClosed_toSubmodule : IsClosed ((B.toSubmodule : Set X)) := isClosed_coe B
 
-/-- A band of a Banach lattice, equipped with the inherited normed vector
-lattice structure, is itself a Banach lattice. -/
-noncomputable instance instBanachLatticeSubtype [BanachLattice X] :
-    BanachLattice ↥B.toSubmodule :=
-  VectorSublattice.banachLatticeSubtype _ B.isClosed_coe
-
 end Band
 
 end Normed
+
+section Banach
+
+variable {X : Type*} [NormedAddCommGroup X] [Lattice X] [IsOrderedAddMonoid X]
+  [BanachLattice X]
+
+namespace Band
+
+variable (B : Band X)
+
+/-- A band of a Banach lattice, equipped with the inherited normed vector
+lattice structure, is itself a Banach lattice. -/
+noncomputable instance instBanachLatticeSubtype :
+    BanachLattice ↥B.toSubmodule :=
+  VectorSublattice.banachLatticeSubtype B.toVectorSublattice B.isClosed_coe
+
+end Band
+
+end Banach

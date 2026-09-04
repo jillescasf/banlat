@@ -1,3 +1,7 @@
+/-
+Authors: Jesús Illescas-Fiorito
+-/
+
 import BanLat.Disjoint
 import Mathlib.Analysis.SpecialFunctions.Pow.Continuity
 

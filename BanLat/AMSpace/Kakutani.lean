@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.AMSpace.Characters
 import BanLat.Convergences.Uniform
 import BanLat.Examples.CofK.Basic

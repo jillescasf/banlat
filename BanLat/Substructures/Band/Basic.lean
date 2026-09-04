@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Substructures.Ideal
 import BanLat.OrderComplete
 
@@ -32,7 +36,7 @@ namespace Band
 
 instance : SetLike (Band X) X where
   coe B := B.carrier
-  coe_injective' p q h := by
+  coe_injective p q h := by
     cases p; cases q; congr
     exact SetLike.ext' h
 
@@ -162,7 +166,9 @@ def ofPosDirectedSSupMem (J : OrderIdeal X)
         exact hsup_ge.trans this
     have hu : y - s₀ ∈ J := h T hT_J hT_pos hT_dir hT_ne (y - s₀) hT_lub
     have hres : y - s₀ + s₀ ∈ J := J.toSubmodule.add_mem hu hs₀J
-    simpa using hres
+    change y ∈ J.carrier
+    rw [sub_add_cancel] at hres
+    exact hres
 
 end Band
 

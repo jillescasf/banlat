@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import Mathlib.MeasureTheory.VectorMeasure.Decomposition.Jordan
 import Mathlib.MeasureTheory.VectorMeasure.Decomposition.JordanSub
 import Mathlib.MeasureTheory.VectorMeasure.Decomposition.RadonNikodym
@@ -55,9 +59,9 @@ theorem apply_le_apply_of_subset {s : SignedMeasure α} (hs : 0 ≤ s)
   have hBdiffA : MeasurableSet (B \ A) := hB.diff hA
   have h_diff_nn : 0 ≤ s (B \ A) := by
     have := hs _ hBdiffA
-    rwa [VectorMeasure.zero_apply] at this
+    rwa [zero_apply] at this
   have h_disj : Disjoint A (B \ A) := Set.disjoint_sdiff_right
-  have h_union : A ∪ (B \ A) = B := Set.union_diff_cancel hAB
+  have h_union : A ∪ (B \ A) = B := Set.union_sdiff_cancel hAB
   have h_add : s A + s (B \ A) = s B := by
     rw [← VectorMeasure.of_union h_disj hA hBdiffA, h_union]
   linarith
@@ -69,7 +73,7 @@ private lemma apply_eq_real_sub (s : SignedMeasure α) {A : Set α} (hA : Measur
     s A = s.toJordanDecomposition.posPart.real A -
           s.toJordanDecomposition.negPart.real A := by
   conv_lhs => rw [← s.toSignedMeasure_toJordanDecomposition]
-  rw [JordanDecomposition.toSignedMeasure, VectorMeasure.coe_sub, Pi.sub_apply,
+  rw [JordanDecomposition.toSignedMeasure, FunLike.coe_sub, Pi.sub_apply,
     Measure.toSignedMeasure_apply_measurable hA,
     Measure.toSignedMeasure_apply_measurable hA]
 

@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Operators.Positive
 
 /-!
@@ -130,7 +134,7 @@ variable {X Y : Type*} [AddCommGroup X] [AddCommGroup Y]
 instance instFunLike :
     FunLike (OrderBoundedHom X Y) X Y where
   coe f := f.toFun
-  coe_injective' := by
+  coe_injective := by
     intro f g h; cases f; cases g; congr 1
     exact LinearMap.ext (congrFun h)
 
@@ -143,7 +147,7 @@ theorem ext {f g : OrderBoundedHom X Y}
 theorem coe_toLinearMap (f : OrderBoundedHom X Y) :
     ⇑f.toLinearMap = ⇑f := rfl
 
-private def toLinearMap_injective :
+private theorem toLinearMap_injective :
     Function.Injective (OrderBoundedHom.toLinearMap :
       OrderBoundedHom X Y → X →ₗ[ℝ] Y) := fun _ _ h =>
   ext fun x => congrFun (congrArg DFunLike.coe h) x

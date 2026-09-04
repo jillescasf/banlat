@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Dual
 import BanLat.Free.FVLv
 import BanLat.Substructures.Sublattice
@@ -451,9 +455,9 @@ private theorem freeNormExt_sub_limit_le_of_cauchySeq {u : ℕ → FunctionSpace
           (fun m => ((u m : C(FVLv.dualUnitBall E, ℝ)) -
             (u N : C(FVLv.dualUnitBall E, ℝ))) (φ i)) Filter.atTop
           (nhds ((g - (u N : C(FVLv.dualUnitBall E, ℝ))) (φ i))) := by
-      simpa using
-        ((continuous_eval_const (φ i)).tendsto
-          (g - (u N : C(FVLv.dualUnitBall E, ℝ)))).comp hdiff_tend
+      exact (((continuous_eval_const (φ i)).tendsto
+        (g - (u N : C(FVLv.dualUnitBall E, ℝ)))).comp hdiff_tend).congr' <|
+          Filter.Eventually.of_forall fun _ => by rfl
     exact (continuous_abs.tendsto _).comp heval_tend
   have htail :
       ∀ᶠ m in Filter.atTop,
@@ -491,9 +495,9 @@ private theorem freeNormExt_sub_limit_le_of_cauchySeq' {u : ℕ → FunctionSpac
           (fun m => ((u N : C(FVLv.dualUnitBall E, ℝ)) -
             (u m : C(FVLv.dualUnitBall E, ℝ))) (φ i)) Filter.atTop
           (nhds (((u N : C(FVLv.dualUnitBall E, ℝ)) - g) (φ i))) := by
-      simpa using
-        ((continuous_eval_const (φ i)).tendsto
-          ((u N : C(FVLv.dualUnitBall E, ℝ)) - g)).comp hdiff_tend
+      exact (((continuous_eval_const (φ i)).tendsto
+        ((u N : C(FVLv.dualUnitBall E, ℝ)) - g)).comp hdiff_tend).congr' <|
+          Filter.Eventually.of_forall fun _ => by rfl
     exact (continuous_abs.tendsto _).comp heval_tend
   have htail :
       ∀ᶠ m in Filter.atTop,
@@ -552,7 +556,11 @@ private noncomputable instance instCompleteSpaceFunctionSpace :
   have hnorm : ‖u n - ⟨g, hg_finite⟩‖ ≤ ε / 2 := by
     change (freeNormExt E (((u n - ⟨g, hg_finite⟩ : FunctionSpace E) :
       C(FVLv.dualUnitBall E, ℝ)))).toReal ≤ ε / 2
-    exact ENNReal.toReal_le_of_le_ofReal (by linarith) (by simpa using hdiff)
+    have hcoe : (((u n - ⟨g, hg_finite⟩ : FunctionSpace E) :
+        C(FVLv.dualUnitBall E, ℝ))) =
+          (u n : C(FVLv.dualUnitBall E, ℝ)) - g := rfl
+    rw [hcoe]
+    exact ENNReal.toReal_le_of_le_ofReal (by linarith) hdiff
   linarith
 
 private noncomputable instance instBanachLatticeFunctionSpace :
@@ -712,6 +720,7 @@ theorem norm_of (x : E) : ‖of x‖ = ‖x‖ := by
     have hle :=
       sum_abs_apply_le_freeNorm E (of x : FBL E) (fun _ : Fin 1 => ψ)
         (normAdmissible_singleton E ψ)
+    change ‖x‖ ≤ ‖((of x : FBL E) : FunctionSpace E)‖
     simpa [Fin.sum_univ_one, ψ, hφx, Real.norm_eq_abs] using hle
 
 /-- The canonical map from `E` to `FBL E` is an isometric embedding. -/
@@ -742,7 +751,8 @@ private theorem eval_coe_submodule {X : Type*} [AddCommGroup X] [Lattice X]
     (y : Fin n → ↥Y.toSubmodule) (e : LLexpr n) :
     ((LLexpr.eval y e : ↥Y.toSubmodule) : X) =
       LLexpr.eval (fun i => (y i : X)) e := by
-  simpa using (LLexpr.map_eval (subtypeHom Y) y e)
+  have hsubtype (z : ↥Y.toSubmodule) : subtypeHom Y z = (z : X) := rfl
+  simpa only [hsubtype] using (LLexpr.map_eval (subtypeHom Y) y e)
 
 /-- The copy of the concrete free vector lattice from `FVLv.lean` inside `FBL E`. -/
 def ofFVLv : FVLv E →ₗ[ℝ] FBL E := by
@@ -785,7 +795,12 @@ theorem denseRange_ofFVLv : DenseRange (ofFVLv (E := E)) := by
     have hmap :
         ofFVLv (LLexpr.eval (fun i : Fin n => FVLv.of (x i)) e) =
           LLexpr.eval (fun i : Fin n => of (x i)) e := by
-      simpa [ofFVLv] using
+      have hof (f : FVLv E) :
+          ofFVLv f = FVLv.lift (ofLinear (E := E)) f := rfl
+      have hof_generator (z : E) :
+          FVLv.lift (ofLinear (E := E)) (FVLv.of z) = of z :=
+        FVLv.lift_of (T := ofLinear (E := E)) z
+      simpa only [hof, hof_generator] using
         LLexpr.map_eval (FVLv.lift (ofLinear (E := E)))
           (fun i : Fin n => FVLv.of (x i)) e
     calc
@@ -793,7 +808,8 @@ theorem denseRange_ofFVLv : DenseRange (ofFVLv (E := E)) := by
           = ((LLexpr.eval (fun i : Fin n => of (x i)) e : FBL E) : FunctionSpace E) := by
             rw [hmap]
       _ = LLexpr.eval (fun i : Fin n => dualEval E (x i)) e := by
-            simpa using
+            have hof (z : E) : ((of z : FBL E) : FunctionSpace E) = dualEval E z := rfl
+            simpa only [hof] using
               (eval_coe_submodule (closedFreeVectorLattice E)
                 (fun i : Fin n => of (x i)) e)
       _ = LLexpr.eval (fun i : Fin n => (z i : FunctionSpace E)) e := by
@@ -801,7 +817,11 @@ theorem denseRange_ofFVLv : DenseRange (ofFVLv (E := E)) := by
             funext i
             rw [hx i]
       _ = (y : FunctionSpace E) := by
-            simpa using hz
+            have hzfun : Subtype.val ∘ z = fun i => (z i : FunctionSpace E) := by
+              funext i
+              rfl
+            rw [hzfun] at hz
+            exact hz
   apply denseRange_iff_closure_range.mpr
   ext z
   constructor
@@ -1000,13 +1020,19 @@ private theorem ofFVLv_supSubLinearCombination_apply {m p n : ℕ}
         S ((FVLv.lift (ofLinear (E := E))) (fvlvLinearCombination x (a i)))) =
         fun i : Fin (m + 1) => dualLinearCombination x (a i) φ := by
     funext i
-    simpa [S, ofFVLv] using ofFVLv_linearCombination_apply (x := x) (a := a i) φ
+    have hS (f : FBL E) : S f = f φ := rfl
+    have hlift (f : FVLv E) :
+        FVLv.lift (ofLinear (E := E)) f = ofFVLv f := rfl
+    simpa only [hS, hlift] using ofFVLv_linearCombination_apply (x := x) (a := a i) φ
   have hB :
       (fun j : Fin (p + 1) =>
         S ((FVLv.lift (ofLinear (E := E))) (fvlvLinearCombination x (b j)))) =
         fun j : Fin (p + 1) => dualLinearCombination x (b j) φ := by
     funext j
-    simpa [S, ofFVLv] using ofFVLv_linearCombination_apply (x := x) (a := b j) φ
+    have hS (f : FBL E) : S f = f φ := rfl
+    have hlift (f : FVLv E) :
+        FVLv.lift (ofLinear (E := E)) f = ofFVLv f := rfl
+    simpa only [hS, hlift] using ofFVLv_linearCombination_apply (x := x) (a := b j) φ
   rw [hA, hB]
 
 private theorem exists_supSubLinearCombination_eval {n : ℕ} (e : LLexpr n) :
@@ -1069,7 +1095,7 @@ private theorem exists_supSubLinearCombination_eq (f : FVLv E) :
       exact he
     _ = finiteSup (fun i : Fin (m + 1) => fvlvLinearCombination x (a i)) -
           finiteSup (fun j : Fin (p + 1) => fvlvLinearCombination x (b j)) := by
-            simpa [fvlvLinearCombination, linCombEval] using
+            simpa [fvlvLinearCombination, linCombEval, Fintype.linearCombination_apply] using
               (hab (fun i : Fin n => FVLv.of (x i)))
 
 private theorem ofFVLv_apply (f : FVLv E) (φ : FVLv.dualUnitBall E) :
@@ -1085,18 +1111,25 @@ private theorem ofFVLv_apply (f : FVLv E) (φ : FVLv.dualUnitBall E) :
   have hmap :
       ofFVLv (LLexpr.eval (fun i : Fin n => FVLv.of (x i)) e) =
         LLexpr.eval (fun i : Fin n => of (x i)) e := by
-    simpa [ofFVLv] using
+    have hof (g : FVLv E) :
+        ofFVLv g = FVLv.lift (ofLinear (E := E)) g := rfl
+    have hof_generator (z : E) :
+        FVLv.lift (ofLinear (E := E)) (FVLv.of z) = of z :=
+      FVLv.lift_of (T := ofLinear (E := E)) z
+    simpa only [hof, hof_generator] using
       LLexpr.map_eval (FVLv.lift (ofLinear (E := E)))
         (fun i : Fin n => FVLv.of (x i)) e
   have hFVLv :
       S (LLexpr.eval (fun i : Fin n => FVLv.of (x i)) e) =
         LLexpr.eval (fun i : Fin n => (φ : WeakDual ℝ E) (x i)) e := by
-    simpa [S, FVLv.of_apply] using
+    have hS (g : FVLv E) : S g = g φ := rfl
+    simpa only [hS, FVLv.of_apply] using
       LLexpr.map_eval S (fun i : Fin n => FVLv.of (x i)) e
   have hFBL :
       evalAtFBL φ (LLexpr.eval (fun i : Fin n => of (x i)) e) =
         LLexpr.eval (fun i : Fin n => (φ : WeakDual ℝ E) (x i)) e := by
-    simpa [evalAtFBL, of_apply] using
+    have heval (g : FBL E) : evalAtFBL φ g = g φ := rfl
+    simpa only [heval, of_apply] using
       LLexpr.map_eval (evalAtFBL φ) (fun i : Fin n => of (x i)) e
   calc
     (ofFVLv (LLexpr.eval (fun i : Fin n => FVLv.of (x i)) e) : FBL E) φ
@@ -1123,13 +1156,23 @@ private theorem isLUB_strongDual_apply_finiteSup {ι : Type*} [Fintype ι] [None
     {r : ℝ | ∃ φi : ι → OrderDualSpace X,
       (∀ i, 0 ≤ φi i) ∧ (∑ i, φi i) = StrongDual.toOrderDualSpace ψ ∧
         r = ∑ i, φi i (y i)}
+  have hzeroOD : StrongDual.toOrderDualSpace (0 : StrongDual ℝ X) = 0 := by
+    ext z
+    rfl
+  have hroundOD (g : OrderDualSpace X) :
+      StrongDual.toOrderDualSpace (StrongDual.ofOrderDualSpace g) = g := by
+    ext z
+    rfl
   have hS : S₁ = S₂ := by
     ext r
     constructor
     · rintro ⟨ψi, hψi0, hsum, hr⟩
       refine ⟨fun i => StrongDual.toOrderDualSpace (ψi i), ?_, ?_, ?_⟩
       · intro i
-        simpa using hψi0 i
+        have h := hψi0 i
+        change StrongDual.toOrderDualSpace 0 ≤
+          StrongDual.toOrderDualSpace (ψi i) at h
+        simpa only [hzeroOD] using h
       · calc
           ∑ i, StrongDual.toOrderDualSpace (ψi i) =
               StrongDual.toOrderDualSpaceLinear (∑ i, ψi i) := by
@@ -1141,7 +1184,7 @@ private theorem isLUB_strongDual_apply_finiteSup {ι : Type*} [Fintype ι] [None
       · intro i
         change StrongDual.toOrderDualSpace (0 : StrongDual ℝ X) ≤
           StrongDual.toOrderDualSpace (StrongDual.ofOrderDualSpace (φi i))
-        simpa using hφi0 i
+        simpa only [hzeroOD, hroundOD] using hφi0 i
       · calc
           ∑ i, StrongDual.ofOrderDualSpace (φi i) =
               StrongDual.equivOrderDualSpace.symm (∑ i, φi i) := by
@@ -1152,7 +1195,9 @@ private theorem isLUB_strongDual_apply_finiteSup {ι : Type*} [Fintype ι] [None
                 rfl
       · simpa [StrongDual.ofOrderDualSpace_apply] using hr
   have hOD : 0 ≤ StrongDual.toOrderDualSpace ψ := by
-    simpa using hψ
+    have h := hψ
+    change StrongDual.toOrderDualSpace 0 ≤ StrongDual.toOrderDualSpace ψ at h
+    simpa only [hzeroOD] using h
   have hLUB :
       IsLUB S₂ ((StrongDual.toOrderDualSpace ψ) (finiteSup y)) := by
     simpa [S₂, finiteSup] using
@@ -1487,14 +1532,15 @@ private theorem norm_liftFVLv_le (T : E →L[ℝ] X) (f : FVLv E) :
 private theorem dist_liftFVLv_le (T : E →L[ℝ] X) (f g : FVLv E) :
     dist (liftFVLv T f) (liftFVLv T g) ≤ ‖T‖ * dist (ofFVLv f) (ofFVLv g) := by
   rw [dist_eq_norm, dist_eq_norm, ← map_sub, ← LinearMap.map_sub]
-  simpa using norm_liftFVLv_le (T := T) (f - g)
+  exact norm_liftFVLv_le (T := T) (f - g)
 
 private noncomputable def liftAux (T : E →L[ℝ] X) : FBL E →L[ℝ] X :=
   ((liftFVLv T).toLinearMap).extendOfNorm (ofFVLv (E := E))
 
 private theorem liftAux_ofFVLv (T : E →L[ℝ] X) (f : FVLv E) :
     liftAux T (ofFVLv f) = liftFVLv T f := by
-  simpa [liftAux] using
+  have hlift (g : FVLv E) : (liftFVLv T).toLinearMap g = liftFVLv T g := rfl
+  simpa only [liftAux, hlift] using
     LinearMap.extendOfNorm_eq (f := (liftFVLv T).toLinearMap) (e := ofFVLv (E := E))
       (h_dense := denseRange_ofFVLv (E := E)) (h_norm := ⟨‖T‖, norm_liftFVLv_le (T := T)⟩) f
 

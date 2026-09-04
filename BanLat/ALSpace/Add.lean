@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.ALSpace.Basic
 import BanLat.AMSpace.Basic
 import BanLat.AMSpace.Max
@@ -108,7 +112,7 @@ private lemma StrongDual.add_apply_le_max_of_nonneg_inf_eq_zero
     calc
       (φ + ψ) x = φ u + ψ v + (φ v + ψ u) := by
         rw [← huv]
-        simp only [map_add, ContinuousLinearMap.add_apply]
+        simp only [map_add, add_apply]
         ring
       _ ≤ ε + (φ a + ψ b + ε) := by linarith
       _ ≤ max ‖φ‖ ‖ψ‖ + 2 * ε := by linarith

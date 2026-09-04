@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Free.FVL
 import BanLat.Examples.CofK.Basic
 import BanLat.Tactic.LLexpr
@@ -58,7 +62,8 @@ private theorem eval_coe_submodule {X : Type*} [AddCommGroup X] [Lattice X]
     (y : Fin n → ↥Y.toSubmodule) (e : LLexpr n) :
     ((LLexpr.eval y e : ↥Y.toSubmodule) : X) =
       LLexpr.eval (fun i => (y i : X)) e := by
-  simpa using (LLexpr.map_eval (subtypeHom Y) y e)
+  have hsubtype (z : ↥Y.toSubmodule) : subtypeHom Y z = (z : X) := rfl
+  simpa only [hsubtype] using (LLexpr.map_eval (subtypeHom Y) y e)
 
 end FVLv
 
@@ -229,7 +234,7 @@ private noncomputable def equivTopOfEq {X : Type*} [AddCommGroup X] [Lattice X]
     map_sup' := fun _ _ => rfl
     map_inf' := fun _ _ => rfl }
 
-private def evalHom (φ : dualUnitBall E) : VecLatHom (FVLv E) ℝ where
+private noncomputable def evalHom (φ : dualUnitBall E) : VecLatHom (FVLv E) ℝ where
   toFun f := f φ
   map_add' _ _ := rfl
   map_smul' _ _ := rfl
@@ -239,7 +244,8 @@ private def evalHom (φ : dualUnitBall E) : VecLatHom (FVLv E) ℝ where
 private theorem eval_apply {n : ℕ} (y : Fin n → FVLv E) (e : LLexpr n)
     (φ : dualUnitBall E) :
     LLexpr.eval y e φ = LLexpr.eval (fun i => y i φ) e := by
-  simpa using (LLexpr.map_eval (evalHom φ) y e)
+  have heval (f : FVLv E) : evalHom φ f = f φ := rfl
+  simpa only [heval] using (LLexpr.map_eval (evalHom φ) y e)
 
 private theorem eval_const_smul_of_nonneg {X : Type*} [AddCommGroup X] [Lattice X]
     [IsOrderedAddMonoid X] [VectorLattice X] {n : ℕ} (c : ℝ) (hc : 0 ≤ c)
@@ -334,7 +340,6 @@ theorem latticeLinearIndependent_of_linearIndependent {n : ℕ} {x : Fin n → E
       rw [← mul_assoc, mul_inv_cancel₀ hc_pos.ne', one_mul]
     have hfun' : (fun i : Fin m => c * (c⁻¹ * r i)) = r := by
       funext i
-      change c * (c⁻¹ * r i) = r i
       rw [← mul_assoc, mul_inv_cancel₀ hc_pos.ne', one_mul]
     simpa [hfun, hfun'] using h
   rw [hscale, hunit_eval, smul_zero]

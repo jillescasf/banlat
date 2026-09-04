@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Normed
 
 /-!
@@ -525,10 +529,10 @@ theorem isMaximalDisjoint_iff_forall_eq_zero {Λ : Set X}
     exact hΛ'.1 (hy0 ▸ hy)
 
 /-- **Existence of a maximal disjoint family of positive vectors.** Every
-vector lattice admits a maximal disjoint family whose elements are all
-strictly positive. -/
+lattice-ordered additive group admits a maximal disjoint family whose elements
+are all strictly positive. -/
 theorem exists_isMaximalDisjoint_pos (X : Type*) [AddCommGroup X] [Lattice X]
-    [IsOrderedAddMonoid X] [VectorLattice X] :
+    [IsOrderedAddMonoid X] :
     ∃ Λ : Set X, IsMaximalDisjoint Λ ∧ ∀ x ∈ Λ, 0 < x := by
   let 𝒞 : Set (Set X) := {S | IsDisjointSet S ∧ ∀ x ∈ S, 0 < x}
   have hZorn : ∀ c ⊆ 𝒞, IsChain (· ⊆ ·) c → ∃ ub ∈ 𝒞, ∀ s ∈ c, s ⊆ ub := by
@@ -615,7 +619,10 @@ theorem eq_zero_of_pairwise_isVLDisjoint_tendsto {Y : Type*}
   have hrhs_zero : Tendsto (fun n => ‖u n - x‖) atTop (𝓝 0) := by
     have h1 : Tendsto (fun n => u n - x) atTop (𝓝 0) := by
       simpa using hlim.sub_const x
-    simpa using (continuous_norm.tendsto (0 : Y)).comp h1
+    have h := (continuous_norm.tendsto (0 : Y)).comp h1
+    have h' : Tendsto (fun n => ‖u n - x‖) atTop (𝓝 ‖(0 : Y)‖) :=
+      h.congr' <| Eventually.of_forall fun n ↦ by simp only [Function.comp_apply]
+    simpa only [norm_zero] using h'
   have hxnn : ‖x‖ ≤ 0 :=
     le_of_tendsto_of_tendsto' hlhs_tendsto hrhs_zero hnorm_limit
   exact norm_le_zero_iff.mp hxnn

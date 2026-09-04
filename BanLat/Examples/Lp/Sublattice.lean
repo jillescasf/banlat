@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Examples.Lp.Basic
 import BanLat.Operators.Hom
 import BanLat.Substructures.Sublattice
@@ -139,7 +143,7 @@ private lemma iUnion_mem_indicatorFamily [IsFiniteMeasure μ]
     have hsymm : ∀ n, symmDiff (A n) (⋃ i, f i) = (⋃ i, f i) \ A n := by
       intro n
       rw [symmDiff_def]
-      simp [Set.diff_eq_empty.mpr (hAsub n)]
+      simp [Set.sdiff_eq_empty.mpr (hAsub n)]
     simp_rw [hsymm]
     have hmtendsto : Filter.Tendsto (fun n => μ (A n)) Filter.atTop
         (nhds (μ (⋃ i, f i))) := by
@@ -147,7 +151,7 @@ private lemma iUnion_mem_indicatorFamily [IsFiniteMeasure μ]
       rw [hAunion] at this
       exact this
     have hsub : ∀ n, μ ((⋃ i, f i) \ A n) = μ (⋃ i, f i) - μ (A n) := fun n =>
-      measure_diff (hAsub n) (hAm n).nullMeasurableSet (measure_ne_top μ _)
+      measure_sdiff (hAsub n) (hAm n).nullMeasurableSet (measure_ne_top μ _)
     simp_rw [hsub]
     have hfin : μ (⋃ i, f i) ≠ ⊤ := measure_ne_top μ _
     have hsub_tendsto : Filter.Tendsto
@@ -271,10 +275,7 @@ private lemma indicatorConstLp_superlevel_mem_sublattice
     refine ⟨n, fun ⟨_, hlt⟩ => ?_⟩
     have : ((n + 1 : ℕ) : ℝ)⁻¹ < ⇑f ω - lam := by
       have : (1 : ℝ) / ((n : ℕ) + 1) < ⇑f ω - lam := hn
-      simp only [one_div] at this
-      convert this using 2
-      push_cast
-      ring
+      simpa only [one_div, Nat.cast_add, Nat.cast_one] using this
     linarith
   have hμB_ne_top : ∀ n, μ (B n) ≠ ⊤ := fun n => measure_ne_top μ (B n)
   have hμB_tendsto : Filter.Tendsto (fun n => μ (B n)) Filter.atTop (𝓝 0) := by

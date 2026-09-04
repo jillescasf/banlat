@@ -1,3 +1,7 @@
+/-
+Authors: David Muñoz-Lahoz
+-/
+
 import BanLat.Examples.MofK.Band
 import BanLat.OrderContinuous.Decomposition
 
@@ -65,33 +69,6 @@ private lemma measurable_sigma_of_fibers {ι : Type*}
 
 end SigmaGluing
 
-/-- In an AL-space, a hasSum of non-negative elements induces a hasSum of
-their norms. -/
-private lemma hasSum_norm_of_nonneg_hasSum
-    {Y : Type*} [NormedAddCommGroup Y] [Lattice Y] [IsOrderedAddMonoid Y]
-    [ALSpace Y] {ι : Type*} {f : ι → Y} {x : Y}
-    (hf : ∀ i, 0 ≤ f i) (hs : HasSum f x) :
-    HasSum (fun i => ‖f i‖) ‖x‖ := by
-  let addCommMonoid : AddCommMonoid Y := inferInstance
-  let latticeOrig : Lattice Y := inferInstance
-  let orderedAddOrig : @IsOrderedAddMonoid Y addCommMonoid
-      latticeOrig.toPartialOrder.toPreorder :=
-    inferInstance
-  letI : AddLeftMono Y := ⟨fun a {_ _} h =>
-    @IsOrderedAddMonoid.add_le_add_right Y addCommMonoid
-      latticeOrig.toPartialOrder.toPreorder orderedAddOrig _ _ h a⟩
-  have hnorm_sum : ∀ (s : Finset ι),
-      ‖∑ i ∈ s, f i‖ = ∑ i ∈ s, ‖f i‖ := by
-    intro s; induction s using Finset.cons_induction with
-    | empty => simp
-    | cons a s has ih =>
-      rw [Finset.sum_cons, Finset.sum_cons,
-        ALSpace.norm_add_eq_of_nonneg (hf a)
-          (Finset.sum_nonneg fun i _ => hf i), ih]
-  rw [HasSum] at hs ⊢
-  convert continuous_norm.continuousAt.tendsto.comp hs using 1
-  ext F; simp only [Function.comp_def]; exact (hnorm_sum F).symm
-
 /-- The norms of band projections over a maximal disjoint family are summable
 with sum `‖x‖` in an AL-space. -/
 private lemma hasSum_norm_principalBandProjection
@@ -100,53 +77,15 @@ private lemma hasSum_norm_principalBandProjection
     (hΛ_pos : ∀ z ∈ Λ, 0 < z) (x : Y) :
     HasSum (fun z : ↑Λ =>
       ‖Band.principalBandProjection (z : Y) x‖) ‖x‖ := by
-  let addCommMonoid : AddCommMonoid Y := inferInstance
-  let addGroup : AddGroup Y := inferInstance
-  let latticeOrig : Lattice Y := inferInstance
-  let orderedAddOrig : @IsOrderedAddMonoid Y addCommMonoid
-      latticeOrig.toPartialOrder.toPreorder :=
-    inferInstance
-  let addLeftMono : @AddLeftMono Y inferInstance latticeOrig.toLE := ⟨fun a {_ _} h =>
-    @IsOrderedAddMonoid.add_le_add_right Y addCommMonoid
-      latticeOrig.toPartialOrder.toPreorder orderedAddOrig _ _ h a⟩
-  letI : AddLeftMono Y := addLeftMono
-  set P := fun z : ↑Λ => Band.principalBandProjection (z : Y) with hP_def
-  set xp := x⁺; set xn := x⁻
-  have hx_decomp : x = xp - xn := by
-    change x = x⁺ - x⁻
-    exact (@posPart_sub_negPart Y latticeOrig addGroup addLeftMono x).symm
-  have hxp_nn : (0 : Y) ≤ xp := posPart_nonneg x
-  have hxn_nn : (0 : Y) ≤ xn := negPart_nonneg x
-  have hsp := hasSum_norm_of_nonneg_hasSum (Y := Y)
-    (fun (z : ↑Λ) =>
-      Positive.zero_le_iff.mp (Band.principalProjectionBand (z : Y)).bandProjection_nonneg
-        xp hxp_nn)
-    (BanachLattice.hasSum_principalBandProjection hΛ hΛ_pos xp)
-  have hsn := hasSum_norm_of_nonneg_hasSum (Y := Y)
-    (fun (z : ↑Λ) =>
-      Positive.zero_le_iff.mp (Band.principalProjectionBand (z : Y)).bandProjection_nonneg
-        xn hxn_nn)
-    (BanachLattice.hasSum_principalBandProjection hΛ hΛ_pos xn)
-  change HasSum (fun z : ↑Λ => ‖P z xp‖) ‖xp‖ at hsp
-  change HasSum (fun z : ↑Λ => ‖P z xn‖) ‖xn‖ at hsn
-  have hle : ∀ z : ↑Λ, ‖P z x‖ ≤ ‖P z xp‖ + ‖P z xn‖ := by
-    intro z
-    rw [hx_decomp, map_sub]
-    exact norm_sub_le _ _
-  have hsum : Summable (fun z => ‖P z x‖) :=
-    .of_nonneg_of_le (fun z => norm_nonneg _) hle (hsp.summable.add hsn.summable)
-  have hub : tsum (fun z => ‖P z x‖) ≤ ‖x‖ :=
-    calc ∑' z, ‖P z x‖
-        ≤ ∑' z, (‖P z xp‖ + ‖P z xn‖) :=
-          hsum.tsum_le_tsum hle (hsp.summable.add hsn.summable)
-      _ = ∑' z, ‖P z xp‖ + ∑' z, ‖P z xn‖ :=
-          (hsp.summable.hasSum.add hsn.summable.hasSum).tsum_eq
-      _ = ‖xp‖ + ‖xn‖ := by rw [hsp.tsum_eq, hsn.tsum_eq]
-      _ = ‖x‖ := ALSpace.norm_posPart_add_norm_negPart x
-  have hlb : ‖x‖ ≤ tsum (fun z => ‖P z x‖) := by
-    conv_lhs => rw [← (BanachLattice.hasSum_principalBandProjection hΛ hΛ_pos x).tsum_eq]
-    exact norm_tsum_le_tsum_norm hsum
-  exact (le_antisymm hub hlb) ▸ hsum.hasSum
+  have hdisj : Pairwise fun a b : ↑Λ =>
+      IsVLDisjoint (Band.principalBandProjection (a : Y) x)
+        (Band.principalBandProjection (b : Y) x) := by
+    intro a b hab
+    exact BanachLattice.principalBandProjection_isVLDisjoint
+      (hΛ.prop.2 a.prop b.prop fun h => hab (Subtype.ext h)) x
+  simpa only [NNReal.coe_one, Real.rpow_one] using
+    ALpSpace.HasSum.norm_rpow_of_pairwise_isVLDisjoint (p := (1 : NNReal))
+      (BanachLattice.hasSum_principalBandProjection hΛ hΛ_pos x) hdisj
 
 /-- **Locally L¹ implies L¹.** If every principal band of an AL-space is
 Banach-lattice isometric to some `L¹(μ)`, then the whole space is
