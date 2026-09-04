@@ -200,6 +200,7 @@ noncomputable def realImagEquiv :
           ext <;> simp }
   refine e.toContinuousLinearEquivOfBounds 1 2 ?_ ?_
   · intro z
+    change ‖(ℜ z, ℑ z)‖ ≤ 1 * ‖z‖
     simpa [Prod.norm_def] using max_le (realPart.norm_le z) (imaginaryPart.norm_le z)
   · intro p
     rw [Prod.norm_def]

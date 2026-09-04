@@ -248,7 +248,7 @@ noncomputable instance : Norm (Complexification E) where
 theorem norm_eq (z : Complexification E) :
     ‖z‖ = ‖modulus z‖ := rfl
 
-private noncomputable def normedSpaceCore : NormedSpace.Core ℂ (Complexification E) where
+private theorem normedSpaceCore : NormedSpace.Core ℂ (Complexification E) where
   norm_nonneg z := norm_nonneg (BanachLattice.complexModulus z.re z.im)
   norm_smul c z := by
     change ‖BanachLattice.complexModulus
