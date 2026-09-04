@@ -153,9 +153,20 @@ For biconditionals use `_iff`; for extensionality lemmas use `.ext` marked with
 
 ## Documentation Style
 
+### Author header
+
+Every Lean file begins with a regular block comment listing its authors, placed
+before all imports:
+
+```lean
+/-
+Authors: First Author, Second Author
+-/
+```
+
 ### Module docstrings
 
-Every file begins with a module docstring (`/-! ... -/`) that:
+After the imports, every Lean file has a module docstring (`/-! ... -/`) that:
 - States the mathematical content and context (~1 short paragraph).
 - Does **not** list every result or re-explain proofs.
 - May highlight one key theorem the rest of the file builds toward.
@@ -179,6 +190,10 @@ tactics.
 ### Example
 
 ```lean
+/-
+Authors: First Author, Second Author
+-/
+
 /-!
 # Positive and negative parts in a lattice-ordered group
 
