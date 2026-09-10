@@ -113,17 +113,9 @@ end
 private lemma indicatorConstLp_one_eq_zero_iff {μ : Measure α} {s : Set α}
     (hs : MeasurableSet s) (hμs : μ s ≠ ∞) :
     indicatorConstLp (p : ENNReal) hs hμs (1 : ℝ) = 0 ↔ μ s = 0 := by
-  constructor
-  · intro h
-    have hzero : (s.indicator fun _ ↦ (1 : ℝ)) =ᵐ[μ] 0 :=
-      (indicatorConstLp_coeFn (p := (p : ENNReal)) (hs := hs) (hμs := hμs)
-        (c := (1 : ℝ))).symm.trans (h ▸ Lp.coeFn_zero ℝ (p : ENNReal) μ)
-    simpa [Function.support] using (Set.indicator_ae_eq_zero.mp hzero)
-  · intro h
-    apply Lp.ext
-    refine (indicatorConstLp_coeFn (p := (p : ENNReal)) (hs := hs) (hμs := hμs)
-      (c := (1 : ℝ))).trans ?_
-    exact (indicator_meas_zero h).trans (Lp.coeFn_zero ℝ (p : ENNReal) μ).symm
+  simpa [ae_eq_empty] using
+    (indicatorConstLp_inj (p := (p : ENNReal)) hs hμs MeasurableSet.empty
+      (by simp) (c := (1 : ℝ)) one_ne_zero)
 
 /-- If `μ` is `σ`-finite, then `f ∈ L^p(μ)` is a weak order unit iff
 `f > 0, μ-a.e`. -/

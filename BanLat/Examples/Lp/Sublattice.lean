@@ -2,7 +2,7 @@
 Authors: David Muñoz-Lahoz
 -/
 
-import BanLat.Examples.Lp.Basic
+import BanLat.Examples.Lp.WeakUnits
 import BanLat.Operators.Hom
 import BanLat.Substructures.Sublattice
 import Mathlib.MeasureTheory.Function.ConditionalExpectation.AEMeasurable
@@ -550,27 +550,6 @@ theorem exists_Lp_banachLatEquiv_of_closed_sublattice_containing_one
     (exists_Lp_banachLatEquiv_aux.sigmaAlgebra_le hp_ne_top L hclosed hone)
     stronglyMeasurable_const hae
 
-private lemma lp_indicatorConstLp_one_eq_zero_iff
-    {α : Type*} [MeasurableSpace α] {ν : Measure α} [IsFiniteMeasure ν]
-    {E : Set α} (hEm : MeasurableSet E) :
-    indicatorConstLp 1 hEm (measure_ne_top ν E) (1 : ℝ) = 0 ↔ ν E = 0 := by
-  refine ⟨fun h => ?_, fun h => ?_⟩
-  · have h1 : (indicatorConstLp 1 hEm (measure_ne_top ν E) (1 : ℝ) : α → ℝ)
-        =ᵐ[ν] 0 := by rw [h]; exact Lp.coeFn_zero ℝ 1 ν
-    have h2 : E.indicator (fun _ => (1 : ℝ)) =ᵐ[ν] 0 :=
-      (indicatorConstLp_coeFn (p := 1) (hs := hEm)
-        (hμs := measure_ne_top ν E) (c := (1 : ℝ))).symm.trans h1
-    have h3 : ν (E ∩ Function.support (fun _ : α => (1 : ℝ))) = 0 :=
-      (Set.indicator_ae_eq_zero (μ := ν)).mp h2
-    have hsupp : Function.support (fun _ : α => (1 : ℝ)) = Set.univ := by
-      ext; simp [Function.support]
-    rw [hsupp, Set.inter_univ] at h3
-    exact h3
-  · apply Lp.ext
-    refine (indicatorConstLp_coeFn (p := 1) (hs := hEm)
-      (hμs := measure_ne_top ν E) (c := (1 : ℝ))).trans ?_
-    exact (indicator_meas_zero h).trans (Lp.coeFn_zero ℝ 1 ν).symm
-
 /-- A non-negative `L¹` function with no nonzero disjoint `L¹` function is
 almost everywhere strictly positive. -/
 theorem lp_aePos_of_forall_isVLDisjoint_eq_zero
@@ -578,44 +557,7 @@ theorem lp_aePos_of_forall_isVLDisjoint_eq_zero
     {g : Lp ℝ 1 ν} (hg : 0 ≤ g)
     (hwou : ∀ v : Lp ℝ 1 ν, IsVLDisjoint v g → v = 0) :
     ∀ᵐ a ∂ν, 0 < (g : α → ℝ) a := by
-  have hg_ae : 0 ≤ᵐ[ν] (g : α → ℝ) := (Lp.coeFn_nonneg g).mpr hg
-  have hg_meas : Measurable (g : α → ℝ) := (Lp.stronglyMeasurable g).measurable
-  set E : Set α := {a | (g : α → ℝ) a ≤ 0}
-  have hEm : MeasurableSet E := hg_meas measurableSet_Iic
-  set χE : Lp ℝ 1 ν := indicatorConstLp 1 hEm (measure_ne_top ν E) (1 : ℝ)
-    with hχE_def
-  have hχE_coe : (χE : α → ℝ) =ᵐ[ν] E.indicator (fun _ => (1 : ℝ)) :=
-    indicatorConstLp_coeFn (p := 1) (hs := hEm)
-      (hμs := measure_ne_top ν E) (c := (1 : ℝ))
-  have hχE_nn : (0 : Lp ℝ 1 ν) ≤ χE := by
-    rw [← Lp.coeFn_le]
-    filter_upwards [Lp.coeFn_zero ℝ 1 ν, hχE_coe] with a h0 hχ
-    rw [h0, hχ]
-    exact Set.indicator_nonneg (fun _ _ => zero_le_one) a
-  have h_inf_zero : χE ⊓ g = 0 := by
-    apply Lp.ext
-    filter_upwards [Lp.coeFn_inf χE g, Lp.coeFn_zero ℝ 1 ν, hχE_coe, hg_ae]
-      with a h1 h0 hχ hgnn
-    rw [h1, h0]
-    change min ((χE : α → ℝ) a) ((g : α → ℝ) a) = (0 : ℝ)
-    rw [hχ]
-    by_cases haE : a ∈ E
-    · have hga_le : (g : α → ℝ) a ≤ 0 := haE
-      have hga_eq : (g : α → ℝ) a = 0 := le_antisymm hga_le hgnn
-      rw [hga_eq, min_comm, min_eq_left]
-      exact Set.indicator_nonneg (fun _ _ => zero_le_one) a
-    · rw [Set.indicator_of_notMem haE]
-      exact min_eq_left hgnn
-  have hχE_disj : IsVLDisjoint χE g := by
-    unfold IsVLDisjoint
-    rw [abs_of_nonneg hχE_nn, abs_of_nonneg hg, h_inf_zero]
-  have hχE_zero : χE = 0 := hwou χE hχE_disj
-  have hEν : ν E = 0 := (lp_indicatorConstLp_one_eq_zero_iff hEm).mp hχE_zero
-  have hae_notE : ∀ᵐ a ∂ν, a ∉ E := ae_iff.mpr (by simpa using hEν)
-  filter_upwards [hae_notE, hg_ae] with a hnotE hnn
-  rcases eq_or_lt_of_le hnn with heq | hlt
-  · exact absurd (le_of_eq heq.symm) hnotE
-  · exact hlt
+  exact (Lp.weakOrderUnit_iff_ae_pos (p := 1)).mp ⟨hg, hwou⟩
 
 private lemma withDensitySMulLI_surjective_of_ae_pos
     {α : Type*} [MeasurableSpace α] (μ : Measure α)
