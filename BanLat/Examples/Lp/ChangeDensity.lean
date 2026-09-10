@@ -2,7 +2,7 @@
 Author: Jesús Illescas-Fiorito
 -/
 
-import BanLat.Examples.Lp.WeakUnits
+import BanLat.Examples.Lp.WeakUnit
 import Mathlib.MeasureTheory.Measure.WithDensity
 
 /-!

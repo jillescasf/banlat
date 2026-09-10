@@ -32,7 +32,7 @@ import BanLat.Examples.Lp.OrderContinuous
 import BanLat.Examples.Lp.Sublattice
 import BanLat.Examples.Lp.Subspaces.Gaussian
 import BanLat.Examples.Lp.Subspaces.Stable
-import BanLat.Examples.Lp.WeakUnits
+import BanLat.Examples.Lp.WeakUnit
 import BanLat.Examples.MofK.ALspace
 import BanLat.Examples.MofK.Atom
 import BanLat.Examples.MofK.Band

@@ -2,7 +2,7 @@
 Authors: David Muñoz-Lahoz
 -/
 
-import BanLat.Examples.Lp.WeakUnits
+import BanLat.Examples.Lp.WeakUnit
 import BanLat.Operators.Hom
 import BanLat.Substructures.Sublattice
 import Mathlib.MeasureTheory.Function.ConditionalExpectation.AEMeasurable
