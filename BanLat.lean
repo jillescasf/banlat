@@ -15,6 +15,9 @@ import BanLat.AMSpace.Maximal
 import BanLat.Atom
 import BanLat.Basic
 import BanLat.Bidual
+import BanLat.ComplexBanachLattice.Basic
+import BanLat.ComplexBanachLattice.Complexification
+import BanLat.ComplexBanachLattice.Modulus
 import BanLat.Convergences.Order
 import BanLat.Convergences.Uniform
 import BanLat.Disjoint
