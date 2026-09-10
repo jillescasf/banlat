@@ -15,8 +15,8 @@ import Mathlib.MeasureTheory.Integral.Bochner.Basic
 For a measure space `(α, μ)` and `1 ≤ p ≤ ∞`, the space `Lp ℝ p μ` of real-valued
 `Lp` functions is a Banach lattice under the pointwise order and the `Lp` norm.
 Moreover:
-  · `L₁` is an AL-space.
-  · `Lₚ` is an ALₚ-space for `1 ≤ p < ∞`.
+* `L₁` is an AL-space.
+* `Lₚ` is an ALₚ-space for `1 ≤ p < ∞`.
 -/
 
 open MeasureTheory Filter
