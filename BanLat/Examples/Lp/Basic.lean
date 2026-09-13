@@ -1,5 +1,5 @@
 /-
-Authors: David Muñoz-Lahoz
+Authors: David Muñoz-Lahoz, Jesús Illescas-Fiorito
 -/
 
 import BanLat.ALSpace.Basic
@@ -14,6 +14,9 @@ import Mathlib.MeasureTheory.Integral.Bochner.Basic
 
 For a measure space `(α, μ)` and `1 ≤ p ≤ ∞`, the space `Lp ℝ p μ` of real-valued
 `Lp` functions is a Banach lattice under the pointwise order and the `Lp` norm.
+
+Some simple properties about indicator functions in `Lp ℝ p μ` are deduced.
+
 Moreover:
 * `L₁` is an AL-space.
 * `Lₚ` is an ALₚ-space for `1 ≤ p < ∞`.
@@ -62,6 +65,8 @@ namespace MeasureTheory.Lp
 
 variable {E : Type*} [NormedAddCommGroup E]
 
+attribute [local instance] Lp.simpleFunc.smul Lp.simpleFunc.module
+
 /-- The `p`-th power of the `L^p`-norm as an integral. -/
 lemma norm_rpow_eq_integral_norm_rpow
     {p : ℝ≥0} (hp : p ≠ 0) (f : Lp E (p : ENNReal) μ) :
@@ -72,6 +77,98 @@ lemma norm_rpow_eq_integral_norm_rpow
   · exact Real.rpow_inv_rpow (integral_nonneg fun _ ↦ Real.rpow_nonneg (norm_nonneg _) _)
       (NNReal.coe_ne_zero.mpr hp)
   · exact Real.rpow_nonneg (integral_nonneg fun _ ↦ Real.rpow_nonneg (norm_nonneg _) _) _
+
+omit [Fact (1 ≤ p)] in
+/-- A real-valued constant indicator is a scalar multiple of the indicator with value one. -/
+theorem indicatorConstLp_eq_smul {s : Set α} (hs : MeasurableSet s)
+    (hμs : μ s ≠ ⊤) (c : ℝ) :
+    indicatorConstLp p hs hμs c = c • indicatorConstLp p hs hμs (1 : ℝ) := by
+  rw [Lp.ext_iff]
+  filter_upwards [indicatorConstLp_coeFn (hs := hs) (hμs := hμs) (c := c),
+    Lp.coeFn_smul c (indicatorConstLp p hs hμs (1 : ℝ)),
+    indicatorConstLp_coeFn (hs := hs) (hμs := hμs) (c := (1 : ℝ))]
+    with x hc hsmul hone
+  rw [hc, hsmul, Pi.smul_apply, hone]
+  by_cases hx : x ∈ s <;> simp [Set.indicator, hx]
+
+omit [Fact (1 ≤ p)] in
+/-- Scalar multiplication can be moved into the value of a real constant indicator. -/
+theorem smul_indicatorConstLp {s : Set α} (hs : MeasurableSet s)
+    (hμs : μ s ≠ ⊤) (r c : ℝ) :
+    r • indicatorConstLp p hs hμs c = indicatorConstLp p hs hμs (r * c) := by
+  rw [indicatorConstLp_eq_smul hs hμs c,
+    indicatorConstLp_eq_smul hs hμs (r * c), smul_smul]
+
+omit [Fact (1 ≤ p)] in
+/-- The absolute value of a real constant indicator is obtained by taking the absolute value of
+its value. -/
+theorem abs_indicatorConstLp {s : Set α} (hs : MeasurableSet s)
+    (hμs : μ s ≠ ⊤) (c : ℝ) :
+    |indicatorConstLp p hs hμs c| = indicatorConstLp p hs hμs |c| := by
+  apply Lp.ext
+  filter_upwards [Lp.coeFn_abs (indicatorConstLp p hs hμs c),
+    indicatorConstLp_coeFn (p := p) (μ := μ) (s := s) (c := c),
+    indicatorConstLp_coeFn (p := p) (μ := μ) (s := s) (c := |c|)]
+    with x habs hc hcabs
+  rw [habs, hc, hcabs]
+  by_cases hx : x ∈ s <;> simp [Set.indicator, hx]
+
+omit [Fact (1 ≤ p)] in
+/-- Constant indicators of disjoint measurable sets are lattice-disjoint in real `Lp`. -/
+theorem indicatorConstLp_isVLDisjoint {s t : Set α} (hs : MeasurableSet s)
+    (ht : MeasurableSet t) (hμs : μ s ≠ ⊤) (hμt : μ t ≠ ⊤)
+    (hst : Disjoint s t) (c d : ℝ) :
+    IsVLDisjoint (indicatorConstLp p hs hμs c) (indicatorConstLp p ht hμt d) := by
+  unfold IsVLDisjoint
+  apply Lp.ext
+  filter_upwards [Lp.coeFn_inf |indicatorConstLp p hs hμs c|
+      |indicatorConstLp p ht hμt d|,
+    Lp.coeFn_abs (indicatorConstLp p hs hμs c),
+    Lp.coeFn_abs (indicatorConstLp p ht hμt d),
+    indicatorConstLp_coeFn (p := p) (μ := μ) (s := s) (c := c),
+    indicatorConstLp_coeFn (p := p) (μ := μ) (s := t) (c := d),
+    Lp.coeFn_zero ℝ p μ] with x hinf habsc habsd hc hd hzero
+  rw [hinf, hzero]
+  change min _ _ = 0
+  rw [habsc, habsd, hc, hd]
+  by_cases hxs : x ∈ s
+  · have hxt : x ∉ t := Set.disjoint_left.1 hst hxs
+    simp [Set.indicator, hxs, hxt]
+  · simp [Set.indicator, hxs]
+
+omit [Fact (1 ≤ p)] in
+/-- A real-valued simple constant indicator is a scalar multiple of the indicator with value
+one. -/
+theorem simpleFunc.indicatorConst_eq_smul {s : Set α} (hs : MeasurableSet s)
+    (hμs : μ s ≠ ⊤) (c : ℝ) :
+    Lp.simpleFunc.indicatorConst p hs hμs c =
+      c • Lp.simpleFunc.indicatorConst p hs hμs (1 : ℝ) := by
+  apply Subtype.ext
+  change indicatorConstLp p hs hμs c = c • indicatorConstLp p hs hμs (1 : ℝ)
+  exact indicatorConstLp_eq_smul hs hμs c
+
+omit [Fact (1 ≤ p)] in
+/-- Simple functions with disjoint supports define lattice-disjoint elements of real `Lp`. -/
+theorem simpleFunc.toLp_isVLDisjoint {f g : SimpleFunc α ℝ}
+    (hf : MemLp f p μ) (hg : MemLp g p μ)
+    (hfg : Disjoint (Function.support f) (Function.support g)) :
+    IsVLDisjoint (SimpleFunc.toLp f hf : Lp ℝ p μ) (SimpleFunc.toLp g hg : Lp ℝ p μ) := by
+  unfold IsVLDisjoint
+  apply Lp.ext
+  filter_upwards [Lp.coeFn_inf |(SimpleFunc.toLp f hf : Lp ℝ p μ)|
+      |(SimpleFunc.toLp g hg : Lp ℝ p μ)|,
+    Lp.coeFn_abs (SimpleFunc.toLp f hf : Lp ℝ p μ),
+    Lp.coeFn_abs (SimpleFunc.toLp g hg : Lp ℝ p μ), hf.coeFn_toLp, hg.coeFn_toLp,
+    Lp.coeFn_zero ℝ p μ] with x hinf habsf habsg hfx hgx hzero
+  rw [hinf, hzero]
+  change min _ _ = 0
+  rw [habsf, habsg, hfx, hgx]
+  by_cases hfx0 : f x = 0
+  · simp [hfx0]
+  have hgx0 : g x = 0 := by
+    by_contra hgx0
+    exact Set.disjoint_left.1 hfg hfx0 hgx0
+  simp [hgx0]
 
 end MeasureTheory.Lp
 

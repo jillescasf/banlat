@@ -33,18 +33,6 @@ variable {p : ℝ≥0} {X : Type*} [Fact (1 ≤ p)]
   [NormedAddCommGroup X] [Lattice X] [IsOrderedAddMonoid X]
   [ALpSpace p X]
 
-private lemma isVLDisjoint_finset_sum
-    {ι : Type*} {s : Finset ι} {x : X} {f : ι → X}
-    (h : ∀ i ∈ s, IsVLDisjoint x (f i)) :
-    IsVLDisjoint x (∑ i ∈ s, f i) := by
-  classical
-  induction s using Finset.induction_on with
-  | empty => simpa using isVLDisjoint_zero_right x
-  | @insert a s ha ih =>
-    rw [Finset.sum_insert ha]
-    exact (h a (Finset.mem_insert_self a s)).add_right
-      (ih (fun i hi ↦ h i (Finset.mem_insert_of_mem hi)))
-
 /-- The definition of `ALₚ`-space can be generalized to finite families
 of pairwise lattice-disjoint elements. -/
 theorem norm_sum_rpow_eq_sum_norm_rpow_of_pairwise_isVLDisjoint
@@ -64,7 +52,7 @@ theorem norm_sum_rpow_eq_sum_norm_rpow_of_pairwise_isVLDisjoint
       fun i hi j hj hij ↦ hdisj (Finset.mem_insert_of_mem hi)
         (Finset.mem_insert_of_mem hj) hij
     have hhead : IsVLDisjoint (x a) (∑ i ∈ s, x i) := by
-      apply isVLDisjoint_finset_sum
+      apply IsVLDisjoint.finset_sum_right
       intro i hi
       exact hdisj (Finset.mem_insert_self a s) (Finset.mem_insert_of_mem hi)
         (fun hai ↦ ha (hai ▸ hi))

@@ -183,24 +183,6 @@ private lemma sigmaAlgebra_le [IsFiniteMeasure μ] (hp_ne_top : p ≠ ⊤)
   intro A hA
   exact hA.1
 
-omit [Fact (1 ≤ p)] in
-/-- For a real scalar, the indicator in `Lp` is the scalar multiple of the
-indicator with value `1`. -/
-private lemma indicatorConstLp_eq_smul [IsFiniteMeasure μ]
-    {A : Set Ω} (hA : MeasurableSet A) (c : ℝ) :
-    indicatorConstLp p hA (measure_ne_top μ A) c
-      = c • indicatorConstLp p hA (measure_ne_top μ A) (1 : ℝ) := by
-  rw [Lp.ext_iff]
-  filter_upwards [indicatorConstLp_coeFn (hs := hA)
-      (hμs := measure_ne_top μ A) (c := c),
-    Lp.coeFn_smul c (indicatorConstLp p hA (measure_ne_top μ A) (1:ℝ)),
-    indicatorConstLp_coeFn (hs := hA) (hμs := measure_ne_top μ A) (c := (1:ℝ))]
-    with x h1 h2 h3
-  rw [h1, h2, Pi.smul_apply, h3]
-  by_cases hxs : x ∈ A
-  · simp [Set.indicator_of_mem, hxs, smul_eq_mul]
-  · simp [Set.indicator_of_notMem, hxs, smul_eq_mul]
-
 /-- Every `m`-simple function lies in `L`: the indicator of every set in
 `indicatorFamily` is in `L`, and `L` is a real subspace. -/
 private lemma simpleFunc_mem_sublattice [IsFiniteMeasure μ]
@@ -218,7 +200,7 @@ private lemma simpleFunc_mem_sublattice [IsFiniteMeasure μ]
     obtain ⟨hsm, hsL⟩ := hs
     rw [show indicatorConstLp p (hm s ⟨hsm, hsL⟩) hμs.ne c
           = c • indicatorConstLp p hsm (measure_ne_top μ s) (1 : ℝ) from
-        indicatorConstLp_eq_smul hsm c]
+        Lp.indicatorConstLp_eq_smul hsm (measure_ne_top μ s) c]
     exact L.toSubmodule.smul_mem c hsL
   · intros _ _ _ _ _ _ _ hPf hPg
     exact L.toSubmodule.add_mem hPf hPg

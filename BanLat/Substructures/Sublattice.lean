@@ -562,21 +562,6 @@ theorem generated_pointedCone_eq_sub_infClosure (C : PointedCone ℝ X) :
     have hv_gen := infClosure_min hC h_inf hv
     exact (generated (C : Set X)).toSubmodule.sub_mem hu_gen hv_gen
 
-omit [VectorLattice X] in
-/-- For a finite set `s` of pairwise lattice-disjoint elements and a family
-`g : X → X` taking values disjoint from a fixed `a`, the sum over `s` remains
-lattice-disjoint from `a`. -/
-private lemma isVLDisjoint_finsetSum {a : X} {s : Finset X} {g : X → X}
-    (h : ∀ i ∈ s, IsVLDisjoint a (g i)) :
-    IsVLDisjoint a (∑ i ∈ s, g i) := by
-  classical
-  induction s using Finset.induction_on with
-  | empty => simpa using isVLDisjoint_zero_right a
-  | insert b s hb ih =>
-    rw [Finset.sum_insert hb]
-    refine (h b (Finset.mem_insert_self b s)).add_right ?_
-    exact ih (fun i hi => h i (Finset.mem_insert_of_mem hi))
-
 /-- Disjoint sum of a scalar family: for a Finset `s` of pairwise-disjoint
 elements with any scalars `f`, `|∑ f(a) • a| = ∑ |f(a)| • |a|`. -/
 private lemma abs_sum_finset_of_pairwise_vlDisjoint {s : Finset X} {f : X → ℝ}
@@ -590,7 +575,7 @@ private lemma abs_sum_finset_of_pairwise_vlDisjoint {s : Finset X} {f : X → �
       hdisj (Finset.mem_insert_of_mem hi) (Finset.mem_insert_of_mem hj) hij
     rw [Finset.sum_insert ha, Finset.sum_insert ha]
     have hdisj_head : IsVLDisjoint (f a • a) (∑ i ∈ s, f i • i) := by
-      apply isVLDisjoint_finsetSum
+      apply IsVLDisjoint.finset_sum_right
       intro i hi
       have hne_ai : a ≠ i := fun h => ha (h ▸ hi)
       exact ((hdisj (Finset.mem_insert_self a s)

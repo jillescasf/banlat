@@ -3,9 +3,12 @@ Authors: David Muñoz-Lahoz
 -/
 
 import Mathlib.MeasureTheory.Constructions.Polish.Basic
+import Mathlib.MeasureTheory.Measure.RegularityCompacts
 import Mathlib.MeasureTheory.Measure.Typeclasses.NullSingletonClass
 import Mathlib.Analysis.SpecificLimits.Basic
 import Mathlib.Order.Zorn
+import Mathlib.Topology.Compactness.SigmaCompact
+import Mathlib.Topology.Metrizable.Basic
 import BanLat.Preliminaries.Regularity
 import BanLat.Preliminaries.SignedMeasure
 
@@ -735,5 +738,56 @@ theorem isContinuous (hμ : μ.HasNoAtoms) : μ.IsContinuous := by
   exact hμ.exists_measurable_subset_measure_eq_of_le hs hr
 
 end Measure.HasNoAtoms
+
+namespace Measure
+
+/-- A finite measure is atomless if one of its measurable pushforwards is a
+singleton-null measure on a σ-compact pseudometrizable Borel space. -/
+theorem hasNoAtoms_of_map_eq
+    {β : Type*} [TopologicalSpace β]
+    [TopologicalSpace.PseudoMetrizableSpace β] [SigmaCompactSpace β]
+    [T2Space β] [MeasurableSpace β] [BorelSpace β]
+    {ν : Measure β} [IsFiniteMeasure μ] [NullSingletonClass ν]
+    {f : α → β} (hf : Measurable f) (hmap : μ.map f = ν) :
+    μ.HasNoAtoms := by
+  intro s hs hs_pos hs_atom
+  let ρ : Measure β := (μ.restrict s).map f
+  have hρ_le : ρ ≤ ν := by
+    dsimp [ρ]
+    rw [← hmap]
+    exact Measure.map_mono Measure.restrict_le_self hf
+  letI : IsFiniteMeasure ρ := by
+    dsimp [ρ]
+    infer_instance
+  letI : NullSingletonClass ρ := ⟨fun x ↦ by
+    exact le_zero_iff.mp ((hρ_le {x}).trans_eq (measure_singleton x))⟩
+  letI : ρ.Regular := by infer_instance
+  have hρ_cont : ρ.IsContinuous :=
+    (hasNoAtoms_of_noAtoms_of_regular (μ := ρ) (by infer_instance)).isContinuous
+  have hρ_univ : ρ Set.univ = μ s := by
+    simp [ρ, Measure.map_apply hf MeasurableSet.univ]
+  obtain ⟨t, ht, -, hρt⟩ := hρ_cont MeasurableSet.univ
+    (show ρ Set.univ / 2 ≤ ρ Set.univ by
+      calc
+        ρ Set.univ / 2 ≤ ρ Set.univ / 2 + ρ Set.univ / 2 := self_le_add_right _ _
+        _ = ρ Set.univ := ENNReal.add_halves _)
+  have hμt : μ (f ⁻¹' t ∩ s) = ρ t := by
+    dsimp [ρ]
+    rw [Measure.map_apply hf ht, Measure.restrict_apply (hf ht)]
+  rcases hs_atom.2.2 ((ht.preimage hf).inter hs) Set.inter_subset_right with hzero | hfull
+  · apply hs_pos.ne'
+    calc
+      μ s = ρ Set.univ := hρ_univ.symm
+      _ = ρ Set.univ / 2 + ρ Set.univ / 2 := (ENNReal.add_halves _).symm
+      _ = 0 := by rw [← hρt, ← hμt, hzero, zero_add]
+  · have heq : μ s / 2 = μ s := by
+      calc
+        μ s / 2 = ρ Set.univ / 2 := congrArg (· / 2) hρ_univ.symm
+        _ = ρ t := hρt.symm
+        _ = μ (f ⁻¹' t ∩ s) := hμt.symm
+        _ = μ s := hfull
+    exact (ENNReal.half_lt_self hs_pos.ne' (measure_ne_top μ s)).ne heq
+
+end Measure
 
 end MeasureTheory
