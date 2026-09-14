@@ -278,7 +278,8 @@ theorem isVLDisjoint_sub_inf (x y : X) :
 
 /-! ### Finite disjoint sums -/
 
-private lemma isVLDisjoint_finset_sum {ι : Type*} {s : Finset ι} {x : X} {f : ι → X}
+/-- An element disjoint from every term of a finite sum is disjoint from the sum. -/
+theorem IsVLDisjoint.finset_sum_right {ι : Type*} {s : Finset ι} {x : X} {f : ι → X}
     (h : ∀ i ∈ s, IsVLDisjoint x (f i)) : IsVLDisjoint x (∑ i ∈ s, f i) := by
   classical
   induction s using Finset.induction_on with
@@ -287,6 +288,22 @@ private lemma isVLDisjoint_finset_sum {ι : Type*} {s : Finset ι} {x : X} {f : 
     rw [Finset.sum_insert ha]
     refine (h a (Finset.mem_insert_self a s)).add_right ?_
     exact ih (fun i hi => h i (Finset.mem_insert_of_mem hi))
+
+/-- Two finite sums are disjoint when every term of the first is disjoint from every term
+of the second. -/
+theorem isVLDisjoint_finset_sum_finset
+    {ι κ : Type*} (s : Finset ι) (t : Finset κ) (x : ι → X) (y : κ → X)
+    (hxy : ∀ i ∈ s, ∀ j ∈ t, IsVLDisjoint (x i) (y j)) :
+    IsVLDisjoint (∑ i ∈ s, x i) (∑ j ∈ t, y j) := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => exact isVLDisjoint_zero_left _
+  | @insert i s hi ih =>
+      rw [Finset.sum_insert hi]
+      apply IsVLDisjoint.add_left
+      · exact IsVLDisjoint.finset_sum_right fun j hj ↦
+          hxy i (Finset.mem_insert_self i s) j hj
+      · exact ih fun k hk j hj ↦ hxy k (Finset.mem_insert_of_mem hk) j hj
 
 private lemma sum_eq_sup'_aux {ι : Type*} {s : Finset ι} (hs : s.Nonempty) (f : ι → X)
     (hnn : ∀ i ∈ s, 0 ≤ f i)
@@ -307,7 +324,7 @@ private lemma sum_eq_sup'_aux {ι : Type*} {s : Finset ι} (hs : s.Nonempty) (f 
     rw [← ih hnn_s hdisj_s]
     have hsum_nn : 0 ≤ ∑ i ∈ s, f i := Finset.sum_nonneg hnn_s
     have hdisj_sum : IsVLDisjoint (f a) (∑ i ∈ s, f i) := by
-      apply isVLDisjoint_finset_sum
+      apply IsVLDisjoint.finset_sum_right
       intro i hi
       have hne_ai : a ≠ i := fun h => ha (h ▸ hi)
       exact hdisj (Finset.mem_cons.mpr (Or.inl rfl)) (mem_cons_of i hi) hne_ai
@@ -414,7 +431,7 @@ private lemma abs_sum_finset {ι : Type*} (s : Finset ι) (x : ι → X) (α : �
       exact hdisj (Finset.mem_insert_of_mem hi) (Finset.mem_insert_of_mem hj) hij
     rw [Finset.sum_insert ha, Finset.sum_insert ha]
     have hdisj_head : IsVLDisjoint (α a • x a) (∑ i ∈ s, α i • x i) := by
-      apply isVLDisjoint_finset_sum
+      apply IsVLDisjoint.finset_sum_right
       intro i hi
       have hne_ai : a ≠ i := fun h => ha (h ▸ hi)
       exact ((hdisj (Finset.mem_insert_self a s)

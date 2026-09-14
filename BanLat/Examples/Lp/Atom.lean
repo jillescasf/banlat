@@ -112,28 +112,6 @@ private lemma indicatorConstLp_pos_iff
       exact hc.ne' this
     exact hμ.ne' (measure_eq_zero_iff_ae_notMem.2 hs_ae)
 
-/-- For all `r, c ∈ ℝ` and measurable set `A`, `r · (c · 1_A) = (r · c) · 1_A` -/
-private lemma smul_indicatorConstLp
-    {s : Set α} (hs : MeasurableSet s) (hμs : μ s < ∞) (r c : ℝ) :
-    r • indicatorConstLp (p : ENNReal) hs hμs.ne c =
-      indicatorConstLp (p : ENNReal) hs hμs.ne (r * c) := by
-  apply Lp.ext
-  filter_upwards [
-    Lp.coeFn_smul r (indicatorConstLp (p : ENNReal) hs hμs.ne c),
-    (indicatorConstLp_coeFn :
-      ((indicatorConstLp (p : ENNReal) hs hμs.ne c : Lp ℝ (p : ENNReal) μ) :
-        α → ℝ) =ᵐ[μ] s.indicator fun _ ↦ c),
-    (indicatorConstLp_coeFn :
-      ((indicatorConstLp (p : ENNReal) hs hμs.ne (r * c) :
-        Lp ℝ (p : ENNReal) μ) : α → ℝ) =ᵐ[μ] s.indicator fun _ ↦ r * c)
-  ] with x hsmul hc hrc
-  rw [hsmul, hrc]
-  simp only [Pi.smul_apply, smul_eq_mul]
-  rw [hc]
-  by_cases hxs : x ∈ s
-  · simp [Set.indicator_of_mem hxs]
-  · simp [Set.indicator_of_notMem hxs]
-
 /-- `∀ f ∈ Lₚ(μ), f > 0` there exists measurable set `s`, with `0 < μ(s)`, and
 some `0 < c` such that `c1_s ≤ f` a.e. -/
 private lemma exists_indicatorConstLp_le_of_pos
@@ -244,41 +222,6 @@ private lemma indicatorConstLp_le_of_subset
       exact hc
     · rw [Set.indicator_of_notMem hxs]
 
-private lemma indicatorConstLp_disjoint
-    {s t : Set α} (hs : MeasurableSet s) (ht : MeasurableSet t)
-    (hμs : μ s < ∞) (hμt : μ t < ∞) (hst : Disjoint s t)
-    {c : ℝ} (hc : 0 ≤ c) :
-    IsVLDisjoint
-      (indicatorConstLp (p : ENNReal) hs hμs.ne c)
-      (indicatorConstLp (p : ENNReal) ht hμt.ne c) := by
-  apply isVLDisjoint_of_inf_eq_zero
-  apply Lp.ext
-  have hscoe :
-      ((indicatorConstLp (p : ENNReal) hs hμs.ne c :
-        Lp ℝ (p : ENNReal) μ) : α → ℝ) =ᵐ[μ] s.indicator fun _ ↦ c :=
-    indicatorConstLp_coeFn
-  have htcoe :
-      ((indicatorConstLp (p : ENNReal) ht hμt.ne c :
-        Lp ℝ (p : ENNReal) μ) : α → ℝ) =ᵐ[μ] t.indicator fun _ ↦ c :=
-    indicatorConstLp_coeFn
-  filter_upwards [Lp.coeFn_inf
-    (indicatorConstLp (p : ENNReal) hs hμs.ne c)
-    (indicatorConstLp (p : ENNReal) ht hμt.ne c),
-    hscoe, htcoe, Lp.coeFn_zero ℝ (p : ENNReal) μ] with x hinf hsx htx hzero
-  rw [hinf, hzero]
-  simp only [Pi.inf_apply]
-  rw [hsx, htx]
-  by_cases hxs : x ∈ s
-  · have hxt : x ∉ t := Set.disjoint_left.1 hst hxs
-    rw [Set.indicator_of_mem hxs, Set.indicator_of_notMem hxt]
-    exact inf_eq_right.2 hc
-  · rw [Set.indicator_of_notMem hxs]
-    by_cases hxt : x ∈ t
-    · rw [Set.indicator_of_mem hxt]
-      exact inf_eq_left.2 hc
-    · rw [Set.indicator_of_notMem hxt]
-      simp
-
 /-- A strictly positive constant function on a finite measure theoretic atom is
 a lattice atom of `Lₚ`. -/
 theorem Measure.IsAtom.isVLAtom_indicatorConstLp
@@ -314,7 +257,7 @@ theorem Measure.IsAtom.isVLAtom_indicatorConstLp
         ha.trans (Set.indicator_of_notMem hxs fun _ ↦ c)
       exact le_antisymm (hba.trans_eq ha0) hb0'
   refine ⟨d / c, hb_indicator.trans ?_⟩
-  rw [smul_indicatorConstLp hs.1 hμs]
+  rw [Lp.smul_indicatorConstLp hs.1 hμs.ne]
   congr 1
   exact (div_mul_cancel₀ d hc.ne').symm
 
@@ -345,7 +288,7 @@ theorem Measure.isAtom_of_isVLAtom_indicatorConstLp
   have hya : y ≤ a := indicatorConstLp_le_of_subset hs hu hμs hμu_finite hus hc.le
   have htu : Disjoint t u := Set.disjoint_sdiff_right
   have hxy : IsVLDisjoint x y :=
-    indicatorConstLp_disjoint ht hu hμt_finite hμu_finite htu hc.le
+    Lp.indicatorConstLp_isVLDisjoint ht hu hμt_finite.ne hμu_finite.ne htu c c
   rcases eq_zero_or_eq_zero_of_isVLDisjoint_of_isVLAtom ha hx0 hxa hy0 hya hxy with
     hx | hy
   · have hx_pos : 0 < x := (indicatorConstLp_pos_iff ht hμt_finite hc).2 hμt_pos
@@ -397,7 +340,7 @@ theorem isVLAtom_iff_exists_isAtom
     let d := r⁻¹ * c
     have hd : 0 < d := mul_pos (inv_pos.mpr hr_pos) hc
     have ha_indicator : a = indicatorConstLp (p : ENNReal) hs hμs.ne d :=
-      ha_recover.trans (smul_indicatorConstLp hs hμs r⁻¹ c)
+      ha_recover.trans (Lp.smul_indicatorConstLp hs hμs.ne r⁻¹ c)
     have hind_atom : IsVLAtom (indicatorConstLp (p : ENNReal) hs hμs.ne d) := by
       rwa [← ha_indicator]
     have hs_atom := Measure.isAtom_of_isVLAtom_indicatorConstLp hs hμs hd hind_atom

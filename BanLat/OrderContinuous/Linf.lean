@@ -61,19 +61,6 @@ private lemma linftyBasis_disjoint :
 private lemma norm_linftyBasis (n : ℕ) : ‖linftyBasis n‖ = 1 := by
   simp [linftyBasis]
 
-private lemma isVLDisjoint_sum_right
-    {X ι : Type*} [AddCommGroup X] [Lattice X] [IsOrderedAddMonoid X]
-    {s : Finset ι} {x : X} {f : ι → X}
-    (h : ∀ i ∈ s, IsVLDisjoint x (f i)) :
-    IsVLDisjoint x (∑ i ∈ s, f i) := by
-  classical
-  induction s using Finset.induction_on with
-  | empty => simpa using isVLDisjoint_zero_right x
-  | @insert a s ha ih =>
-      rw [Finset.sum_insert ha]
-      exact (h a (Finset.mem_insert_self a s)).add_right
-        (ih fun i hi => h i (Finset.mem_insert_of_mem hi))
-
 private def linftyPartialSum
     {X : Type*} [AddCommGroup X] [Lattice X] [IsOrderedAddMonoid X]
     [VectorLattice X] (x : ℕ → X) (a : ℓ^∞(ℕ, ℝ)) (N : ℕ) : X :=
@@ -115,7 +102,7 @@ private lemma sum_range_le_of_pairwise_isVLDisjoint
   | succ N ih =>
       rw [Finset.sum_range_succ]
       have hd : IsVLDisjoint (∑ n ∈ Finset.range N, x n) (x N) :=
-        isVLDisjoint_comm.mpr <| isVLDisjoint_sum_right fun n hn =>
+        isVLDisjoint_comm.mpr <| IsVLDisjoint.finset_sum_right fun n hn =>
           hdisj (Nat.ne_of_gt (Finset.mem_range.mp hn))
       rw [add_eq_sup_of_isVLDisjoint_of_nonneg
         (Finset.sum_nonneg fun n _ => hx n) (hx N) hd]
@@ -270,10 +257,10 @@ private lemma isVLDisjoint_linftyPartialSum_posPart_negPart
     IsVLDisjoint (linftyPartialSum x a⁺ N) (linftyPartialSum x a⁻ M) := by
   change IsVLDisjoint (∑ i ∈ Finset.range N, (a i)⁺ • x i)
     (∑ j ∈ Finset.range M, (a j)⁻ • x j)
-  apply isVLDisjoint_sum_right
+  apply IsVLDisjoint.finset_sum_right
   intro j _
   rw [isVLDisjoint_comm]
-  apply isVLDisjoint_sum_right
+  apply IsVLDisjoint.finset_sum_right
   intro i _
   exact isVLDisjoint_comm.mpr
     (isVLDisjoint_linfty_posPart_negPart_terms hdisj a i j)

@@ -54,18 +54,6 @@ theorem band_of_isClosed_orderIdeal [IsOrderContinuousNorm X]
   exact hcl.mem_of_tendsto hval_tend (Filter.Eventually.of_forall (fun s => hS s.2))
 
 omit [BanachLattice X] in
-private lemma isVLDisjoint_finset_sum_right {ι : Type*} {s : Finset ι}
-    {x : X} {f : ι → X}
-    (h : ∀ i ∈ s, IsVLDisjoint x (f i)) : IsVLDisjoint x (∑ i ∈ s, f i) := by
-  classical
-  induction s using Finset.induction_on with
-  | empty => simpa using isVLDisjoint_zero_right x
-  | insert a s ha ih =>
-      rw [Finset.sum_insert ha]
-      refine (h a (Finset.mem_insert_self a s)).add_right ?_
-      exact ih (fun i hi => h i (Finset.mem_insert_of_mem hi))
-
-omit [BanachLattice X] in
 private lemma le_of_le_add_of_isVLDisjoint {y p q : X}
     (hy0 : 0 ≤ y) (hp0 : 0 ≤ p) (hq0 : 0 ≤ q)
     (hy : y ≤ p + q) (hyq : IsVLDisjoint y q) : y ≤ p := by
@@ -237,7 +225,7 @@ theorem isOrderContinuousNorm_of_isClosed_ideal_isBand
       exact (Set.mem_range.mp (hts z hz)).choose_spec
     refine Filter.eventually_atTop.mpr ⟨t.sup idx + 1, fun n hn => ?_⟩
     have hdis_sum : IsVLDisjoint (v n) (∑ z ∈ t, c z • |z|) := by
-      apply isVLDisjoint_finset_sum_right
+      apply IsVLDisjoint.finset_sum_right
       intro z hz
       have hidx_lt : idx z < n := by
         exact Nat.lt_of_le_of_lt (Finset.le_sup (f := idx) hz) (by omega)
