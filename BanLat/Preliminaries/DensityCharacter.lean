@@ -3,6 +3,7 @@ Authors: Jesús Illescas-Fiorito
 -/
 
 import Mathlib.SetTheory.Cardinal.Basic
+import Mathlib.SetTheory.Cardinal.Ordinal
 import Mathlib.Topology.Bases
 import Mathlib.Topology.MetricSpace.Basic
 
@@ -80,6 +81,26 @@ theorem exists_injective_denseRange_densityCharacter
     rw [hrange]
     exact hD
 
+/-- If `densityCharacter(X) = κ`, then `X` has a dense family indexed by the type
+underlying the initial ordinal `κ.ord`. -/
+theorem exists_denseRange_ord
+    (X : Type u) [TopologicalSpace X] (κ : Cardinal.{u})
+    (hκ : densityCharacter X = κ) :
+    ∃ f : κ.ord.ToType → X, DenseRange f := by
+  obtain ⟨D, hD, hDcard⟩ := exists_dense_mk_eq_densityCharacter X
+  have hcard : Cardinal.mk κ.ord.ToType = Cardinal.mk D := by
+    rw [Cardinal.mk_ord_toType, hDcard, hκ]
+  let e : κ.ord.ToType ≃ D := Classical.choice (Cardinal.eq.mp hcard)
+  refine ⟨fun i ↦ e i, ?_⟩
+  change Dense (Set.range fun i ↦ (e i : X))
+  convert hD using 1
+  ext x
+  constructor
+  · rintro ⟨i, rfl⟩
+    exact (e i).property
+  · intro hx
+    exact ⟨e.symm ⟨x, hx⟩, by simp⟩
+
 /-- A dense subset bounds the density character from above. -/
 theorem densityCharacter_le_mk_of_dense
     {X : Type u} [TopologicalSpace X] {D : Set X} (hD : Dense D) :
@@ -130,6 +151,11 @@ theorem densityCharacter_le_card (X : Type u) [TopologicalSpace X] :
   unfold densityCharacter
   apply csInf_le'
   exact ⟨Set.univ, dense_univ, Cardinal.mk_univ⟩
+
+/-- The density character of a finite topological space is strictly less than `ℵ₀`. -/
+theorem densityCharacter_lt_aleph0 (X : Type u) [TopologicalSpace X] [Finite X] :
+    densityCharacter X < Cardinal.aleph0 := by
+  exact (densityCharacter_le_card X).trans_lt Cardinal.mk_lt_aleph0
 
 /-- The density character of an infinite T₁ space is infinite. -/
 theorem aleph0_le_densityCharacter
