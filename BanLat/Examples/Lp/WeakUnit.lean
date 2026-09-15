@@ -192,8 +192,7 @@ private lemma normalize_weakOrderUnit {μ : Measure α} {e : Lp ℝ (p : ENNReal
   have he_norm_pos : 0 < ‖e‖ := norm_pos_iff.mpr he_ne
   refine ⟨‖e‖⁻¹ • e, quasiInteriorPoint_iff_weakOrderUnit.mp
     (quasiInteriorPoint_smul_of_pos he' (inv_pos.mpr he_norm_pos)), ?_⟩
-  simp [norm_smul, Real.norm_of_nonneg (inv_nonneg.mpr he_norm_pos.le),
-    he_norm_pos.ne']
+  simp [norm_smul, he_norm_pos.ne']
 
 /-- Every nontrivial separable real `L^p` space has a weak order unit of norm one. -/
 theorem exists_weakOrderUnit_norm_one_of_separable

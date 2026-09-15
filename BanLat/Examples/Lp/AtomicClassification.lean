@@ -53,7 +53,7 @@ private lemma norm_smul_normalizedAtom
     ‖c • (a : Lp ℝ (p : ENNReal) μ)‖ = |c| := by
   have ha_norm : ‖(a : Lp ℝ (p : ENNReal) μ)‖ = 1 :=
     (mem_normalizedAtoms.mp a.property).2
-  rw [norm_smul, ha_norm, mul_one, Real.norm_eq_abs]
+  rw [norm_smul, ha_norm, mul_one]
 
 /-- The `p`-th powers of the absolute atomic coordinates sum to the
 `p`-th power of the `L^p(α, μ)` norm. -/
