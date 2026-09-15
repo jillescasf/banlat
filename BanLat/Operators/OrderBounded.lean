@@ -147,6 +147,11 @@ theorem ext {f g : OrderBoundedHom X Y}
 theorem coe_toLinearMap (f : OrderBoundedHom X Y) :
     ⇑f.toLinearMap = ⇑f := rfl
 
+/-- The underlying linear map of an order-bounded operator has the same values. -/
+@[simp]
+theorem toLinearMap_apply (f : OrderBoundedHom X Y) (x : X) :
+    f.toLinearMap x = f x := rfl
+
 private theorem toLinearMap_injective :
     Function.Injective (OrderBoundedHom.toLinearMap :
       OrderBoundedHom X Y → X →ₗ[ℝ] Y) := fun _ _ h =>
@@ -162,6 +167,10 @@ theorem ofPositive_apply (f : X →ₗ[ℝ] Y) (hf : Positive f) (x : X) :
 
 instance instZero : Zero (OrderBoundedHom X Y) :=
   ⟨ofPositive 0 fun _ _ => by simp⟩
+
+/-- The zero order-bounded operator vanishes at every point. -/
+@[simp]
+theorem zero_apply (x : X) : (0 : OrderBoundedHom X Y) x = (0 : Y) := rfl
 
 instance instAdd : Add (OrderBoundedHom X Y) :=
   ⟨fun f g => ⟨f.toLinearMap + g.toLinearMap,

@@ -59,6 +59,21 @@ theorem abs_eq_zero_iff_zero : |x| = 0 ↔ x = 0 := by
   · intro h
     simp [h]
 
+/-- The absolute difference of two suprema is bounded by the sum of the
+absolute differences of their corresponding terms. -/
+theorem abs_sup_sub_sup_le_add (a b c d : X) :
+    |(a ⊔ b) - (c ⊔ d)| ≤ |a - c| + |b - d| := by
+  calc
+    |(a ⊔ b) - (c ⊔ d)|
+        = |((a ⊔ b) - (c ⊔ b)) + ((c ⊔ b) - (c ⊔ d))| := by
+          congr 1
+          abel
+    _ ≤ |(a ⊔ b) - (c ⊔ b)| + |(c ⊔ b) - (c ⊔ d)| := abs_add_le _ _
+    _ ≤ |a - c| + |b - d| := by
+      exact add_le_add (abs_sup_sub_sup_le_abs a c b) (by
+        rw [sup_comm c b, sup_comm c d]
+        exact abs_sup_sub_sup_le_abs b d c)
+
 /-- If `x = u - v` with `u ⊓ v = 0`, then `u` is the positive part of `x`. -/
 theorem uniqueness_posPart {u v : X} (hdif : x = u - v) (udisv : u ⊓ v = 0) :
     u = x⁺ := by

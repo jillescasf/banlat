@@ -53,20 +53,6 @@ private lemma prod_coord_diff_mem_uniformity {S : Set E} (hS : S ∈ 𝓝 (0 : E
   exact ⟨V ×ˢ V, Filter.prod_mem_prod hV hV, fun _ hq => hq⟩
 
 omit [VectorLattice E] [UniformSpace E] [IsUniformAddGroup E] [ContinuousSMul ℝ E] in
-private lemma abs_sup_sub_sup_le_add (a b c d : E) :
-    |(a ⊔ b) - (c ⊔ d)| ≤ |a - c| + |b - d| := by
-  calc
-    |(a ⊔ b) - (c ⊔ d)|
-        = |((a ⊔ b) - (c ⊔ b)) + ((c ⊔ b) - (c ⊔ d))| := by
-          congr 1
-          abel
-    _ ≤ |(a ⊔ b) - (c ⊔ b)| + |(c ⊔ b) - (c ⊔ d)| := abs_add_le _ _
-    _ ≤ |a - c| + |b - d| := by
-      exact add_le_add (abs_sup_sub_sup_le_abs a c b) (by
-        rw [sup_comm c b, sup_comm c d]
-        exact abs_sup_sub_sup_le_abs b d c)
-
-omit [VectorLattice E] [UniformSpace E] [IsUniformAddGroup E] [ContinuousSMul ℝ E] in
 private lemma solid_abs_mem {S : Set E} (hS : LatticeOrderedAddCommGroup.IsSolid S)
     {x : E} (hx : x ∈ S) : |x| ∈ S :=
   hS hx (by rw [abs_abs])

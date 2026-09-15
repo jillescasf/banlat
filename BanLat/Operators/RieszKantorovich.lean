@@ -23,11 +23,6 @@ variable {X Y : Type*} [AddCommGroup X] [AddCommGroup Y]
   [IsOrderedAddMonoid Y] [VectorLattice X]
   [VectorLattice Y]
 
-private lemma obZero_apply (x : X) : (0 : OrderBoundedHom X Y) x = (0 : Y) := rfl
-
-private lemma obToLinearMap_apply (f : OrderBoundedHom X Y) (x : X) :
-    f.toLinearMap x = f x := rfl
-
 /-! ### Positive part construction for the Riesz-Kantorovich theorem -/
 
 private def ppSet (f : OrderBoundedHom X Y) (x : X) : Set Y :=
@@ -157,7 +152,7 @@ private lemma obPosPart_apply (f : OrderBoundedHom X Y) (x : X) :
 private lemma obPosPart_nonneg (f : OrderBoundedHom X Y) :
     (0 : OrderBoundedHom X Y) ≤ obPosPart f :=
   le_iff.mpr fun x hx => by
-    simpa only [obZero_apply, obPosPart_apply] using ppOp_positive f x hx
+    simpa only [zero_apply, obPosPart_apply] using ppOp_positive f x hx
 
 private lemma le_obPosPart (f : OrderBoundedHom X Y) :
     f ≤ obPosPart f :=
@@ -169,7 +164,7 @@ private lemma obPosPart_le {f g : OrderBoundedHom X Y}
   le_iff.mpr fun x hx => by
     apply ppOp_le f g _ _ hx
     · intro y hy
-      simpa only [obZero_apply] using le_iff.mp hg0 y hy
+      simpa only [zero_apply] using le_iff.mp hg0 y hy
     · intro y hy; exact le_iff.mp hgf y hy
 
 private noncomputable def obSup
@@ -416,7 +411,7 @@ private lemma isGLB_inf_apply_disjoint_zero
   have hg0 : (0 : OrderBoundedHom X Y) ≤ g := by
     simpa [hfg0] using (inf_le_right : f ⊓ g ≤ g)
   have hS : IsGLB S 0 := by
-    simpa only [S, hfg0, obZero_apply] using (isGLB_inf_apply (f := f) (g := g) hx)
+    simpa only [S, hfg0, zero_apply] using (isGLB_inf_apply (f := f) (g := g) hx)
   refine ⟨?_, ?_⟩
   · intro w hw
     rcases hw with ⟨y, z, hdisj, hyz, rfl⟩
@@ -636,13 +631,13 @@ private lemma f_mono_of_nonneg {f : OrderBoundedHom X Y}
     (hf : (0 : OrderBoundedHom X Y) ≤ f) : Monotone f.toLinearMap :=
   Positive.monotone_iff.mpr fun y hy => by
     have := le_iff.mp hf y hy
-    simpa only [obZero_apply, obToLinearMap_apply] using this
+    simpa only [zero_apply, toLinearMap_apply] using this
 
 
 private lemma f_apply_nonneg {f : OrderBoundedHom X Y}
     (hf : (0 : OrderBoundedHom X Y) ≤ f) {y : X} (hy : 0 ≤ y) : 0 ≤ f y := by
   have := le_iff.mp hf y hy
-  simpa only [obZero_apply] using this
+  simpa only [zero_apply] using this
 
 /-- The value of the witness operator on the positive cone:
 `witFun f x₀ y = sup_n f (y ⊓ n • x₀)`. Defaults to `0` outside the regime where
@@ -795,7 +790,7 @@ private lemma witOp_nonneg {f : OrderBoundedHom X Y}
   le_iff.mpr fun y hy => by
     have h := witLin_positive hf hx₀ y hy
     change (0 : Y) ≤ witLin hf hx₀ y at h
-    simpa only [obZero_apply, witOp_apply] using h
+    simpa only [zero_apply, witOp_apply] using h
 
 private lemma witOp_le_f {f : OrderBoundedHom X Y}
     (hf : (0 : OrderBoundedHom X Y) ≤ f) {x₀ : X} (hx₀ : 0 ≤ x₀) :

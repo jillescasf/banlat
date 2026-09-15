@@ -48,23 +48,6 @@ theorem dualEval_apply (x : E) (φ : dualUnitBall E) :
 noncomputable def concreteSublattice : VectorSublattice C(dualUnitBall E, ℝ) :=
   VectorSublattice.generated (Set.range (dualEval E : E → C(dualUnitBall E, ℝ)))
 
-private def subtypeHom {X : Type*} [AddCommGroup X] [Lattice X] [IsOrderedAddMonoid X]
-    [VectorLattice X] (Y : VectorSublattice X) :
-    VecLatHom ↥Y.toSubmodule X where
-  toFun y := y
-  map_add' _ _ := rfl
-  map_smul' _ _ := rfl
-  map_sup' _ _ := rfl
-  map_inf' _ _ := rfl
-
-private theorem eval_coe_submodule {X : Type*} [AddCommGroup X] [Lattice X]
-    [IsOrderedAddMonoid X] [VectorLattice X] {n : ℕ} (Y : VectorSublattice X)
-    (y : Fin n → ↥Y.toSubmodule) (e : LLexpr n) :
-    ((LLexpr.eval y e : ↥Y.toSubmodule) : X) =
-      LLexpr.eval (fun i => (y i : X)) e := by
-  have hsubtype (z : ↥Y.toSubmodule) : subtypeHom Y z = (z : X) := rfl
-  simpa only [hsubtype] using (LLexpr.map_eval (subtypeHom Y) y e)
-
 end FVLv
 
 /-- The free vector lattice over a real normed space, realized inside `C(B_{E*}, ℝ)`. -/
@@ -177,7 +160,9 @@ theorem of_injective : Function.Injective (of : E → FVLv E) := by
 theorem ker_ofLinear : LinearMap.ker (ofLinear (E := E)) = ⊥ := by
   exact LinearMap.ker_eq_bot.mpr (of_injective (E := E))
 
-private theorem exists_eval_of_eq (f : FVLv E) :
+/-- Every element of the free vector lattice is the evaluation of a lattice-linear
+expression at finitely many canonical generators. -/
+theorem exists_eval_of_eq (f : FVLv E) :
     ∃ (n : ℕ) (x : Fin n → E) (e : LLexpr n),
       LLexpr.eval (fun i => of (x i)) e = f := by
   classical
@@ -196,7 +181,8 @@ private theorem exists_eval_of_eq (f : FVLv E) :
     ((LLexpr.eval (fun i : Fin n => of (x i)) e : FVLv E) :
         C(dualUnitBall E, ℝ))
         = LLexpr.eval (fun i : Fin n => dualEval E (x i)) e := by
-          exact eval_coe_submodule (concreteSublattice E) (fun i : Fin n => of (x i)) e
+          exact LLexpr.coe_eval_vectorSublattice
+            (concreteSublattice E) (fun i : Fin n => of (x i)) e
     _ = LLexpr.eval (fun i : Fin n => (z i : C(dualUnitBall E, ℝ))) e := by
           congr
           funext i
@@ -221,7 +207,7 @@ theorem generated_range_of :
 private noncomputable def equivTopOfEq {X : Type*} [AddCommGroup X] [Lattice X]
     [IsOrderedAddMonoid X] [VectorLattice X] (Y : VectorSublattice X) (hY : Y = ⊤) :
     VecLatEquiv ↥Y.toSubmodule X :=
-  { LinearEquiv.ofBijective (subtypeHom Y).toLinearMap
+  { LinearEquiv.ofBijective Y.subtype.toLinearMap
       ⟨by
         intro a b h
         ext

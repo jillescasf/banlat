@@ -74,31 +74,6 @@ theorem coe_of (a : α) : ((of a : FVL α) : FunctionSpace α) = coordinate a :=
 @[simp]
 theorem of_apply (a : α) (x : α → ℝ) : (of a : FVL α) x = x a := rfl
 
-private theorem eval_coe_submodule {X : Type*} [AddCommGroup X] [Lattice X]
-    [IsOrderedAddMonoid X] [VectorLattice X] {n : ℕ} (Y : VectorSublattice X)
-    (y : Fin n → ↥Y.toSubmodule) (e : LLexpr n) :
-    ((LLexpr.eval y e : ↥Y.toSubmodule) : X) =
-      LLexpr.eval (fun i => (y i : X)) e := by
-  induction e with
-  | zero => simp [LLexpr.eval]
-  | var i => simp [LLexpr.eval]
-  | add e₁ e₂ h₁ h₂ => simp [LLexpr.eval, h₁, h₂]
-  | smul r e h => simp [LLexpr.eval, h]
-  | sup e₁ e₂ h₁ h₂ =>
-      change
-        ((LLexpr.eval y e₁ : ↥Y.toSubmodule) : X) ⊔
-            ((LLexpr.eval y e₂ : ↥Y.toSubmodule) : X) =
-          LLexpr.eval (fun i => (y i : X)) e₁ ⊔
-            LLexpr.eval (fun i => (y i : X)) e₂
-      rw [h₁, h₂]
-  | inf e₁ e₂ h₁ h₂ =>
-      change
-        ((LLexpr.eval y e₁ : ↥Y.toSubmodule) : X) ⊓
-            ((LLexpr.eval y e₂ : ↥Y.toSubmodule) : X) =
-          LLexpr.eval (fun i => (y i : X)) e₁ ⊓
-            LLexpr.eval (fun i => (y i : X)) e₂
-      rw [h₁, h₂]
-
 private theorem eval_apply {ι X : Type*} [AddCommGroup X] [Lattice X]
     [IsOrderedAddMonoid X] [VectorLattice X] {n : ℕ} (y : Fin n → ι → X)
     (e : LLexpr n) (t : ι) :
@@ -128,7 +103,8 @@ private theorem exists_eval_of_eq (f : FVL α) :
   calc
     ((LLexpr.eval (fun i : Fin n => of (a i)) e : FVL α) : FunctionSpace α)
         = LLexpr.eval (fun i : Fin n => coordinate (a i)) e := by
-          exact eval_coe_submodule (concreteSublattice α) (fun i : Fin n => of (a i)) e
+          exact LLexpr.coe_eval_vectorSublattice
+            (concreteSublattice α) (fun i : Fin n => of (a i)) e
     _ = LLexpr.eval (fun i : Fin n => (z i : FunctionSpace α)) e := by
           congr
           funext i
@@ -225,7 +201,7 @@ theorem of_finiteLatticeLinearIndependent {n : ℕ} {a : Fin n → α}
   intro m b hb e h
   apply vanishes_real_of_eval_coordinate_eq_zero e (ha.comp hb)
   have hcoord := congrArg (fun f : FVL α => (f : FunctionSpace α)) h
-  simpa [eval_coe_submodule] using hcoord
+  simpa [LLexpr.coe_eval_vectorSublattice] using hcoord
 
 /-- The canonical family of generators of a free vector lattice is lattice-linearly
 independent. -/
@@ -343,8 +319,10 @@ private theorem eval_eq_of_of_eval_eq {m n : ℕ} (φ : α → X)
     LLexpr.eval (fun i => φ (a i)) e = LLexpr.eval (fun i => φ (b i)) d := by
   apply eval_eq_of_coordinate_eval_eq φ
   have hcoord := congrArg (fun f : FVL α => (f : FunctionSpace α)) h
-  have hleft := eval_coe_submodule (concreteSublattice α) (fun i : Fin m => of (a i)) e
-  have hright := eval_coe_submodule (concreteSublattice α) (fun i : Fin n => of (b i)) d
+  have hleft := LLexpr.coe_eval_vectorSublattice
+    (concreteSublattice α) (fun i : Fin m => of (a i)) e
+  have hright := LLexpr.coe_eval_vectorSublattice
+    (concreteSublattice α) (fun i : Fin n => of (b i)) d
   simpa [hleft, hright] using hcoord
 
 private noncomputable def liftFun (φ : α → X) (f : FVL α) : X :=
@@ -532,11 +510,11 @@ theorem latticeLinearIndependent_iff_lift_injective (x : α → X) :
     have hfcoord : (f : FunctionSpace α) =
         LLexpr.eval (fun i => coordinate (rf.a i)) rf.e := by
       have hrf := congrArg (fun y : FVL α => (y : FunctionSpace α)) rf.eval_eq
-      simpa [eval_coe_submodule] using hrf.symm
+      simpa [LLexpr.coe_eval_vectorSublattice] using hrf.symm
     have hgcoord : (g : FunctionSpace α) =
         LLexpr.eval (fun i => coordinate (rg.a i)) rg.e := by
       have hrg := congrArg (fun y : FVL α => (y : FunctionSpace α)) rg.eval_eq
-      simpa [eval_coe_submodule] using hrg.symm
+      simpa [LLexpr.coe_eval_vectorSublattice] using hrg.symm
     calc
       (f : FunctionSpace α) = LLexpr.eval (fun i => coordinate (rf.a i)) rf.e := hfcoord
       _ = LLexpr.eval (fun i => coordinate (rg.a i)) rg.e := hcoord
@@ -551,7 +529,7 @@ theorem latticeLinearIndependent_iff_lift_injective (x : α → X) :
         _ = lift x (0 : FVL α) := by simp
     have hcoord : LLexpr.eval (fun i => coordinate (a i)) e = 0 := by
       have hcoe := congrArg (fun f : FVL α => (f : FunctionSpace α)) hf0
-      simpa [eval_coe_submodule] using hcoe
+      simpa [LLexpr.coe_eval_vectorSublattice] using hcoe
     exact vanishes_real_of_eval_coordinate_eq_zero e ha hcoord
 
 end Lift

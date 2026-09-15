@@ -2,10 +2,9 @@
 Authors: Jesús Illescas-Fiorito
 -/
 
+import BanLat.Examples.Lp.Basic
 import BanLat.Probability.ConvergenceInMeasure
 import BanLat.Probability.Distributions.Stable.HasSymmetricStableLaw.Moments
-import Mathlib.Analysis.Normed.Lp.lpSpace
-import Mathlib.MeasureTheory.Function.LpSpace.Complete
 
 /-!
 # Symmetric stable sequences in `Lᵖ(P)` spaces
@@ -67,13 +66,6 @@ private lemma rpow_tsum_nnnorm_rpow (hq_pos : 0 < q)
     (by simpa [ENNReal.toReal_ofReal hq_pos.le] using hq_pos) a
   rw [NNReal.coe_tsum]
   simpa [NNReal.coe_rpow, ENNReal.toReal_ofReal hq_pos.le, one_div] using hnorm.symm
-
-/-- Scalar multiplication in `Lᵖ` is homogeneous even when `0 < p < 1`. -/
-private lemma norm_smul_Lp (r : ℝ) (f : Lp ℝ p P) :
-    ‖r • f‖ = |r| * ‖f‖ := by
-  rw [Lp.norm_def, eLpNorm_congr_ae (Lp.coeFn_smul r f),
-    eLpNorm_const_smul, ENNReal.toReal_mul, toReal_enorm, Real.norm_eq_abs,
-    Lp.norm_def]
 
 /-- For `0 < p < q < 2`, the assignment `eₙ ↦ Xₙ` extends linearly to a map
 `G : ℓ^q(ℕ, ℝ) → Lᵖ(P)` satisfying `‖G a‖ = ‖X₀‖ₚ ‖a‖`. -/
@@ -208,7 +200,7 @@ private lemma exists_linearMap_standardQStable_norm_eq {X : ℕ → Ω → ℝ}
   let T : lp (fun _ : ℕ ↦ ℝ) (ENNReal.ofReal q) →ₗ[ℝ] Lp ℝ p P := c⁻¹ • G
   have hTnorm (a : lp (fun _ : ℕ ↦ ℝ) (ENNReal.ofReal q)) : ‖T a‖ = ‖a‖ := by
     change ‖c⁻¹ • G a‖ = ‖a‖
-    rw [norm_smul_Lp, hGnorm]
+    rw [Lp.norm_smul, hGnorm]
     simp [c, abs_of_pos hc, hc.ne']
   refine ⟨T, hTnorm, ?_⟩
   intro n
