@@ -77,6 +77,14 @@ theorem isAtomless_iff_denselyOrdered :
     rw [ha.2 x hxa] at hbotx
     exact (lt_irrefl ⊥ hbotx).elim
 
+/-- Every nonzero element of an atomless Boolean algebra contains a strictly
+smaller nonzero element. -/
+theorem IsAtomless.exists_nonzero_lt (hB : IsAtomless B) {b : B} (hb : b ≠ ⊥) :
+    ∃ a : B, a < b ∧ a ≠ ⊥ := by
+  letI : DenselyOrdered B := isAtomless_iff_denselyOrdered.mp hB
+  obtain ⟨a, ha_bot, ha_b⟩ := exists_between (bot_lt_iff_ne_bot.mpr hb)
+  exact ⟨a, ha_b, ne_of_gt ha_bot⟩
+
 end BooleanAlgebra
 
 namespace BooleanSubalgebra
@@ -98,14 +106,12 @@ theorem isRelativelyAtomless_bot_iff_isAtomless :
     rcases hb.le_iff.mp hcb with rfl | rfl
     · exact hc ⊥ (by simp)
     · exact hc ⊤ (by simp)
-  · intro hB
-    letI : DenselyOrdered B := BooleanAlgebra.isAtomless_iff_denselyOrdered.mp hB
-    intro b hb
-    obtain ⟨c, hc_bot, hc⟩ := exists_between (bot_lt_iff_ne_bot.mpr hb)
+  · intro hB b hb
+    obtain ⟨c, hc, hc_ne⟩ := hB.exists_nonzero_lt hb
     refine ⟨c, hc.le, ?_⟩
     intro a
     rcases BooleanSubalgebra.mem_bot.mp a.property with ha | ha
-    · simpa [ha] using ne_of_gt hc_bot
+    · simpa [ha] using hc_ne
     · simpa [ha] using ne_of_lt hc
 
 /-- If `B` is relatively atomless over `D`, then it is relatively atomless over every
@@ -155,15 +161,14 @@ theorem isRelativelyAtomless_of_isAtomless_of_finite
   intro b hb
   obtain ⟨p, hp, -, hbp⟩ :=
     exists_atom_inf_ne_bot_of_finite hA b ⊤ (by simpa using hb)
-  letI : DenselyOrdered B := BooleanAlgebra.isAtomless_iff_denselyOrdered.mp hB
-  obtain ⟨c, hc_bot, hc⟩ := exists_between (bot_lt_iff_ne_bot.mpr hbp)
+  obtain ⟨c, hc, hc_ne⟩ := hB.exists_nonzero_lt hbp
   refine ⟨c, hc.le.trans inf_le_left, ?_⟩
   intro a hca
   have hc_p : c ≤ (p : B) := hc.le.trans inf_le_right
   have hc_a : c ≤ (a : B) := hca.le.trans inf_le_right
   have hpinf_ne : (p ⊓ a : A) ≠ ⊥ := by
     intro hpinf
-    apply not_le_of_gt hc_bot
+    apply not_le_of_gt (bot_lt_iff_ne_bot.mpr hc_ne)
     calc
       c ≤ (p : B) ⊓ (a : B) := le_inf hc_p hc_a
       _ = ((p ⊓ a : A) : B) := rfl

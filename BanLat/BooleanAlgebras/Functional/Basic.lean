@@ -14,7 +14,7 @@ This file introduces **nonnegative countably additive functionals** defined on
 
 open Function
 open Filter Topology
-open scoped ENNReal
+open scoped ENNReal symmDiff
 
 universe u v
 
@@ -38,6 +38,14 @@ namespace CountablyAdditiveFunctional
 
 variable {B : Type u} [SigmaCompleteBooleanAlgebra B]
 variable (ν : CountablyAdditiveFunctional B)
+
+/-- A countably additive functional is finite if its value at the top element
+is finite. -/
+def IsFinite : Prop := ν ⊤ ≠ ∞
+
+/-- A countably additive functional is faithful if it vanishes only at the
+bottom element. -/
+def IsFaithful : Prop := ∀ b, ν b = 0 ↔ b = ⊥
 
 /-- A countably additive functional vanishes at the bottom element. -/
 @[simp]
@@ -75,6 +83,26 @@ theorem map_sup {a b : B} (h : Disjoint a b) :
     simp only [hz, tsum_zero, add_zero, c, if_pos, if_false, Nat.one_ne_zero]
   rw [← hiSup, ν.map_iSup hc, hsum]
 
+/-- A countably additive functional maps the supremum of a finite pairwise
+disjoint family to the sum of its values. -/
+theorem map_finset_sup (s : Finset B) (hs : (s : Set B).PairwiseDisjoint id) :
+    ν (s.sup id) = ∑ b ∈ s, ν b := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simp
+  | @insert b s hb ih =>
+      have hs' : (s : Set B).PairwiseDisjoint id := by
+        intro c hc d hd hcd
+        exact hs (Finset.mem_insert_of_mem hc) (Finset.mem_insert_of_mem hd) hcd
+      have hb_disjoint : Disjoint b (s.sup id) := by
+        rw [Finset.disjoint_sup_right]
+        intro c hc
+        exact hs (Finset.mem_insert_self b s) (Finset.mem_insert_of_mem hc)
+          (fun hbc ↦ hb (hbc ▸ hc))
+      rw [Finset.sup_insert]
+      simp only [id_eq]
+      rw [ν.map_sup hb_disjoint, Finset.sum_insert hb, ih hs']
+
 /-- A countably additive functional is monotone. -/
 theorem monotone : Monotone ν := by
   intro a b h
@@ -87,13 +115,183 @@ theorem map_sdiff_add_inf (a b : B) :
     ν (a \ b) + ν (a ⊓ b) = ν a := by
   rw [← ν.map_sup disjoint_inf_sdiff.symm, sup_sdiff_inf]
 
-/-- A countably additive functional is finite if its value at the top element
-is finite. -/
-def IsFinite : Prop := ν ⊤ ≠ ∞
+/-- A countably additive functional maps a symmetric difference to the sum of
+the two corresponding differences. -/
+theorem map_symmDiff (a b : B) :
+    ν (a ∆ b) = ν (a \ b) + ν (b \ a) := by
+  exact ν.map_sup disjoint_sdiff_sdiff
+
+/-- The value of a supremum is at most the sum of the values. -/
+theorem map_sup_le (a b : B) : ν (a ⊔ b) ≤ ν a + ν b := by
+  rw [← sup_sdiff_self a b, ν.map_sup disjoint_sdiff_self_right]
+  exact add_le_add_right (ν.monotone (sdiff_le : b \ a ≤ b)) (ν a)
+
+/-- A countably additive functional is a valuation. -/
+theorem map_sup_add_inf (a b : B) :
+    ν (a ⊔ b) + ν (a ⊓ b) = ν a + ν b := by
+  rw [← sdiff_sup_self b a, ν.map_sup disjoint_sdiff_self_left,
+    ← ν.map_sdiff_add_inf a b]
+  ac_rfl
+
+/-- The values of an element and its complement add up to the value at the
+top element. -/
+theorem map_add_map_compl (a : B) : ν a + ν aᶜ = ν ⊤ := by
+  rw [← ν.map_sup disjoint_compl_right, sup_compl_eq_top]
+
+/-- The value of a countable supremum is at most the sum of the values. -/
+theorem map_iSup_le (a : ℕ → B) :
+    ν (⨆ n, a n) ≤ ∑' n, ν (a n) := by
+  rw [← SigmaCompleteBooleanAlgebra.iSup_disjointed_nat a,
+    ν.map_iSup (disjoint_disjointed a)]
+  exact ENNReal.tsum_le_tsum fun n ↦ ν.monotone (disjointed_le a n)
+
+/-- On every `σ`-complete Boolean subalgebra `A`, intersection with a fixed
+element defines a countably additive functional. -/
+noncomputable def infFunctional (A : BooleanSubalgebra B)
+    (hA : A.IsSigmaComplete) (b : B) :
+    letI := hA.toSigmaCompleteBooleanAlgebra
+    CountablyAdditiveFunctional A := by
+  letI := hA.toSigmaCompleteBooleanAlgebra
+  refine
+    { toFun := fun a ↦ ν ((a : B) ⊓ b)
+      map_bot' := by simp
+      map_iSup' := ?_ }
+  intro a ha
+  rw [hA.coe_iSup, SigmaCompleteBooleanAlgebra.iSup_inf_nat]
+  apply ν.map_iSup
+  intro i j hij
+  have hd := ha hij
+  change Disjoint (a i) (a j) at hd
+  have hd' : Disjoint (a i : B) (a j : B) := by
+    rw [disjoint_iff] at hd ⊢
+    exact congrArg Subtype.val hd
+  exact hd'.mono inf_le_left inf_le_left
+
+/-- The functional obtained by intersecting with `b` evaluates `a` as
+`ν (a ⊓ b)`. -/
+@[simp]
+theorem infFunctional_apply (A : BooleanSubalgebra B)
+    (hA : A.IsSigmaComplete) (b : B) (a : A) :
+    letI := hA.toSigmaCompleteBooleanAlgebra
+    ν.infFunctional A hA b a = ν ((a : B) ⊓ b) := by
+  rfl
+
+/-- The functional obtained by intersecting with `b` is dominated by the
+restriction of the original functional. -/
+theorem infFunctional_le (A : BooleanSubalgebra B)
+    (hA : A.IsSigmaComplete) (b : B) (a : A) :
+    letI := hA.toSigmaCompleteBooleanAlgebra
+    ν.infFunctional A hA b a ≤ ν (a : B) := by
+  simp only [infFunctional_apply]
+  exact ν.monotone inf_le_left
+
+/-- The restriction of a countably additive functional to a principal
+interval. -/
+noncomputable def restrict (b : B) :
+    CountablyAdditiveFunctional (Set.Iic b) where
+  toFun c := ν c
+  map_bot' := ν.map_bot
+  map_iSup' {a} ha := by
+    rw [Set.Iic.coe_iSup_nat]
+    exact ν.map_iSup fun _ _ hij ↦ Set.Iic.disjoint_iff.mp (ha hij)
+
+@[simp]
+theorem restrict_apply (b : B) (c : Set.Iic b) :
+    ν.restrict b c = ν c := by
+  rfl
+
+/-- The restriction of a countably additive functional to a `σ`-complete
+Boolean subalgebra. -/
+noncomputable def restrictToSubalgebra (A : BooleanSubalgebra B)
+    (hA : A.IsSigmaComplete) :
+    letI := hA.toSigmaCompleteBooleanAlgebra
+    CountablyAdditiveFunctional A := by
+  letI := hA.toSigmaCompleteBooleanAlgebra
+  refine
+    { toFun := fun a ↦ ν (a : B)
+      map_bot' := ν.map_bot
+      map_iSup' := ?_ }
+  intro a ha
+  rw [hA.coe_iSup]
+  apply ν.map_iSup
+  intro i j hij
+  change Disjoint (a i : B) (a j : B)
+  rw [disjoint_iff]
+  have hd := ha hij
+  change Disjoint (a i) (a j) at hd
+  rw [disjoint_iff] at hd
+  exact congrArg Subtype.val hd
+
+@[simp]
+theorem restrictToSubalgebra_apply (A : BooleanSubalgebra B)
+    (hA : A.IsSigmaComplete) (a : A) :
+    letI := hA.toSigmaCompleteBooleanAlgebra
+    ν.restrictToSubalgebra A hA a = ν (a : B) := by
+  rfl
 
 /-- Every value of a finite countably additive functional is finite. -/
 theorem ne_top (hν : ν.IsFinite) (a : B) : ν a ≠ ∞ := by
   exact ne_top_of_le_ne_top hν (ν.monotone le_top)
+
+/-- Intersecting with an element of finite functional value produces a finite
+functional on every `σ`-complete Boolean subalgebra. -/
+theorem infFunctional_isFinite (A : BooleanSubalgebra B)
+    (hA : A.IsSigmaComplete) (b : B) (hb : ν b ≠ ∞) :
+    letI := hA.toSigmaCompleteBooleanAlgebra
+    (ν.infFunctional A hA b).IsFinite := by
+  change ν (((⊤ : A) : B) ⊓ b) ≠ ∞
+  simpa using hb
+
+/-- A finite faithful countably additive functional is strictly monotone. -/
+theorem strictMono (hν_fin : ν.IsFinite) (hν_faith : ν.IsFaithful) :
+    StrictMono ν := by
+  intro a b hab
+  refine lt_of_le_of_ne (ν.monotone hab.le) ?_
+  intro hν
+  have hsum := ν.map_sdiff_add_inf b a
+  rw [inf_eq_right.mpr hab.le, ← hν] at hsum
+  have hzero : ν (b \ a) = 0 :=
+    (ENNReal.add_left_inj (ν.ne_top hν_fin a)).mp (by simpa using hsum)
+  apply not_le_of_gt hab
+  rw [← sdiff_eq_bot_iff, ← hν_faith]
+  exact hzero
+
+/-- Restriction to a principal interval is finite when the functional is
+finite at the endpoint. -/
+theorem restrict_isFinite (b : B) (hb : ν b ≠ ∞) :
+    (ν.restrict b).IsFinite := by
+  exact hb
+
+/-- Restriction to a principal interval preserves faithfulness. -/
+theorem restrict_isFaithful (b : B) (hν : ν.IsFaithful) :
+    (ν.restrict b).IsFaithful := by
+  intro c
+  rw [restrict_apply, hν]
+  constructor
+  · intro hc
+    exact Subtype.ext hc
+  · intro hc
+    exact congrArg Subtype.val hc
+
+/-- Restriction to a `σ`-complete Boolean subalgebra preserves finiteness. -/
+theorem restrictToSubalgebra_isFinite (A : BooleanSubalgebra B)
+    (hA : A.IsSigmaComplete) (hν : ν.IsFinite) :
+    letI := hA.toSigmaCompleteBooleanAlgebra
+    (ν.restrictToSubalgebra A hA).IsFinite := by
+  exact hν
+
+/-- Restriction to a `σ`-complete Boolean subalgebra preserves faithfulness. -/
+theorem restrictToSubalgebra_isFaithful (A : BooleanSubalgebra B)
+    (hA : A.IsSigmaComplete) (hν : ν.IsFaithful) :
+    letI := hA.toSigmaCompleteBooleanAlgebra
+    (ν.restrictToSubalgebra A hA).IsFaithful := by
+  intro a
+  rw [restrictToSubalgebra_apply, hν]
+  constructor
+  · intro ha
+    exact Subtype.ext ha
+  · intro ha
+    exact congrArg Subtype.val ha
 
 /-- For `r ∈ ℝ≥0` and `ν : B → ℝ≥0∞`, `ν.scaledFunctional r` is the countably
 additive functional given by `b ↦ r * ν b`. -/
@@ -115,11 +313,11 @@ theorem scaledFunctional_isFinite (r : NNReal) (hν : ν.IsFinite) :
     (scaledFunctional ν r).IsFinite := by
   exact ENNReal.mul_ne_top (by simp) hν
 
-/-- Let `ρ, ν : B → ℝ≥0∞` be countably additive functionals such that `ν` is
-finite and `ρ b ≤ ν b` for every `b ∈ B`. Then `subFunctional ν ρ hν hρν` is
+/-- Let `ρ, ν : B → ℝ≥0∞` be countably additive functionals such that `ρ` is
+finite and `ρ b ≤ ν b` for every `b ∈ B`. Then `subFunctional ν ρ hρ hρν` is
 the countably additive functional given by `b ↦ ν b - ρ b`. -/
 noncomputable def subFunctional (ρ : CountablyAdditiveFunctional B)
-    (hν : ν.IsFinite) (hρν : ∀ b, ρ b ≤ ν b) :
+    (hρ : ρ.IsFinite) (hρν : ∀ b, ρ b ≤ ν b) :
     CountablyAdditiveFunctional B where
   toFun := fun b ↦ ν b - ρ b
   map_bot' := by simp
@@ -127,7 +325,7 @@ noncomputable def subFunctional (ρ : CountablyAdditiveFunctional B)
     intro a ha
     have hsum : ∑' n, ρ (a n) ≠ ∞ := by
       rw [← ρ.map_iSup ha]
-      exact ne_top_of_le_ne_top (ν.ne_top hν _) (hρν _)
+      exact ρ.ne_top hρ _
     rw [ν.map_iSup ha, ρ.map_iSup ha]
     exact (ENNReal.tsum_sub hsum fun n ↦ hρν (a n)).symm
 

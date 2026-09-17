@@ -182,6 +182,32 @@ theorem densityCharacter_le_aleph0 (X : Type u) [TopologicalSpace X]
   exact (csInf_le' hmem).trans
     (Cardinal.le_aleph0_iff_set_countable.mpr hDcount)
 
+/-- A topological space is separable if and only if its density character is
+at most countable. -/
+theorem separableSpace_iff_densityCharacter_le_aleph0
+    (X : Type u) [TopologicalSpace X] :
+    SeparableSpace X ↔ densityCharacter X ≤ Cardinal.aleph0 := by
+  constructor
+  · intro hX
+    letI := hX
+    exact densityCharacter_le_aleph0 X
+  · intro hX
+    obtain ⟨D, hD, hDcard⟩ :=
+      densityCharacter_le_iff_exists_dense_mk_le.mp hX
+    exact ⟨⟨D, Cardinal.le_aleph0_iff_set_countable.mp hDcard, hD⟩⟩
+
+/-- A nonempty topological space is separable if and only if it admits a
+sequence with dense range. -/
+theorem separableSpace_iff_exists_dense_seq
+    (X : Type u) [TopologicalSpace X] [Nonempty X] :
+    SeparableSpace X ↔ ∃ u : ℕ → X, DenseRange u := by
+  constructor
+  · intro hX
+    letI := hX
+    exact exists_dense_seq X
+  · rintro ⟨u, hu⟩
+    exact SeparableSpace.of_denseRange u hu
+
 /-- Homeomorphic spaces have the same density character. -/
 theorem densityCharacter_eq_of_homeomorph
     {X : Type u} {Y : Type v}
