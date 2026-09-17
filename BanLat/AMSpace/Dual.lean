@@ -29,32 +29,6 @@ private lemma StrongDual.exists_pos_norm_le_one_norm_sub_lt
       rw [Real.norm_eq_abs]
       exact StrongDual.abs_apply_le_apply_abs hφ x)
 
-private lemma exists_decomposition_apply_add_apply_lt
-    {φ ψ : StrongDual ℝ X} (hdisj : φ ⊓ ψ = 0)
-    {u : X} (hu : 0 ≤ u) {ε : ℝ} (hε : 0 < ε) :
-    ∃ u₁ u₂ : X, 0 ≤ u₁ ∧ 0 ≤ u₂ ∧ u₁ + u₂ = u ∧
-      φ u₁ + ψ u₂ < ε := by
-  let φ' : OrderDualSpace X := StrongDual.toOrderDualSpace φ
-  let ψ' : OrderDualSpace X := StrongDual.toOrderDualSpace ψ
-  have hglb : IsGLB
-      {r : ℝ | ∃ y z : X, 0 ≤ y ∧ 0 ≤ z ∧ y + z = u ∧
-        r = φ' y + ψ' z} 0 := by
-    have h := OrderDualSpace.isGLB_inf_apply (φ := φ') (ψ := ψ') hu
-    have hzero : (φ' ⊓ ψ') u = 0 := by
-      dsimp [φ', ψ']
-      change (φ ⊓ ψ) u = 0
-      rw [hdisj]
-      rfl
-    simpa [hzero] using h
-  by_contra hno
-  have hlower : ε ∈ lowerBounds
-      {r : ℝ | ∃ y z : X, 0 ≤ y ∧ 0 ≤ z ∧ y + z = u ∧
-        r = φ' y + ψ' z} := by
-    rintro r ⟨y, z, hy, hz, hyz, rfl⟩
-    exact le_of_not_gt (fun hlt => hno ⟨y, z, hy, hz, hyz, hlt⟩)
-  have hε_le_zero : ε ≤ 0 := hglb.2 hlower
-  exact (not_lt_of_ge hε_le_zero) hε
-
 private lemma StrongDual.exists_disjoint_pos_norm_le_one_norm_sub_lt
     {φ ψ : StrongDual ℝ X} (hφ : 0 ≤ φ) (hψ : 0 ≤ ψ)
     (hdisj : φ ⊓ ψ = 0) {ε : ℝ} (hε : 0 < ε) :
@@ -66,9 +40,9 @@ private lemma StrongDual.exists_disjoint_pos_norm_le_one_norm_sub_lt
   obtain ⟨v, hv0, hvnorm, hvψ⟩ :=
     StrongDual.exists_pos_norm_le_one_norm_sub_lt hψ hε4
   obtain ⟨u₁, u₂, hu₁0, hu₂0, hu_sum, hu_small⟩ :=
-    exists_decomposition_apply_add_apply_lt hdisj hu0 hε4
+    StrongDual.exists_decomposition_apply_add_apply_lt hdisj hu0 hε4
   obtain ⟨v₁, v₂, hv₁0, hv₂0, hv_sum, hv_small⟩ :=
-    exists_decomposition_apply_add_apply_lt hdisj hv0 hε4
+    StrongDual.exists_decomposition_apply_add_apply_lt hdisj hv0 hε4
   set w : X := u₂ ⊓ v₁
   refine ⟨u₂ - w, v₁ - w, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · exact sub_nonneg.mpr inf_le_left

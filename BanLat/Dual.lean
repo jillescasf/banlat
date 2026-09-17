@@ -516,6 +516,34 @@ theorem orderDual_separatesPoints :
   refine SeparatingDual.eq_zero_of_forall_dual_eq_zero (R := ℝ) fun f => ?_
   simpa using hx (toOrderDualSpace f)
 
+/-- If two functionals are disjoint, every positive vector admits a
+positive decomposition on which the sum of their values is arbitrarily small. -/
+theorem exists_decomposition_apply_add_apply_lt
+    {φ ψ : StrongDual ℝ X} (hdisj : φ ⊓ ψ = 0)
+    {u : X} (hu : 0 ≤ u) {ε : ℝ} (hε : 0 < ε) :
+    ∃ u₁ u₂ : X, 0 ≤ u₁ ∧ 0 ≤ u₂ ∧ u₁ + u₂ = u ∧
+      φ u₁ + ψ u₂ < ε := by
+  let φ' : OrderDualSpace X := toOrderDualSpace φ
+  let ψ' : OrderDualSpace X := toOrderDualSpace ψ
+  have hglb : IsGLB
+      {r : ℝ | ∃ y z : X, 0 ≤ y ∧ 0 ≤ z ∧ y + z = u ∧
+        r = φ' y + ψ' z} 0 := by
+    have h := OrderDualSpace.isGLB_inf_apply (φ := φ') (ψ := ψ') hu
+    have hzero : (φ' ⊓ ψ') u = 0 := by
+      dsimp [φ', ψ']
+      change (φ ⊓ ψ) u = 0
+      rw [hdisj]
+      rfl
+    simpa [hzero] using h
+  by_contra hno
+  have hlower : ε ∈ lowerBounds
+      {r : ℝ | ∃ y z : X, 0 ≤ y ∧ 0 ≤ z ∧ y + z = u ∧
+        r = φ' y + ψ' z} := by
+    rintro r ⟨y, z, hy, hz, hyz, rfl⟩
+    exact le_of_not_gt (fun hlt => hno ⟨y, z, hy, hz, hyz, hlt⟩)
+  have hε_le_zero : ε ≤ 0 := hglb.2 hlower
+  exact (not_lt_of_ge hε_le_zero) hε
+
 end BanachLattice
 
 end StrongDual

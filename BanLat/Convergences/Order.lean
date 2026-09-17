@@ -64,19 +64,6 @@ private theorem isGLB_range_add {κ τ : Type u} (r : κ → X) (s : τ → X)
       exact sub_nonpos.mp (hr.2 hw_r)
     exact hs.2 hw_s
 
-private theorem abs_sup_sub_sup_le_add (a b c d : X) :
-    |(a ⊔ b) - (c ⊔ d)| ≤ |a - c| + |b - d| := by
-  calc
-    |(a ⊔ b) - (c ⊔ d)|
-        = |((a ⊔ b) - (c ⊔ b)) + ((c ⊔ b) - (c ⊔ d))| := by
-          congr 1
-          abel
-    _ ≤ |(a ⊔ b) - (c ⊔ b)| + |(c ⊔ b) - (c ⊔ d)| := abs_add_le _ _
-    _ ≤ |a - c| + |b - d| := by
-      exact add_le_add (abs_sup_sub_sup_le_abs a c b) (by
-        rw [sup_comm c b, sup_comm c d]
-        exact abs_sup_sub_sup_le_abs b d c)
-
 private theorem abs_inf_sub_inf_le_add (a b c d : X) :
     |(a ⊓ b) - (c ⊓ d)| ≤ |a - c| + |b - d| := by
   calc

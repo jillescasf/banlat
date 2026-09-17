@@ -2,10 +2,9 @@
 Authors: Jesús Illescas-Fiorito
 -/
 
+import BanLat.Examples.Lp.Basic
 import BanLat.Probability.ConvergenceInMeasure
 import BanLat.Probability.Distributions.Stable.HasSymmetricStableLaw.Moments
-import Mathlib.Analysis.Normed.Lp.lpSpace
-import Mathlib.MeasureTheory.Function.LpSpace.Complete
 
 /-!
 # Gaussian sequences in `Lᵖ(P)` spaces
@@ -97,13 +96,6 @@ private lemma coeFn_sum_standardGaussianToLp {X : ℕ → Ω → ℝ}
         coeFn_smul_standardGaussianToLp (hX i) (a i), ih]
         with ω hadd hsmul hsum
       rw [hadd, Pi.add_apply, hsmul, hsum]
-
-/-- Scalar multiplication in `Lᵖ` is homogeneous even when `0 < p < 1`. -/
-private lemma norm_smul_Lp (r : ℝ) (f : Lp ℝ p P) :
-    ‖r • f‖ = |r| * ‖f‖ := by
-  rw [Lp.norm_def, eLpNorm_congr_ae (Lp.coeFn_smul r f),
-    eLpNorm_const_smul, ENNReal.toReal_mul, toReal_enorm, Real.norm_eq_abs,
-    Lp.norm_def]
 
 /-- The `Lᵖ` norm of a finite Gaussian sum is the standard Gaussian
 `Lᵖ` norm multiplied by the Euclidean norm of its coefficient vector. -/
@@ -329,7 +321,7 @@ private lemma exists_linearMap_standardGaussian_norm_eq {X : ℕ → Ω → ℝ}
   let T : ℓ²(ℕ, ℝ) →ₗ[ℝ] Lp ℝ p P := c⁻¹ • G
   have hTnorm (a : ℓ²(ℕ, ℝ)) : ‖T a‖ = ‖a‖ := by
     change ‖c⁻¹ • G a‖ = ‖a‖
-    rw [norm_smul_Lp, hGnorm]
+    rw [Lp.norm_smul, hGnorm]
     simp [c, abs_of_pos hc, hc.ne']
   refine ⟨T, hTnorm, ?_⟩
   intro n

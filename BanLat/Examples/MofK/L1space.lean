@@ -15,14 +15,6 @@ universe u
 
 namespace MofK
 
-namespace Band
-
-private abbrev principalBand {X : Type*} [AddCommGroup X] [Lattice X]
-    [IsOrderedAddMonoid X] [VectorLattice X] (a : X) : Band X :=
-  Band.generated ({a} : Set X)
-
-end Band
-
 variable (X : Type u) [NormedAddCommGroup X] [Lattice X]
   [IsOrderedAddMonoid X]
 
@@ -94,7 +86,7 @@ theorem exists_L1_banachLatEquiv_of_principalBandModels [ALSpace X]
     (h : ∀ x : X, 0 ≤ x →
       ∃ (Ω : Type u) (_ : MeasurableSpace Ω) (μ : Measure Ω),
         Nonempty (BanachLatEquiv
-          ↥(Band.principalBand x).toSubmodule (Lp ℝ 1 μ))) :
+          ↥(Band.principal x).toSubmodule (Lp ℝ 1 μ))) :
     ∃ (Ω : Type u) (_ : MeasurableSpace Ω) (ν : Measure Ω),
       Nonempty (BanachLatEquiv X (Lp ℝ 1 ν)) := by
   classical
@@ -103,7 +95,7 @@ theorem exists_L1_banachLatEquiv_of_principalBandModels [ALSpace X]
   choose Ω mΩ μ hT using fun (z : Λ) =>
     h z.1 (le_of_lt (hpos z.1 z.2))
   have T : ∀ z : Λ, BanachLatEquiv
-      (Band.principalBand (z : X)).toSubmodule
+      (Band.principal (z : X)).toSubmodule
       (Lp ℝ 1 (μ z)) :=
     fun z => (hT z).some
   letI : ∀ z : Λ, MeasurableSpace (Ω z) := mΩ
@@ -112,7 +104,7 @@ theorem exists_L1_banachLatEquiv_of_principalBandModels [ALSpace X]
   set ν := Measure.sum (fun z : Λ => (μ z).map (Sigma.mk z)) with hν_def
   have hP_mem : ∀ (z : Λ) (x : X),
       Band.principalBandProjection (z : X) x ∈
-        (Band.principalBand (z : X)).toSubmodule :=
+        (Band.principal (z : X)).toSubmodule :=
     fun z x => by
       change _root_.Band.principalBandProjection (z : X) x ∈
         (_root_.Band.generated ({(z : X)} : Set X) : Set X)
@@ -123,14 +115,14 @@ theorem exists_L1_banachLatEquiv_of_principalBandModels [ALSpace X]
   have hfL_add : ∀ z x y, fL z (x + y) = fL z x + fL z y := by
     intro z x y
     have heq : (⟨Band.principalBandProjection (z : X) (x + y),
-        hP_mem z (x + y)⟩ : (Band.principalBand (z : X)).toSubmodule) =
+        hP_mem z (x + y)⟩ : (Band.principal (z : X)).toSubmodule) =
       ⟨_, hP_mem z x⟩ + ⟨_, hP_mem z y⟩ := by ext; simp [map_add]
     change T z ⟨_, _⟩ = T z ⟨_, _⟩ + T z ⟨_, _⟩
     rw [heq]; exact (T z).toLinearIsometryEquiv.map_add _ _
   have hfL_smul : ∀ z (c : ℝ) x, fL z (c • x) = c • fL z x := by
     intro z c x
     have heq : (⟨Band.principalBandProjection (z : X) (c • x),
-        hP_mem z (c • x)⟩ : (Band.principalBand (z : X)).toSubmodule) =
+        hP_mem z (c • x)⟩ : (Band.principal (z : X)).toSubmodule) =
       c • ⟨_, hP_mem z x⟩ := by ext; simp [map_smul]
     change T z ⟨_, _⟩ = c • T z ⟨_, _⟩
     rw [heq]; exact (T z).toLinearIsometryEquiv.map_smul c _
@@ -219,7 +211,7 @@ theorem exists_L1_banachLatEquiv_of_principalBandModels [ALSpace X]
         _ < ⊤ := ENNReal.coe_lt_top
     let g_z (z : ↑Λ) : Lp ℝ 1 (μ z) := (hg_fiber_memLp z).toLp _
     let y (z : ↑Λ) :
-        ↥(Band.principalBand (↑z : X)).toSubmodule :=
+        ↥(Band.principal (↑z : X)).toSubmodule :=
       (T z).toLinearIsometryEquiv.symm (g_z z)
     have hTy : ∀ z, T z (y z) = g_z z := fun z =>
       (T z).toLinearIsometryEquiv.apply_symm_apply (g_z z)
@@ -280,8 +272,8 @@ theorem exists_L1_banachLatEquiv_of_principalBandModels [ALSpace X]
         have hzne : (↑z : X) ≠ (↑z' : X) := fun hzz =>
           hz (Subtype.ext hzz)
         have hzz' : IsVLDisjoint (↑z : X) (↑z' : X) := hdisj.2 z.2 z'.2 hzne
-        have hyz : (y z).val ∈ (Band.principalBand (↑z : X) : Set X) := (y z).2
-        have ha' : a ∈ (Band.principalBand (↑z' : X) : Set X) := by
+        have hyz : (y z).val ∈ (Band.principal (↑z : X) : Set X) := (y z).2
+        have ha' : a ∈ (Band.principal (↑z' : X) : Set X) := by
           rwa [Band.principalProjectionBand_coe (↑z' : X)] at ha
         have hyz_disj_z' : IsVLDisjoint (y z).val (↑z' : X) := by
           have hz_in : (↑z : X) ∈ ({(↑z' : X)} : Set X)ᵈ := by
@@ -322,7 +314,7 @@ theorem exists_L1_banachLatEquiv_of_principalBandModels [ALSpace X]
       change T z' ⟨Band.principalBandProjection (↑z' : X)
           (∑' z, (y z).val), _⟩ = g_z z'
       have heq : (⟨Band.principalBandProjection (↑z' : X) (∑' z, (y z).val),
-          hP_mem z' _⟩ : (Band.principalBand (↑z' : X)).toSubmodule) =
+          hP_mem z' _⟩ : (Band.principal (↑z' : X)).toSubmodule) =
           y z' := Subtype.ext (hP_tsum z')
       rw [heq, hTy z']
     apply Lp.ext
@@ -340,7 +332,7 @@ theorem exists_L1_banachLatEquiv_of_principalBandModels [ALSpace X]
       have hP := (Band.principalProjectionBand (z : X)).bandProjection_isVecLatHom.map_sup' x y
       have hsub : (⟨Band.principalBandProjection (↑z : X) (x ⊔ y),
           hP_mem z (x ⊔ y)⟩ :
-          (Band.principalBand (↑z : X)).toSubmodule) =
+          (Band.principal (↑z : X)).toSubmodule) =
         ⟨_, hP_mem z x⟩ ⊔ ⟨_, hP_mem z y⟩ := Subtype.ext hP
       change T z ⟨_, _⟩ = T z ⟨_, _⟩ ⊔ T z ⟨_, _⟩
       rw [hsub]; exact (T z).map_sup' _ _
@@ -361,7 +353,7 @@ theorem exists_L1_banachLatEquiv_of_principalBandModels [ALSpace X]
       have hP := (Band.principalProjectionBand (z : X)).bandProjection_isVecLatHom.map_inf' x y
       have hsub : (⟨Band.principalBandProjection (↑z : X) (x ⊓ y),
           hP_mem z (x ⊓ y)⟩ :
-          (Band.principalBand (↑z : X)).toSubmodule) =
+          (Band.principal (↑z : X)).toSubmodule) =
         ⟨_, hP_mem z x⟩ ⊓ ⟨_, hP_mem z y⟩ := Subtype.ext hP
       change T z ⟨_, _⟩ = T z ⟨_, _⟩ ⊓ T z ⟨_, _⟩
       rw [hsub]; exact (T z).map_inf' _ _

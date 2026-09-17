@@ -737,23 +737,6 @@ theorem ofLinearIsometry_apply (x : E) : ofLinearIsometry x = of x := by
 theorem of_injective : Function.Injective (of : E → FBL E) := by
   exact ofLinearIsometry.injective
 
-private def subtypeHom {X : Type*} [AddCommGroup X] [Lattice X] [IsOrderedAddMonoid X]
-    [VectorLattice X] (Y : VectorSublattice X) :
-    VecLatHom ↥Y.toSubmodule X where
-  toFun y := y
-  map_add' _ _ := rfl
-  map_smul' _ _ := rfl
-  map_sup' _ _ := rfl
-  map_inf' _ _ := rfl
-
-private theorem eval_coe_submodule {X : Type*} [AddCommGroup X] [Lattice X]
-    [IsOrderedAddMonoid X] [VectorLattice X] {n : ℕ} (Y : VectorSublattice X)
-    (y : Fin n → ↥Y.toSubmodule) (e : LLexpr n) :
-    ((LLexpr.eval y e : ↥Y.toSubmodule) : X) =
-      LLexpr.eval (fun i => (y i : X)) e := by
-  have hsubtype (z : ↥Y.toSubmodule) : subtypeHom Y z = (z : X) := rfl
-  simpa only [hsubtype] using (LLexpr.map_eval (subtypeHom Y) y e)
-
 /-- The copy of the concrete free vector lattice from `FVLv.lean` inside `FBL E`. -/
 def ofFVLv : FVLv E →ₗ[ℝ] FBL E := by
   exact (FVLv.lift (ofLinear (E := E))).toLinearMap
@@ -810,7 +793,7 @@ theorem denseRange_ofFVLv : DenseRange (ofFVLv (E := E)) := by
       _ = LLexpr.eval (fun i : Fin n => dualEval E (x i)) e := by
             have hof (z : E) : ((of z : FBL E) : FunctionSpace E) = dualEval E z := rfl
             simpa only [hof] using
-              (eval_coe_submodule (closedFreeVectorLattice E)
+              (LLexpr.coe_eval_vectorSublattice (closedFreeVectorLattice E)
                 (fun i : Fin n => of (x i)) e)
       _ = LLexpr.eval (fun i : Fin n => (z i : FunctionSpace E)) e := by
             congr
@@ -1054,39 +1037,13 @@ private theorem exists_supSubLinearCombination_eval {n : ℕ} (e : LLexpr n) :
         finiteSup (fun j : Fin (p + 1) => linCombEval (b j) y) := by
           rw [LLexpr.NormalForm.eval, ← ha y, ← hb y]
 
-private theorem exists_eval_of_eq_FVLv (f : FVLv E) :
-    ∃ (n : ℕ) (x : Fin n → E) (e : LLexpr n),
-      LLexpr.eval (fun i => FVLv.of (x i)) e = f := by
-  classical
-  have hf : (f : C(FVLv.dualUnitBall E, ℝ)) ∈
-      (VectorSublattice.generated
-        (Set.range (FVLv.dualEval E : E → C(FVLv.dualUnitBall E, ℝ))) :
-          Set C(FVLv.dualUnitBall E, ℝ)) := f.2
-  rw [LLexpr.generated_eq_iUnion_combinations
-    (Set.range (FVLv.dualEval E : E → C(FVLv.dualUnitBall E, ℝ)))] at hf
-  simp only [Set.mem_iUnion, LLexpr.combinations, Set.mem_range] at hf
-  obtain ⟨n, z, e, hz⟩ := hf
-  choose x hx using fun i : Fin n => (z i).2
-  refine ⟨n, x, e, ?_⟩
-  apply Subtype.ext
-  calc
-    ((LLexpr.eval (fun i : Fin n => FVLv.of (x i)) e : FVLv E) :
-        C(FVLv.dualUnitBall E, ℝ))
-        = LLexpr.eval (fun i : Fin n => FVLv.dualEval E (x i)) e := by
-          exact eval_coe_submodule (FVLv.concreteSublattice E) (fun i : Fin n => FVLv.of (x i)) e
-    _ = LLexpr.eval (fun i : Fin n => (z i : C(FVLv.dualUnitBall E, ℝ))) e := by
-          congr
-          funext i
-          rw [hx i]
-    _ = f := hz
-
 private theorem exists_supSubLinearCombination_eq (f : FVLv E) :
     ∃ (n m p : ℕ) (x : Fin n → E) (a : Fin (m + 1) → Fin n → ℝ)
       (b : Fin (p + 1) → Fin n → ℝ),
         f =
           finiteSup (fun i : Fin (m + 1) => fvlvLinearCombination x (a i)) -
             finiteSup (fun j : Fin (p + 1) => fvlvLinearCombination x (b j)) := by
-  obtain ⟨n, x, e, he⟩ := exists_eval_of_eq_FVLv (E := E) f
+  obtain ⟨n, x, e, he⟩ := FVLv.exists_eval_of_eq (E := E) f
   obtain ⟨m, p, a, b, hab⟩ := exists_supSubLinearCombination_eval e
   refine ⟨n, m, p, x, a, b, ?_⟩
   calc
@@ -1100,7 +1057,7 @@ private theorem exists_supSubLinearCombination_eq (f : FVLv E) :
 
 private theorem ofFVLv_apply (f : FVLv E) (φ : FVLv.dualUnitBall E) :
     (ofFVLv f : FBL E) φ = f φ := by
-  obtain ⟨n, x, e, hf⟩ := exists_eval_of_eq_FVLv (E := E) f
+  obtain ⟨n, x, e, hf⟩ := FVLv.exists_eval_of_eq (E := E) f
   rw [← hf]
   let S : VecLatHom (FVLv E) ℝ :=
     { toFun := fun g => g φ

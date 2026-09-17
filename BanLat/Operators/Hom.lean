@@ -222,6 +222,23 @@ theorem symm_apply (f : VecLatHom X Y) (h : Function.Bijective f)
 
 end VecLatHom
 
+namespace VectorSublattice
+
+/-- The canonical inclusion of a vector sublattice into its ambient vector lattice. -/
+def subtype (Y : VectorSublattice X) : VecLatHom ↥Y.toSubmodule X where
+  toFun y := y
+  map_add' _ _ := rfl
+  map_smul' _ _ := rfl
+  map_sup' _ _ := rfl
+  map_inf' _ _ := rfl
+
+/-- The canonical inclusion maps a vector-sublattice element to its underlying value. -/
+@[simp]
+theorem subtype_apply (Y : VectorSublattice X) (y : ↥Y.toSubmodule) :
+    Y.subtype y = (y : X) := rfl
+
+end VectorSublattice
+
 namespace LLexpr
 
 variable {n : ℕ}
@@ -239,6 +256,12 @@ theorem map_eval {Y Z : Type*}
   | smul r e h => simp [eval, h]
   | sup e₁ e₂ h₁ h₂ => simp [eval, h₁, h₂, map_sup]
   | inf e₁ e₂ h₁ h₂ => simp [eval, h₁, h₂, map_inf]
+
+/-- Evaluation in a vector sublattice agrees with evaluation in the ambient lattice. -/
+theorem coe_eval_vectorSublattice {n : ℕ} (Y : VectorSublattice X)
+    (y : Fin n → ↥Y.toSubmodule) (e : LLexpr n) :
+    ((eval y e : ↥Y.toSubmodule) : X) = eval (fun i ↦ (y i : X)) e := by
+  simpa using map_eval Y.subtype y e
 
 end LLexpr
 

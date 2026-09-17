@@ -19,32 +19,6 @@ namespace ALSpace
 variable {X : Type*} [NormedAddCommGroup X] [Lattice X]
   [IsOrderedAddMonoid X] [ALSpace X]
 
-private lemma exists_decomposition_apply_add_apply_lt
-    {φ ψ : StrongDual ℝ X} (hdisj : φ ⊓ ψ = 0)
-    {u : X} (hu : 0 ≤ u) {ε : ℝ} (hε : 0 < ε) :
-    ∃ u₁ u₂ : X, 0 ≤ u₁ ∧ 0 ≤ u₂ ∧ u₁ + u₂ = u ∧
-      φ u₁ + ψ u₂ < ε := by
-  let φ' : OrderDualSpace X := StrongDual.toOrderDualSpace φ
-  let ψ' : OrderDualSpace X := StrongDual.toOrderDualSpace ψ
-  have hglb : IsGLB
-      {r : ℝ | ∃ y z : X, 0 ≤ y ∧ 0 ≤ z ∧ y + z = u ∧
-        r = φ' y + ψ' z} 0 := by
-    have h := OrderDualSpace.isGLB_inf_apply (φ := φ') (ψ := ψ') hu
-    have hzero : (φ' ⊓ ψ') u = 0 := by
-      dsimp [φ', ψ']
-      change (φ ⊓ ψ) u = 0
-      rw [hdisj]
-      rfl
-    simpa [hzero] using h
-  by_contra hno
-  have hlower : ε ∈ lowerBounds
-      {r : ℝ | ∃ y z : X, 0 ≤ y ∧ 0 ≤ z ∧ y + z = u ∧
-        r = φ' y + ψ' z} := by
-    rintro r ⟨y, z, hy, hz, hyz, rfl⟩
-    exact le_of_not_gt (fun hlt => hno ⟨y, z, hy, hz, hyz, hlt⟩)
-  have hε_le_zero : ε ≤ 0 := hglb.2 hlower
-  exact (not_lt_of_ge hε_le_zero) hε
-
 private lemma StrongDual.add_apply_le_max_of_nonneg_inf_eq_zero
     {φ ψ : StrongDual ℝ X} (hφ : 0 ≤ φ) (hψ : 0 ≤ ψ) (hdisj : φ ⊓ ψ = 0)
     {x : X} (hx : 0 ≤ x) (hxnorm : ‖x‖ ≤ 1) :
@@ -54,7 +28,7 @@ private lemma StrongDual.add_apply_le_max_of_nonneg_inf_eq_zero
   set ε : ℝ := ((φ + ψ) x - max ‖φ‖ ‖ψ‖) / 3 with hε_def
   have hεpos : 0 < ε := by rw [hε_def]; linarith
   obtain ⟨u, v, hu0, hv0, huv, huv_small⟩ :=
-    exists_decomposition_apply_add_apply_lt hdisj hx hεpos
+    StrongDual.exists_decomposition_apply_add_apply_lt hdisj hx hεpos
   set w : X := u ⊓ v with hw_def
   set a : X := v - w with ha_def
   set b : X := u - w with hb_def

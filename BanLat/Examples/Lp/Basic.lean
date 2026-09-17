@@ -67,6 +67,15 @@ variable {E : Type*} [NormedAddCommGroup E]
 
 attribute [local instance] Lp.simpleFunc.smul Lp.simpleFunc.module
 
+omit [Fact (1 ≤ p)] in
+/-- The `Lᵖ` (quasi-)norm is homogeneous under real scalar multiplication for every
+exponent. -/
+theorem norm_smul (r : ℝ) (f : Lp ℝ p μ) :
+    ‖r • f‖ = |r| * ‖f‖ := by
+  rw [Lp.norm_def, eLpNorm_congr_ae (Lp.coeFn_smul r f),
+    eLpNorm_const_smul, ENNReal.toReal_mul, toReal_enorm, Real.norm_eq_abs,
+    Lp.norm_def]
+
 /-- The `p`-th power of the `L^p`-norm as an integral. -/
 lemma norm_rpow_eq_integral_norm_rpow
     {p : ℝ≥0} (hp : p ≠ 0) (f : Lp E (p : ENNReal) μ) :

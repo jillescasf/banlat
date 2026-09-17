@@ -41,11 +41,6 @@ theorem mem_OrderContinuousOperator (T : OrderBoundedHom X Y) :
     T ∈ OrderContinuousOperator (X := X) (Y := Y) ↔ IsOrderContinuousOp T.toLinearMap := by
   rfl
 
-private lemma obZero_apply (x : X) : (0 : OrderBoundedHom X Y) x = (0 : Y) := rfl
-
-private lemma obToLinearMap_apply (T : OrderBoundedHom X Y) (x : X) :
-    T.toLinearMap x = T x := rfl
-
 private lemma obAdd_apply (S T : OrderBoundedHom X Y) (x : X) :
     (S + T) x = S x + T x := rfl
 
@@ -76,21 +71,21 @@ private lemma add_mem_OrderContinuousOperator {S T : OrderBoundedHom X Y}
     S + T ∈ OrderContinuousOperator (X := X) (Y := Y) := by
   rw [mem_OrderContinuousOperator] at hS hT ⊢
   intro ι _ _ _ x a hx
-  simpa only [obToLinearMap_apply, obAdd_apply] using (hS hx).add (hT hx)
+  simpa only [OrderBoundedHom.toLinearMap_apply, obAdd_apply] using (hS hx).add (hT hx)
 
 private lemma neg_mem_OrderContinuousOperator {T : OrderBoundedHom X Y}
     (hT : T ∈ OrderContinuousOperator (X := X) (Y := Y)) :
     -T ∈ OrderContinuousOperator (X := X) (Y := Y) := by
   rw [mem_OrderContinuousOperator] at hT ⊢
   intro ι _ _ _ x a hx
-  simpa only [obToLinearMap_apply, obNeg_apply] using (hT hx).neg
+  simpa only [OrderBoundedHom.toLinearMap_apply, obNeg_apply] using (hT hx).neg
 
 private lemma smul_mem_OrderContinuousOperator (c : ℝ) {T : OrderBoundedHom X Y}
     (hT : T ∈ OrderContinuousOperator (X := X) (Y := Y)) :
     c • T ∈ OrderContinuousOperator (X := X) (Y := Y) := by
   rw [mem_OrderContinuousOperator] at hT ⊢
   intro ι _ _ _ x a hx
-  simpa only [obToLinearMap_apply, obSmul_apply] using (hT hx).smul c
+  simpa only [OrderBoundedHom.toLinearMap_apply, obSmul_apply] using (hT hx).smul c
 
 private lemma isGLB_range_abs_of_orderConvergesTo_zero
     {Z : Type w} [AddCommGroup Z] [Lattice Z] [IsOrderedAddMonoid Z]
@@ -184,7 +179,7 @@ private lemma positive_orderContinuous_of_decreasing_abs_glb_zero {S : OrderBoun
   letI : IsDirected κ (· ≤ ·) := hκdir
   letI : Nonempty κ := hκnon
   have hSpos : Positive S.toLinearMap := fun y hy => by
-    simpa only [obZero_apply, obToLinearMap_apply] using
+    simpa only [OrderBoundedHom.zero_apply, OrderBoundedHom.toLinearMap_apply] using
       OrderBoundedHom.le_iff.mp hS y hy
   have hSmono : Monotone S.toLinearMap := Positive.monotone_iff.mpr hSpos
   have hglb_abs : IsGLB (Set.range fun k => |S (r k)|) 0 :=
@@ -257,7 +252,7 @@ private lemma posPart_decreasing_abs_glb_zero (T : OrderBoundedHom X Y)
     (hglb : IsGLB (Set.range x) 0) :
     IsGLB (Set.range fun i => |T⁺ (x i)|) 0 := by
   have hTpos_pos : Positive T⁺.toLinearMap := fun y hy => by
-    simpa only [obZero_apply, obToLinearMap_apply] using
+    simpa only [OrderBoundedHom.zero_apply, OrderBoundedHom.toLinearMap_apply] using
       OrderBoundedHom.le_iff.mp (posPart_nonneg T) y hy
   have hTpos_mono : Monotone T⁺.toLinearMap := Positive.monotone_iff.mpr hTpos_pos
   have hglb_pos : IsGLB (Set.range fun i => T⁺ (x i)) 0 := by
@@ -407,7 +402,7 @@ private lemma modulus_orderContinuous_of_parts (T : OrderBoundedHom X Y)
   intro ι _ _ _ x a hx
   have hsum := (hparts.1 hx).add (hparts.2 hx)
   have habs : (|T| : OrderBoundedHom X Y) = T⁺ + T⁻ := (posPart_add_negPart T).symm
-  simpa only [habs, obToLinearMap_apply, obAdd_apply] using hsum
+  simpa only [habs, OrderBoundedHom.toLinearMap_apply, obAdd_apply] using hsum
 
 private lemma orderContinuous_of_modulus_orderContinuous (T : OrderBoundedHom X Y)
     (hmod : IsOrderContinuousOp (|T| : OrderBoundedHom X Y).toLinearMap) :
@@ -599,7 +594,7 @@ private lemma positive_directed_isLUB_mem_OrderContinuousOperator
   · exact hT_nonneg
   intro ι _ _ _ x hanti hnn hglb
   have hTpos_fun : Positive T.toLinearMap := fun z hz => by
-    simpa only [obZero_apply, obToLinearMap_apply] using
+    simpa only [OrderBoundedHom.zero_apply, OrderBoundedHom.toLinearMap_apply] using
       OrderBoundedHom.le_iff.mp hT_nonneg z hz
   have hglb_T : IsGLB (Set.range fun i => T (x i)) 0 := by
     refine ⟨?_, ?_⟩
@@ -623,7 +618,7 @@ private lemma positive_directed_isLUB_mem_OrderContinuousOperator
         (mem_OrderContinuousOperator A.1).mp (hS A.2)
       have hA_nonneg : (0 : OrderBoundedHom X Y) ≤ A.1 := hpos A.1 A.2
       have hApos_fun : Positive A.1.toLinearMap := fun z hz => by
-        simpa only [obZero_apply, obToLinearMap_apply] using
+        simpa only [OrderBoundedHom.zero_apply, OrderBoundedHom.toLinearMap_apply] using
           OrderBoundedHom.le_iff.mp hA_nonneg z hz
       have hA_glb_abs := decreasing_abs_glb_zero_of_orderContinuous hAoc hanti hnn hglb
       have hA_glb : IsGLB (Set.range fun i => A.1 (x i)) 0 := by
