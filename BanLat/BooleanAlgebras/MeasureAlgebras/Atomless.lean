@@ -25,18 +25,11 @@ namespace MeasureAlgebra
 
 variable {B : Type u} [SigmaCompleteBooleanAlgebra B]
 
-private theorem exists_nonzero_lt_of_isAtomless
-    (hB : BooleanAlgebra.IsAtomless B) {s : B} (hs : s ≠ ⊥) :
-    ∃ t : B, t < s ∧ t ≠ ⊥ := by
-  by_contra h
-  push Not at h
-  exact hB s ⟨hs, h⟩
-
 private theorem exists_positive_le_half_of_isAtomless
     (μ : MeasureAlgebra B) (hB : BooleanAlgebra.IsAtomless B)
     {s : B} (hs : s ≠ ⊥) :
     ∃ t ≤ s, 0 < μ t ∧ μ t ≤ μ s / 2 := by
-  obtain ⟨u, hu_lt, hu_ne⟩ := exists_nonzero_lt_of_isAtomless hB hs
+  obtain ⟨u, hu_lt, hu_ne⟩ := hB.exists_nonzero_lt hs
   by_cases hu_le : μ u ≤ μ s / 2
   · exact ⟨u, hu_lt.le, pos_iff_ne_zero.2 (mt (μ.measure_eq_zero_iff u).1 hu_ne), hu_le⟩
   · refine ⟨s \ u, sdiff_le, ?_, ?_⟩
