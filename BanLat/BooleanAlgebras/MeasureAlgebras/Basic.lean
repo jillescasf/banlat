@@ -8,16 +8,17 @@ import BanLat.BooleanAlgebras.Functional.Basic
 # Measure algebras
 
 This file introduces **measure algebras** `(B, μ)`, where `B` is a `σ`-order complete
-Boolean algebra and `μ : B → [0, ∞]` is a function, satisfying that:
-* `μ(b) = 0 ↔ b = ⊥`
+Boolean algebra and `μ : B → [0, ∞]` is a function satisfying that:
+* `μ(b) = 0 ↔ b = ⊥`.
 * `μ(⊤) < ∞`.
 * `μ(∨ b i) = ∑ μ(b i)` for every pairwise disjoint sequence `b i` in `B`.
 
-It proves that on every `σ`-complete Boolean subalgebra `A`, the maps `• ↦ μ(• ⊓ b)`
-define countably additive functionals.
+The file constructs restrictions to principal intervals and `σ`-complete Boolean subalgebras.
+On every such subalgebra `A`, the maps `a ↦ μ (a ⊓ b)` define finite countably additive functionals.
 
-Lastly, it introduces **measure algebra equivalences** as order isomorphisms that preserve
-the measure.
+It also introduces **measure-algebra equivalences**, and **partial measure-algebra equivalences**
+between `σ`-complete Boolean subalgebras, together with the relation expressing that one partial
+equivalence extends another.
 -/
 
 open Function
