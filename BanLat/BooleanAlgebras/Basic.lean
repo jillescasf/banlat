@@ -15,7 +15,8 @@ This file add some basic constructions for Boolean algebras that are missing in 
 the induced structure.
 * the increasing union over a (non-empty) linearly ordered set `{A i, i ∈ ι}` of Boolean
 subalgebras becomes as well a Boolean subalgebra.
-* *the gluing of order isos!!*
+* a compatible family of order isomorphisms `εᵢ : A i ≃o C i` between two increasing
+families of Boolean subalgebras extends to an order isomorphism `ε : (⋃ i, A i) ≃o (⋃ i, C i)`.
 -/
 
 universe u v
