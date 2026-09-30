@@ -30,7 +30,7 @@ in `C(ellInfinityUnitSphere n, ℝ)`.
 * Both functional calculi are preserved by lattice homomorphisms.
 -/
 
-universe u
+universe u v
 
 /-! ### Coordinate lattice-linear functions in `C(ℝⁿ)` -/
 
@@ -189,7 +189,7 @@ end CoordinateLLFunction
 
 /-! ### Functoriality of the lattice-linear functional calculus -/
 
-variable {n : ℕ} {X Y : Type u}
+variable {n : ℕ} {X : Type u} {Y : Type v}
   [AddCommGroup X] [Lattice X] [IsOrderedAddMonoid X] [VectorLattice X]
   [AddCommGroup Y] [Lattice Y] [IsOrderedAddMonoid Y] [VectorLattice Y]
 
@@ -938,13 +938,50 @@ theorem eq_functionalCalculus_of_map_coordinate (x : Fin n → X)
     simpa [T, VecLatHom.comp_apply] using DFunLike.congr_fun heq f
   exact eq_functionalCalculus_of_eq_coordinateLL x V hV'
 
+/-- The positively homogeneous functional calculus associated to
+the zero tuple is zero. -/
+@[simp]
+theorem functionalCalculus_zero (f : PosHomFunction n) :
+    functionalCalculus (fun _ : Fin n => (0 : X)) f = 0 := by
+  have hzero : ∀ i,
+      zeroVecLatHom (PosHomFunction.coordinate i) = (fun _ : Fin n => (0 : X)) i := by
+    intro i
+    rw [zeroVecLatHom_apply]
+  have heq := eq_functionalCalculus_of_map_coordinate
+    (fun _ : Fin n => (0 : X)) zeroVecLatHom hzero
+  rw [← heq]
+  exact zeroVecLatHom_apply f
+
+/-- The positively homogeneous functional calculus on `C(K, ℝ)` is
+computed pointwise. -/
+theorem functionalCalculus_continuousMap_apply
+    {K : Type*} [TopologicalSpace K] [CompactSpace K]
+    [IsUniformlyCompleteVectorLattice C(K, ℝ)]
+    (x : Fin n → C(K, ℝ)) (f : PosHomFunction n) (t : K) :
+    functionalCalculus x f t = f (fun i => x i t) := by
+  let V : VecLatHom (PosHomFunction n) C(K, ℝ) :=
+    { toFun := fun g =>
+        ⟨fun s => g (fun i => x i s),
+          g.1.continuous.comp (continuous_pi fun i => (x i).continuous)⟩
+      map_add' := fun _ _ => rfl
+      map_smul' := fun _ _ => rfl
+      map_sup' := fun _ _ => rfl
+      map_inf' := fun _ _ => rfl }
+  have hV : ∀ i, V (coordinate i) = x i := by
+    intro i
+    ext s
+    rfl
+  have heq := eq_functionalCalculus_of_map_coordinate x V hV
+  rw [← heq]
+  rfl
+
 end PosHomFunction
 
 /-! ### Functoriality of positively homogeneous functional calculus -/
 
 namespace PosHomFunction
 
-variable {n : ℕ} {X Y : Type u}
+variable {n : ℕ} {X : Type u} {Y : Type v}
   [AddCommGroup X] [Lattice X] [IsOrderedAddMonoid X] [VectorLattice X]
   [IsUniformlyCompleteVectorLattice X]
   [AddCommGroup Y] [Lattice Y] [IsOrderedAddMonoid Y] [VectorLattice Y]

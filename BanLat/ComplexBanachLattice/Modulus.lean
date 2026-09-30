@@ -3,11 +3,12 @@ Authors: Jesús Illescas-Fiorito
 -/
 
 import BanLat.AMSpace.Kakutani
+import BanLat.FunctionalCalculus
 import Mathlib.Analysis.SpecialFunctions.Complex.Arg
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 
 /-!
-# Complex modulus
+# Complex modulus in real Banach lattices
 
 This file introduces the **complex modulus** associated to each pair `(x, y)` of elements of a
 real Banach lattice `E`, defined as `|(x, y)| := sup{cos(θ)x+sin(θ)y | θ ∈ ℝ} ∈ E₊`.
@@ -19,6 +20,7 @@ exist for any two elements of a real Banach lattice.
 Usual properties of this modulus are also derived.
 -/
 
+/-- The Euclidean norm is attained by rotation through the complex argument. -/
 private theorem sqrt_sq_add_sq_eq_rotation_arg (a b : ℝ) :
     Real.sqrt (a ^ 2 + b ^ 2) =
       Real.cos (Complex.arg ⟨a, b⟩) * a + Real.sin (Complex.arg ⟨a, b⟩) * b := by
@@ -35,6 +37,7 @@ private theorem sqrt_sq_add_sq_eq_rotation_arg (a b : ℝ) :
       rw [Real.cos_sq_add_sin_sq]
     _ = _ := by ring
 
+/-- The Euclidean norm is the least upper bound of all real rotations. -/
 private theorem real_rotationRange_isLUB (a b : ℝ) :
     IsLUB (Set.range fun θ : ℝ ↦ Real.cos θ * a + Real.sin θ * b)
       (Real.sqrt (a ^ 2 + b ^ 2)) := by
@@ -53,11 +56,13 @@ private theorem real_rotationRange_isLUB (a b : ℝ) :
     rw [sqrt_sq_add_sq_eq_rotation_arg]
     exact h
 
+/-- The pointwise Euclidean modulus of two real-valued continuous functions. -/
 private noncomputable def continuousMapModulus {K : Type*} [TopologicalSpace K]
     (f g : C(K, ℝ)) : C(K, ℝ) where
   toFun t := Real.sqrt (f t ^ 2 + g t ^ 2)
   continuous_toFun := Real.continuous_sqrt.comp ((f.continuous.pow 2).add (g.continuous.pow 2))
 
+/-- The pointwise modulus is the least upper bound of all rotations. -/
 private theorem continuousMapModulus_isLUB {K : Type*} [TopologicalSpace K]
     (f g : C(K, ℝ)) :
     IsLUB (Set.range fun θ : ℝ ↦ Real.cos θ • f + Real.sin θ • g)
@@ -79,6 +84,7 @@ variable {E : Type*} [NormedAddCommGroup E] [Lattice E] [IsOrderedAddMonoid E]
 def rotationRange (x y : E) : Set E :=
   Set.range fun θ : ℝ ↦ Real.cos θ • x + Real.sin θ • y
 
+/-- Every rotation is bounded above by the sum of the absolute values. -/
 private theorem rotation_le_abs_add_abs (x y : E) (θ : ℝ) :
     Real.cos θ • x + Real.sin θ • y ≤ |x| + |y| := by
   calc
@@ -92,6 +98,7 @@ private theorem rotation_le_abs_add_abs (x y : E) (θ : ℝ) :
       (smul_le_smul_of_nonneg_right (Real.abs_sin_le_one θ) (abs_nonneg y))
     _ = |x| + |y| := by rw [one_smul, one_smul]
 
+/-- An upper bound for all rotations also bounds the supremum of the component moduli. -/
 private theorem sup_abs_le_of_upperBound_rotationRange {x y u : E}
     (hu : u ∈ upperBounds (rotationRange x y)) : |x| ⊔ |y| ≤ u := by
   apply sup_le
@@ -109,11 +116,13 @@ private theorem sup_abs_le_of_upperBound_rotationRange {x y u : E}
         Real.sin_pi_div_two, zero_smul, neg_smul, one_smul, zero_add] using
         hu ⟨-(Real.pi / 2), rfl⟩
 
+/-- Every upper bound for all rotations is nonnegative. -/
 private theorem nonneg_of_upperBound_rotationRange {x y u : E}
     (hu : u ∈ upperBounds (rotationRange x y)) : 0 ≤ u := by
   exact (abs_nonneg x).trans
     (le_sup_left.trans (sup_abs_le_of_upperBound_rotationRange hu))
 
+/-- Negating the first component does not change the rotation range. -/
 private theorem rotationRange_neg_left (x y : E) :
     rotationRange (-x) y = rotationRange x y := by
   apply Set.Subset.antisymm
@@ -130,6 +139,7 @@ private theorem rotationRange_neg_left (x y : E) :
     rw [Real.cos_pi_sub, Real.sin_pi_sub]
     module
 
+/-- Negating the second component does not change the rotation range. -/
 private theorem rotationRange_neg_right (x y : E) :
     rotationRange x (-y) = rotationRange x y := by
   apply Set.Subset.antisymm
@@ -146,6 +156,7 @@ private theorem rotationRange_neg_right (x y : E) :
     rw [Real.cos_neg, Real.sin_neg]
     module
 
+/-- Swapping the components does not change the rotation range. -/
 private theorem rotationRange_comm (x y : E) :
     rotationRange x y = rotationRange y x := by
   apply Set.Subset.antisymm
@@ -162,6 +173,7 @@ private theorem rotationRange_comm (x y : E) :
     rw [Real.cos_pi_div_two_sub, Real.sin_pi_div_two_sub]
     module
 
+/-- A complex-linear coordinate change scales the rotation range by its Euclidean norm. -/
 private theorem rotationRange_linear_transform (a b : ℝ) (x y : E) :
     rotationRange (a • x - b • y) (b • x + a • y) =
       (fun z ↦ Real.sqrt (a ^ 2 + b ^ 2) • z) '' rotationRange x y := by
@@ -327,6 +339,16 @@ theorem complexModulus_isLUB (x y : E) :
     IsLUB (rotationRange x y) (complexModulus x y) :=
   Classical.choose_spec (exists_isLUB_rotationRange x y)
 
+/-- On real-valued continuous functions, the complex modulus is computed pointwise. -/
+@[simp]
+theorem complexModulus_apply {K : Type*} [TopologicalSpace K] [CompactSpace K]
+    (f g : C(K, ℝ)) (t : K) :
+    complexModulus f g t = Real.sqrt (f t ^ 2 + g t ^ 2) := by
+  have h : complexModulus f g = continuousMapModulus f g :=
+    (complexModulus_isLUB f g).unique (continuousMapModulus_isLUB f g)
+  rw [h]
+  rfl
+
 /-- The complex modulus is nonnegative. -/
 theorem complexModulus_nonneg (x y : E) :
     0 ≤ complexModulus x y :=
@@ -482,6 +504,28 @@ theorem norm_complexModulus_le_add_norm (x y : E) :
     _ ≤ ‖|x|‖ + ‖|y|‖ := norm_add_le _ _
     _ = ‖x‖ + ‖y‖ := by rw [norm_abs_eq_norm, norm_abs_eq_norm]
 
+/-- A real-linear order isomorphism between Banach lattices preserves the complex modulus. -/
+private theorem map_complexModulus_of_linearOrderIso
+    {F : Type*}
+    [NormedAddCommGroup F] [Lattice F] [IsOrderedAddMonoid F] [BanachLattice F]
+    (K : E ≃o F) (hK : IsLinearMap ℝ K) (x y : E) :
+    K (complexModulus x y) = complexModulus (K x) (K y) := by
+  symm
+  apply (complexModulus_isLUB (K x) (K y)).unique
+  constructor
+  · rintro _ ⟨θ, rfl⟩
+    change Real.cos θ • K x + Real.sin θ • K y ≤
+      K (complexModulus x y)
+    rw [← hK.map_smul, ← hK.map_smul, ← hK.map_add]
+    exact K.monotone
+      ((complexModulus_isLUB x y).1 ⟨θ, rfl⟩)
+  · intro u hu
+    rw [← K.apply_symm_apply u, map_le_map_iff K]
+    apply (complexModulus_isLUB x y).2
+    rintro _ ⟨θ, rfl⟩
+    rw [K.le_symm_apply, hK.map_add, hK.map_smul, hK.map_smul]
+    exact hu ⟨θ, rfl⟩
+
 end BanachLattice
 
 namespace VecLatEquiv
@@ -495,24 +539,151 @@ variable {E F : Type*}
 theorem map_complexModulus (e : VecLatEquiv E F) (x y : E) :
     e (BanachLattice.complexModulus x y) =
       BanachLattice.complexModulus (e x) (e y) := by
-  symm
-  apply (BanachLattice.complexModulus_isLUB (e x) (e y)).unique
-  constructor
-  · rintro _ ⟨θ, rfl⟩
-    change Real.cos θ • e.toLinearEquiv x + Real.sin θ • e.toLinearEquiv y ≤
-      e.toLinearEquiv (BanachLattice.complexModulus x y)
-    rw [← map_smul, ← map_smul, ← map_add]
-    exact e.toVecLatHom.monotone
-      ((BanachLattice.complexModulus_isLUB x y).1 ⟨θ, rfl⟩)
-  · intro u hu
-    rw [← e.toLinearEquiv.apply_symm_apply u]
-    apply e.toVecLatHom.monotone
-    apply (BanachLattice.complexModulus_isLUB x y).2
-    rintro _ ⟨θ, rfl⟩
-    apply e.toVecLatHom.le_of_map_le e.toLinearEquiv.injective
-    change e.toLinearEquiv (Real.cos θ • x + Real.sin θ • y) ≤
-      e.toLinearEquiv (e.toLinearEquiv.symm u)
-    rw [map_add, map_smul, map_smul, e.toLinearEquiv.apply_symm_apply]
-    exact hu ⟨θ, rfl⟩
+  let eorder := e.toLinearEquiv.toEquiv.toOrderIso
+    e.toVecLatHom.monotone e.symm.toVecLatHom.monotone
+  exact BanachLattice.map_complexModulus_of_linearOrderIso eorder
+    e.toLinearEquiv.toLinearMap.isLinear x y
 
 end VecLatEquiv
+
+/-- The Euclidean norm as a positively homogeneous function on two coordinates. -/
+private noncomputable def euclideanNorm : PosHomFunction 2 :=
+  ⟨⟨fun r => Real.sqrt (r 0 ^ 2 + r 1 ^ 2),
+      Real.continuous_sqrt.comp
+        (((continuous_apply 0).pow 2).add ((continuous_apply 1).pow 2))⟩, by
+    intro c hc r
+    change Real.sqrt ((c * r 0) ^ 2 + (c * r 1) ^ 2) =
+      c * Real.sqrt (r 0 ^ 2 + r 1 ^ 2)
+    rw [show (c * r 0) ^ 2 + (c * r 1) ^ 2 =
+        c ^ 2 * (r 0 ^ 2 + r 1 ^ 2) by ring,
+      Real.sqrt_mul (sq_nonneg c), Real.sqrt_sq_eq_abs, abs_of_nonneg hc]⟩
+
+/-- The complex modulus agrees with the functional calculus of the Euclidean norm. -/
+private theorem complexModulus_eq_functionalCalculus
+    {E : Type*} [NormedAddCommGroup E] [Lattice E] [IsOrderedAddMonoid E]
+    [BanachLattice E] [IsUniformlyCompleteVectorLattice E] (x y : E) :
+    BanachLattice.complexModulus x y =
+      PosHomFunction.functionalCalculus ![x, y] euclideanNorm := by
+  let e := |x| + |y|
+  have he : 0 ≤ e := add_nonneg (abs_nonneg x) (abs_nonneg y)
+  by_cases hzero : e = 0
+  · have hmod : BanachLattice.complexModulus x y = 0 :=
+      le_antisymm
+        ((BanachLattice.complexModulus_le_abs_add_abs x y).trans hzero.le)
+        (BanachLattice.complexModulus_nonneg x y)
+    obtain ⟨rfl, rfl⟩ :=
+      (BanachLattice.complexModulus_eq_zero_iff x y).mp hmod
+    rw [BanachLattice.complexModulus_zero_right, abs_zero]
+    have htuple : ![(0 : E), 0] = (fun _ : Fin 2 => 0) := by
+      funext i
+      fin_cases i <;> rfl
+    rw [htuple, PosHomFunction.functionalCalculus_zero]
+  · have hepos : 0 < e := lt_of_le_of_ne he (Ne.symm hzero)
+    letI : NormedAddCommGroup ↥(OrderIdeal.principal e) :=
+      OrderIdeal.principalNormedAddCommGroup e
+    letI : Lattice ↥(OrderIdeal.principal e) := OrderIdeal.instLatticePrincipal e
+    letI : IsOrderedAddMonoid ↥(OrderIdeal.principal e) :=
+      OrderIdeal.instIsOrderedAddMonoidPrincipal e
+    letI : AMSpaceWithUnit ↥(OrderIdeal.principal e) :=
+      OrderIdeal.principalAMSpaceWithUnit he
+        (IsUniformlyCompleteVectorLattice.complete_principal e hepos)
+    have hx : x ∈ OrderIdeal.principal e := by
+      rw [OrderIdeal.mem_principal]
+      refine ⟨1, zero_le_one, ?_⟩
+      rw [one_smul, abs_of_nonneg he]
+      exact le_add_of_nonneg_right (abs_nonneg y)
+    have hy : y ∈ OrderIdeal.principal e := by
+      rw [OrderIdeal.mem_principal]
+      refine ⟨1, zero_le_one, ?_⟩
+      rw [one_smul, abs_of_nonneg he]
+      exact le_add_of_nonneg_left (abs_nonneg x)
+    let x' : ↥(OrderIdeal.principal e) := ⟨x, hx⟩
+    let y' : ↥(OrderIdeal.principal e) := ⟨y, hy⟩
+    have hm : BanachLattice.complexModulus x y ∈ OrderIdeal.principal e := by
+      rw [OrderIdeal.mem_principal]
+      refine ⟨1, zero_le_one, ?_⟩
+      rw [one_smul, abs_of_nonneg he,
+        abs_of_nonneg (BanachLattice.complexModulus_nonneg x y)]
+      exact BanachLattice.complexModulus_le_abs_add_abs x y
+    let m : ↥(OrderIdeal.principal e) :=
+      ⟨BanachLattice.complexModulus x y, hm⟩
+    have hm_eq : BanachLattice.complexModulus x' y' = m := by
+      apply (BanachLattice.complexModulus_isLUB x' y').unique
+      constructor
+      · rintro _ ⟨θ, rfl⟩
+        exact (BanachLattice.complexModulus_isLUB x y).1 ⟨θ, rfl⟩
+      · intro u hu
+        change BanachLattice.complexModulus x y ≤ u.1
+        apply (BanachLattice.complexModulus_isLUB x y).2
+        rintro _ ⟨θ, rfl⟩
+        exact hu ⟨θ, rfl⟩
+    let K := OrderIdeal.principalKakutaniEquiv hepos
+    letI := isUniformlyCompleteVectorLattice_of_banachLattice
+      ↥(OrderIdeal.principal e)
+    letI := isUniformlyCompleteVectorLattice_of_banachLattice
+      C(AMSpaceWithUnit.LatticeCharacter ↥(OrderIdeal.principal e), ℝ)
+    have hprincipal :
+        BanachLattice.complexModulus x' y' =
+          PosHomFunction.functionalCalculus ![x', y'] euclideanNorm := by
+      apply K.injective
+      calc
+        K (BanachLattice.complexModulus x' y') =
+            BanachLattice.complexModulus (K x') (K y') :=
+          K.toVecLatEquiv.map_complexModulus x' y'
+        _ = PosHomFunction.functionalCalculus ![K x', K y'] euclideanNorm := by
+          ext t
+          rw [BanachLattice.complexModulus_apply,
+            PosHomFunction.functionalCalculus_continuousMap_apply]
+          rfl
+        _ = K (PosHomFunction.functionalCalculus ![x', y'] euclideanNorm) := by
+          have htuple :
+              (fun i => K.toVecLatEquiv.toVecLatHom (![x', y'] i)) =
+                ![K x', K y'] := by
+            funext i
+            fin_cases i <;> rfl
+          rw [← htuple]
+          exact (PosHomFunction.functionalCalculus_map
+            K.toVecLatEquiv.toVecLatHom ![x', y'] euclideanNorm).symm
+    calc
+      BanachLattice.complexModulus x y = (m : E) := rfl
+      _ = ((BanachLattice.complexModulus x' y' :
+          ↥(OrderIdeal.principal e)) : E) := congrArg Subtype.val hm_eq.symm
+      _ = ((PosHomFunction.functionalCalculus ![x', y'] euclideanNorm :
+          ↥(OrderIdeal.principal e)) : E) := congrArg Subtype.val hprincipal
+      _ = PosHomFunction.functionalCalculus ![x, y] euclideanNorm := by
+        have htuple :
+            (fun i => (OrderIdeal.principal e).subtype (![x', y'] i)) =
+              ![x, y] := by
+          funext i
+          fin_cases i <;> rfl
+        rw [← htuple]
+        exact PosHomFunction.functionalCalculus_map
+          (OrderIdeal.principal e).subtype ![x', y'] euclideanNorm
+
+namespace VecLatHom
+
+variable {E F : Type*}
+  [NormedAddCommGroup E] [Lattice E] [IsOrderedAddMonoid E] [BanachLattice E]
+  [NormedAddCommGroup F] [Lattice F] [IsOrderedAddMonoid F] [BanachLattice F]
+
+/-- A vector lattice homomorphism between Banach lattices preserves the complex modulus. -/
+@[simp]
+theorem map_complexModulus (T : VecLatHom E F) (x y : E) :
+    T (BanachLattice.complexModulus x y) =
+      BanachLattice.complexModulus (T x) (T y) := by
+  letI := isUniformlyCompleteVectorLattice_of_banachLattice E
+  letI := isUniformlyCompleteVectorLattice_of_banachLattice F
+  rw [complexModulus_eq_functionalCalculus]
+  calc
+    T (PosHomFunction.functionalCalculus ![x, y] euclideanNorm) =
+        PosHomFunction.functionalCalculus (fun i => T (![x, y] i))
+          euclideanNorm :=
+      PosHomFunction.functionalCalculus_map T ![x, y] euclideanNorm
+    _ = PosHomFunction.functionalCalculus ![T x, T y] euclideanNorm := by
+      congr 2
+      funext i
+      fin_cases i <;> rfl
+    _ = BanachLattice.complexModulus (T x) (T y) :=
+      (complexModulus_eq_functionalCalculus (T x) (T y)).symm
+
+end VecLatHom

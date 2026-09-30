@@ -2,7 +2,7 @@
 Authors: Jesús Illescas-Fiorito
 -/
 
-import BanLat.ComplexBanachLattice.Basic
+import BanLat.ComplexBanachLattice.Hom
 import Mathlib.LinearAlgebra.Complex.Module
 
 /-!
@@ -12,7 +12,7 @@ This file constructs the **complexification** of a real Banach lattice `E`, whos
 are pairs with real and imaginary components `z.re` and `z.im`. Addition, complex scalar
 multiplication and conjugation are defined in the usual way.
 
-Disclaimer: Mathlib provides abstract real and imaginary parts for any complex star module, but it
+*Disclaimer:* Mathlib provides abstract real and imaginary parts for any complex star module, but it
 does not provide the complexification constructed here. After equipping `Complexification E` with a
 complex module structure and conjugation, we identify its self-adjoint part with `E` and show that
 Mathlib's abstract real and imaginary parts agree with the concrete `re` and `im` coordinates.
@@ -21,7 +21,7 @@ Moreover, the lattice-valued modulus `modulus z ∈ E₊` is defined as the supr
 `{cos(θ)·z.re + sin(θ)·z.im | θ : ℝ}`, and the norm is defined by means of
 `‖z‖ = ‖modulus z‖`.
 
-With all this structure, the complexification becomes a complete complex normed space
+With all this structure, the complexification becomes a complete complex normed space.
 -/
 
 /-- The complexification of a type `E`, represented as a pair of elements of `E`. -/
@@ -389,6 +389,20 @@ theorem selfAdjointBanachLatEquiv_modulus (z : Complexification E) :
   rw [selfAdjointBanachLatEquiv_apply, selfAdjointBanachLatEquiv_apply,
     selfAdjointEquiv_realPart, selfAdjointEquiv_imaginaryPart]
 
+/-- The abstract complex modulus, viewed in the ambient complexification, has
+the concrete modulus as its real coordinate and zero imaginary coordinate. -/
+@[simp]
+theorem coe_modulus (z : Complexification E) :
+    ((ComplexBanachLattice.modulus z :
+      selfAdjoint (Complexification E)) : Complexification E) =
+      ⟨Complexification.modulus z, 0⟩ := by
+  ext
+  · change selfAdjointBanachLatEquiv
+      (ComplexBanachLattice.modulus z) = Complexification.modulus z
+    exact selfAdjointBanachLatEquiv_modulus z
+  · exact (isSelfAdjoint_iff_im_eq_zero _).mp
+      (ComplexBanachLattice.modulus z).property
+
 /-- The complexification of a real Banach lattice is a complex Banach lattice. -/
 noncomputable instance instComplexBanachLattice :
     ComplexBanachLattice (Complexification E) := by
@@ -403,3 +417,362 @@ noncomputable instance instComplexBanachLattice :
 end SelfAdjointBanachLattice
 
 end Complexification
+
+/-! ## Canonical equivalence with the complexification of the self-adjoint part -/
+
+open scoped ComplexStarModule
+
+namespace ComplexBanachLattice
+
+variable (Z : Type*)
+  [NormedAddCommGroup Z] [NormedSpace ℂ Z]
+  [StarAddMonoid Z] [StarModule ℂ Z]
+  [Lattice (selfAdjoint Z)] [IsOrderedAddMonoid (selfAdjoint Z)]
+  [ComplexBanachLattice Z]
+
+private theorem modulus_coe_add_I_smul_coe
+    (x y : selfAdjoint Z) :
+    modulus ((x : Z) + Complex.I • (y : Z)) =
+      BanachLattice.complexModulus x y := by
+  rw [modulus]
+  simp only [map_add, realPart_I_smul, imaginaryPart_I_smul,
+    selfAdjoint.realPart_coe, selfAdjoint.imaginaryPart_coe,
+    neg_zero, add_zero, zero_add]
+
+/-- A complex Banach lattice is canonically equivalent to the complexification
+of its self-adjoint part. -/
+noncomputable def complexificationEquiv :
+    ComplexBanachLatEquiv (Complexification (selfAdjoint Z)) Z := by
+  let L : Complexification (selfAdjoint Z) →ₗ[ℂ] Z :=
+    { toFun := fun z ↦ (z.re : Z) + Complex.I • (z.im : Z)
+      map_add' := by
+        intro z w
+        simp only [Complexification.re_add, Complexification.im_add,
+          (selfAdjoint Z).coe_add]
+        module
+      map_smul' := by
+        intro c z
+        rw [Complexification.re_smul, Complexification.im_smul,
+          (selfAdjoint Z).coe_sub, (selfAdjoint Z).coe_add]
+        simp only [ComplexBanachLattice.coe_smul]
+        match_scalars <;> apply Complex.ext <;> simp_all }
+  let e : Complexification (selfAdjoint Z) ≃ₗ[ℂ] Z :=
+    { toFun := L
+      invFun := fun z ↦ ⟨ℜ z, ℑ z⟩
+      left_inv := by
+        intro z
+        change ⟨ℜ ((z.re : Z) + Complex.I • (z.im : Z)),
+          ℑ ((z.re : Z) + Complex.I • (z.im : Z))⟩ = z
+        ext <;> simp
+      right_inv := realPart_add_I_smul_imaginaryPart
+      map_add' := L.map_add
+      map_smul' := L.map_smul }
+  refine
+    { toLinearIsometryEquiv :=
+        { toLinearEquiv := e
+          norm_map' := ?_ }
+      map_modulus' := ?_ }
+  · intro z
+    calc
+      ‖L z‖ = ‖modulus (L z)‖ := (norm_modulus (L z)).symm
+      _ = ‖Complexification.modulus z‖ := by
+        change ‖modulus ((z.re : Z) + Complex.I • (z.im : Z))‖ = _
+        rw [modulus_coe_add_I_smul_coe]
+        rfl
+      _ = ‖z‖ := (Complexification.norm_eq z).symm
+  · intro z
+    change L ((modulus z : selfAdjoint
+      (Complexification (selfAdjoint Z))) :
+        Complexification (selfAdjoint Z)) =
+      ((modulus (L z) : selfAdjoint Z) : Z)
+    rw [Complexification.coe_modulus]
+    simp only [L]
+    change ((Complexification.modulus z : selfAdjoint Z) : Z) +
+      Complex.I • (0 : Z) =
+      ((modulus ((z.re : Z) + Complex.I • (z.im : Z)) :
+        selfAdjoint Z) : Z)
+    rw [smul_zero, add_zero]
+    apply congrArg Subtype.val
+    rw [modulus_coe_add_I_smul_coe]
+    rfl
+
+/-- The canonical equivalence reconstructs an element from its two coordinates. -/
+@[simp]
+theorem complexificationEquiv_apply
+    (z : Complexification (selfAdjoint Z)) :
+    complexificationEquiv Z z =
+      (z.re : Z) + Complex.I • (z.im : Z) := by
+  rfl
+
+/-- The inverse canonical equivalence takes real and imaginary parts. -/
+@[simp]
+theorem complexificationEquiv_symm_apply (z : Z) :
+    (complexificationEquiv Z).symm z = ⟨ℜ z, ℑ z⟩ := by
+  rfl
+
+end ComplexBanachLattice
+
+namespace Complexification
+
+/-! ## Complexification of morphisms -/
+
+open scoped ComplexStarModule
+
+section Morphisms
+
+variable {E F : Type*}
+  [NormedAddCommGroup E] [Lattice E] [IsOrderedAddMonoid E]
+  [BanachLattice E]
+  [NormedAddCommGroup F] [Lattice F] [IsOrderedAddMonoid F]
+  [BanachLattice F]
+
+/-- A vector lattice homomorphism between two Banach lattices
+extends canonically to their complexifications. -/
+noncomputable def homOfVecLatHom (T : VecLatHom E F) :
+    ComplexBanachLatHom (Complexification E) (Complexification F) := by
+  refine
+    { toLinearMap :=
+        { toFun := fun z => ⟨T z.re, T z.im⟩
+          map_add' := by
+            intro z w
+            ext <;> simp
+          map_smul' := by
+            intro c z
+            ext <;> simp }
+      map_modulus' := by
+        intro z
+        let w : Complexification F := ⟨T z.re, T z.im⟩
+        change ⟨T ((ComplexBanachLattice.modulus z :
+            selfAdjoint (Complexification E)) : Complexification E).re,
+          T ((ComplexBanachLattice.modulus z :
+            selfAdjoint (Complexification E)) : Complexification E).im⟩ =
+          ((ComplexBanachLattice.modulus w :
+            selfAdjoint (Complexification F)) : Complexification F)
+        rw [coe_modulus z, coe_modulus w]
+        ext
+        · exact T.map_complexModulus z.re z.im
+        · exact map_zero T
+      }
+
+/-- The complexification of a vector lattice homomorphism acts
+coordinatewise. -/
+@[simp]
+theorem homOfVecLatHom_apply (T : VecLatHom E F)
+    (z : Complexification E) :
+    homOfVecLatHom T z = ⟨T z.re, T z.im⟩ := by
+  rfl
+
+/-- A Banach-lattice isometric equivalence between two Banach lattices
+extends canonically to their complexifications. -/
+noncomputable def equivOfBanachLatEquiv (e : BanachLatEquiv E F) :
+    ComplexBanachLatEquiv (Complexification E) (Complexification F) := by
+  let T := homOfVecLatHom e.toVecLatEquiv.toVecLatHom
+  let S := homOfVecLatHom e.symm.toVecLatEquiv.toVecLatHom
+  let L : Complexification E ≃ₗ[ℂ] Complexification F :=
+    { toFun := T
+      invFun := S
+      left_inv := by
+        intro z
+        apply Complexification.ext
+        · exact e.toLinearIsometryEquiv.symm_apply_apply z.re
+        · exact e.toLinearIsometryEquiv.symm_apply_apply z.im
+      right_inv := by
+        intro z
+        apply Complexification.ext
+        · exact e.toLinearIsometryEquiv.apply_symm_apply z.re
+        · exact e.toLinearIsometryEquiv.apply_symm_apply z.im
+      map_add' := T.map_add
+      map_smul' := T.map_smul }
+  exact
+    { toLinearIsometryEquiv :=
+        { toLinearEquiv := L
+          norm_map' := by
+            intro z
+            rw [Complexification.norm_eq, Complexification.norm_eq]
+            change ‖BanachLattice.complexModulus (e z.re) (e z.im)‖ =
+              ‖BanachLattice.complexModulus z.re z.im‖
+            calc
+              ‖BanachLattice.complexModulus (e z.re) (e z.im)‖ =
+                  ‖e (BanachLattice.complexModulus z.re z.im)‖ := by
+                congr 1
+                exact (e.toVecLatEquiv.map_complexModulus z.re z.im).symm
+              _ = ‖BanachLattice.complexModulus z.re z.im‖ :=
+                e.toLinearIsometryEquiv.norm_map _ }
+      map_modulus' := T.map_modulus' }
+
+/-- The complexification of a Banach-lattice isometric equivalence acts
+coordinatewise. -/
+@[simp]
+theorem equivOfBanachLatEquiv_apply (e : BanachLatEquiv E F)
+    (z : Complexification E) :
+    equivOfBanachLatEquiv e z = ⟨e z.re, e z.im⟩ := by
+  rfl
+
+end Morphisms
+
+end Complexification
+
+/-! ## Extension from self-adjoint parts -/
+
+open scoped ComplexStarModule
+
+namespace ComplexBanachLatHom
+
+variable {Z : Type*}
+  [NormedAddCommGroup Z] [NormedSpace ℂ Z]
+  [StarAddMonoid Z] [StarModule ℂ Z]
+  [Lattice (selfAdjoint Z)] [IsOrderedAddMonoid (selfAdjoint Z)]
+  [ComplexBanachLattice Z]
+
+variable {W : Type*}
+  [NormedAddCommGroup W] [NormedSpace ℂ W]
+  [StarAddMonoid W] [StarModule ℂ W]
+  [Lattice (selfAdjoint W)] [IsOrderedAddMonoid (selfAdjoint W)]
+  [ComplexBanachLattice W]
+
+/-- A vector lattice homomorphism between the self-adjoint parts extends uniquely
+to a complex Banach-lattice homomorphism. -/
+noncomputable def ofSelfAdjointVecLatHom
+    (T : VecLatHom (selfAdjoint Z) (selfAdjoint W)) :
+    ComplexBanachLatHom Z W :=
+  (ComplexBanachLattice.complexificationEquiv W).toComplexBanachLatHom.comp
+    ((Complexification.homOfVecLatHom T).comp
+      (ComplexBanachLattice.complexificationEquiv Z).symm.toComplexBanachLatHom)
+
+/-- The extension of a vector lattice homomorphism between the self-adjoint
+parts acts separately on real and imaginary parts. -/
+@[simp]
+theorem ofSelfAdjointVecLatHom_apply
+    (T : VecLatHom (selfAdjoint Z) (selfAdjoint W)) (z : Z) :
+    ofSelfAdjointVecLatHom T z =
+      (T (ℜ z) : W) + Complex.I • (T (ℑ z) : W) := by
+  simp [ofSelfAdjointVecLatHom]
+
+/-- Complex Banach-lattice homomorphisms correspond to vector lattice
+homomorphisms between their self-adjoint parts. -/
+noncomputable def selfAdjointEquiv :
+    ComplexBanachLatHom Z W ≃
+      VecLatHom (selfAdjoint Z) (selfAdjoint W) := by
+  exact
+    { toFun := toSelfAdjointVecLatHom
+      invFun := ofSelfAdjointVecLatHom
+      left_inv := by
+        intro T
+        ext z
+        rw [ofSelfAdjointVecLatHom_apply]
+        rw [toSelfAdjointVecLatHom_apply, toSelfAdjointVecLatHom_apply]
+        rw [T.map_realPart, T.map_imaginaryPart]
+        exact realPart_add_I_smul_imaginaryPart (T z)
+      right_inv := by
+        intro T
+        apply DFunLike.coe_injective
+        funext x
+        apply Subtype.ext
+        rw [toSelfAdjointVecLatHom_apply, ofSelfAdjointVecLatHom_apply]
+        simp only [selfAdjoint.realPart_coe, selfAdjoint.imaginaryPart_coe,
+          map_zero]
+        change (T x : W) + Complex.I • (0 : W) = (T x : W)
+        simp }
+
+/-- The forward direction of `selfAdjointEquiv` is restriction to the
+self-adjoint parts. -/
+@[simp]
+theorem selfAdjointEquiv_apply (T : ComplexBanachLatHom Z W) :
+    selfAdjointEquiv T = T.toSelfAdjointVecLatHom := by
+  rfl
+
+/-- The inverse direction of `selfAdjointEquiv` is complex-linear extension
+from the self-adjoint parts. -/
+@[simp]
+theorem selfAdjointEquiv_symm_apply
+    (T : VecLatHom (selfAdjoint Z) (selfAdjoint W)) :
+    selfAdjointEquiv.symm T = ofSelfAdjointVecLatHom T := by
+  rfl
+
+
+end ComplexBanachLatHom
+
+namespace ComplexBanachLatEquiv
+
+variable {Z : Type*}
+  [NormedAddCommGroup Z] [NormedSpace ℂ Z]
+  [StarAddMonoid Z] [StarModule ℂ Z]
+  [Lattice (selfAdjoint Z)] [IsOrderedAddMonoid (selfAdjoint Z)]
+  [ComplexBanachLattice Z]
+
+variable {W : Type*}
+  [NormedAddCommGroup W] [NormedSpace ℂ W]
+  [StarAddMonoid W] [StarModule ℂ W]
+  [Lattice (selfAdjoint W)] [IsOrderedAddMonoid (selfAdjoint W)]
+  [ComplexBanachLattice W]
+
+/-- A Banach-lattice isometric equivalence between the self-adjoint parts
+extends uniquely to a complex Banach-lattice isometric equivalence. -/
+noncomputable def ofSelfAdjointBanachLatEquiv
+    (e : BanachLatEquiv (selfAdjoint Z) (selfAdjoint W)) :
+    ComplexBanachLatEquiv Z W :=
+  (ComplexBanachLattice.complexificationEquiv Z).symm.trans
+    ((Complexification.equivOfBanachLatEquiv e).trans
+      (ComplexBanachLattice.complexificationEquiv W))
+
+/-- The extension of a Banach-lattice isometric equivalence between the
+self-adjoint parts acts separately on real and imaginary parts. -/
+@[simp]
+theorem ofSelfAdjointBanachLatEquiv_apply
+    (e : BanachLatEquiv (selfAdjoint Z) (selfAdjoint W)) (z : Z) :
+    ofSelfAdjointBanachLatEquiv e z =
+      (e (ℜ z) : W) + Complex.I • (e (ℑ z) : W) := by
+  change ComplexBanachLattice.complexificationEquiv W
+    (Complexification.equivOfBanachLatEquiv e
+      ((ComplexBanachLattice.complexificationEquiv Z).symm z)) = _
+  rw [ComplexBanachLattice.complexificationEquiv_symm_apply,
+    Complexification.equivOfBanachLatEquiv_apply,
+    ComplexBanachLattice.complexificationEquiv_apply]
+
+/-- Complex Banach-lattice isometric equivalences correspond to Banach-lattice
+isometric equivalences between their self-adjoint parts. -/
+noncomputable def selfAdjointEquiv :
+    ComplexBanachLatEquiv Z W ≃
+      BanachLatEquiv (selfAdjoint Z) (selfAdjoint W) := by
+  exact
+    { toFun := toSelfAdjointBanachLatEquiv
+      invFun := ofSelfAdjointBanachLatEquiv
+      left_inv := by
+        intro e
+        ext z
+        rw [ofSelfAdjointBanachLatEquiv_apply]
+        change e (ℜ z : Z) + Complex.I • e (ℑ z : Z) = e z
+        rw [e.map_realPart, e.map_imaginaryPart]
+        exact realPart_add_I_smul_imaginaryPart (e z)
+      right_inv := by
+        intro e
+        apply DFunLike.coe_injective
+        funext x
+        rw [toSelfAdjointBanachLatEquiv_apply]
+        apply Subtype.ext
+        change ofSelfAdjointBanachLatEquiv e (x : Z) = (e x : W)
+        rw [ofSelfAdjointBanachLatEquiv_apply]
+        simp only [selfAdjoint.realPart_coe, selfAdjoint.imaginaryPart_coe]
+        have hzero : e (0 : selfAdjoint Z) = 0 :=
+          e.toLinearIsometryEquiv.map_zero
+        rw [hzero]
+        change (e x : W) + Complex.I • (0 : W) = (e x : W)
+        simp }
+
+/-- The forward direction of `selfAdjointEquiv` is restriction to the
+self-adjoint parts. -/
+@[simp]
+theorem selfAdjointEquiv_apply (e : ComplexBanachLatEquiv Z W) :
+    selfAdjointEquiv e = e.toSelfAdjointBanachLatEquiv := by
+  rfl
+
+/-- The inverse direction of `selfAdjointEquiv` is complex-linear extension
+from the self-adjoint parts. -/
+@[simp]
+theorem selfAdjointEquiv_symm_apply
+    (e : BanachLatEquiv (selfAdjoint Z) (selfAdjoint W)) :
+    selfAdjointEquiv.symm e = ofSelfAdjointBanachLatEquiv e := by
+  rfl
+
+
+end ComplexBanachLatEquiv
