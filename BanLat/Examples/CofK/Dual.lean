@@ -19,7 +19,7 @@ Banach lattice `M(K)` of regular finite signed Borel measures.
 
 This file constructs the functional associated to a regular signed measure,
 the regular signed measure associated to a continuous functional, and the
-resulting Banach-lattice equivalence `M(K) ≃ C(K, ℝ)*`.
+resulting Banach lattice equivalence `M(K) ≃ C(K, ℝ)*`.
 -/
 
 noncomputable section

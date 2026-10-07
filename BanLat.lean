@@ -8,7 +8,8 @@ import BanLat.ALSpace.Sublattice
 import BanLat.ALpSpace.Basic
 import BanLat.AMSpace.Basic
 import BanLat.AMSpace.Characters
-import BanLat.AMSpace.Complex
+import BanLat.AMSpace.Complex.Basic
+import BanLat.AMSpace.Complex.Kakutani
 import BanLat.AMSpace.Dual
 import BanLat.AMSpace.Kakutani
 import BanLat.AMSpace.Max
@@ -107,6 +108,8 @@ import BanLat.Probability.Distributions.Stable.Moments
 import BanLat.QuasiInteriorPoint
 import BanLat.Quotient
 import BanLat.RieszDec
+import BanLat.SPR.Basic
+import BanLat.SPR.Characterization
 import BanLat.Substructures.Band.Basic
 import BanLat.Substructures.Band.Decomposition
 import BanLat.Substructures.Band.DisjointComplement

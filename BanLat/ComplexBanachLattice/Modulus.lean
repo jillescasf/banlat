@@ -278,7 +278,7 @@ private theorem exists_isLUB_rotationRange (x y : E) :
       have hfun := (continuousMapModulus_isLUB f g).1 ⟨θ, rfl⟩
       change Real.cos θ • f + Real.sin θ • g ≤ continuousMapModulus f g at hfun
       rw [← hrmap] at hfun
-      have hback := T.symm.toVecLatEquiv.toVecLatHom.monotone hfun
+      have hback := T.symm.toOrderIso.monotone hfun
       change T.symm (T r) ≤ T.symm (continuousMapModulus f g) at hback
       have hleft : T.symm (T r) = r := by
         change T.toLinearIsometryEquiv.symm (T.toLinearIsometryEquiv r) = r
@@ -303,7 +303,7 @@ private theorem exists_isLUB_rotationRange (x y : E) :
         have hr : r ≤ v := by
           change Real.cos θ • x + Real.sin θ • y ≤ u ⊓ e
           exact le_inf (hu ⟨θ, rfl⟩) (rotation_le_abs_add_abs x y θ)
-        have hmap := T.toVecLatEquiv.toVecLatHom.monotone hr
+        have hmap := T.toOrderIso.monotone hr
         change T r ≤ T v at hmap
         have hrmap : T r = Real.cos θ • f + Real.sin θ • g := by
           change T.toLinearIsometryEquiv
@@ -317,7 +317,7 @@ private theorem exists_isLUB_rotationRange (x y : E) :
       have hmod : continuousMapModulus f g ≤ T v :=
         (continuousMapModulus_isLUB f g).2 hTv
       have hzv : z ≤ v := by
-        have hback := T.symm.toVecLatEquiv.toVecLatHom.monotone hmod
+        have hback := T.symm.toOrderIso.monotone hmod
         change T.symm (continuousMapModulus f g) ≤ v
         change T.symm (continuousMapModulus f g) ≤ T.symm (T v) at hback
         have hright : T.symm (T v) = v := by
@@ -539,9 +539,7 @@ variable {E F : Type*}
 theorem map_complexModulus (e : VecLatEquiv E F) (x y : E) :
     e (BanachLattice.complexModulus x y) =
       BanachLattice.complexModulus (e x) (e y) := by
-  let eorder := e.toLinearEquiv.toEquiv.toOrderIso
-    e.toVecLatHom.monotone e.symm.toVecLatHom.monotone
-  exact BanachLattice.map_complexModulus_of_linearOrderIso eorder
+  exact BanachLattice.map_complexModulus_of_linearOrderIso e.toOrderIso
     e.toLinearEquiv.toLinearMap.isLinear x y
 
 end VecLatEquiv

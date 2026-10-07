@@ -507,7 +507,7 @@ private noncomputable def banachLatEquiv [IsFiniteMeasure μ]
 end exists_Lp_banachLatEquiv_aux
 
 /-- A norm-closed vector sublattice of `Lp ℝ p μ` (with `1 ≤ p < ∞` and `μ` a
-finite measure) that contains the constant function `1` is Banach-lattice
+finite measure) that contains the constant function `1` is Banach lattice
 isomorphic to `Lp ℝ p ν` for a finite measure `ν` on some measurable space. -/
 theorem exists_Lp_banachLatEquiv_of_closed_sublattice_containing_one
     [IsFiniteMeasure μ] (hp_ne_top : p ≠ ⊤)
@@ -668,7 +668,7 @@ private lemma withDensitySMulLI_map_inf
     exact mul_min_of_nonneg _ _ (NNReal.coe_nonneg _)
 
 /-- A Banach lattice that embeds as a closed sublattice of an `L¹` space and
-contains an almost everywhere strictly positive element is Banach-lattice
+contains an almost everywhere strictly positive element is Banach lattice
 isomorphic to an `L¹` space. -/
 theorem exists_L1_banachLatEquiv_of_embeds_in_L1_with_aePositive.{v}
     {X : Type u} [NormedAddCommGroup X] [Lattice X] [IsOrderedAddMonoid X]

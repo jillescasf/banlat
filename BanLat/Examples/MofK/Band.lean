@@ -628,7 +628,7 @@ private theorem bandGeneratedToLp_map_inf (μ : MofK K)
       bandGeneratedToLp_map_add, bandGeneratedToLp_map_sup, sub_eq_add_neg]
   rw [lhs, ← eq_sub_of_add_eq (inf_add_sup _ _)]
 
-/-- The Radon-Nikodym correspondence as a Banach-lattice equivalence. -/
+/-- The Radon-Nikodym correspondence as a Banach lattice equivalence. -/
 private noncomputable def bandGeneratedBanachLatEquivL1 (μ : MofK K) :
     BanachLatEquiv ↥(Band.generated ({μ} : Set (MofK K))).toSubmodule
       (Lp ℝ 1 (μ : MeasureTheory.SignedMeasure K).totalVariation) := by
@@ -645,7 +645,7 @@ private noncomputable def bandGeneratedBanachLatEquivL1 (μ : MofK K) :
       map_sup' := bandGeneratedToLp_map_sup μ
       map_inf' := bandGeneratedToLp_map_inf μ }
 
-/-- Every principal band in `M(K)` is Banach-lattice isometric to some `L¹`
+/-- Every principal band in `M(K)` is Banach lattice isometric to some `L¹`
 space. -/
 theorem exists_principalBand_banachLatEquivL1 (μ : MofK K) :
     ∃ (Ω : Type u) (_ : MeasurableSpace Ω) (ν : Measure Ω) (_ : IsFiniteMeasure ν),

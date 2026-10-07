@@ -11,7 +11,7 @@ import Mathlib.MeasureTheory.Integral.FinMeasAdditive
 # Measure algebra equivalences and the associated `L^p` spaces
 
 Let `1 ≤ p < +∞`. An equivalence between the measure algebras of two finite
-measure spaces induces a Banach-lattice equivalence between their real `L^p`
+measure spaces induces a Banach lattice equivalence between their real `L^p`
 spaces.
 
 The equivalence is first constructed on the dense subspaces

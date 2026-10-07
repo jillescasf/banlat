@@ -147,7 +147,7 @@ noncomputable instance instBanachLattice [∀ i, BanachLattice (X i)] :
 
 end lp
 
-/-! ### Banach-lattice isometries between `ℓᵖ`-sums -/
+/-! ### Banach lattice isometries between `ℓᵖ`-sums -/
 
 namespace BanachLatEquiv
 
@@ -245,7 +245,7 @@ private lemma norm_congrRight (e : ∀ i, BanachLatEquiv (X i) (Y i))
   exact lp_norm_eq_of_norm_eq f _
     (fun i => (e i).toLinearIsometryEquiv.norm_map (f i))
 
-/-- Coordinatewise Banach-lattice isometries induce a Banach-lattice isometry
+/-- Coordinatewise Banach lattice isometries induce a Banach lattice isometry
 between the corresponding `ℓᵖ`-sums. -/
 def lpCongrRight (e : ∀ i, BanachLatEquiv (X i) (Y i)) :
     BanachLatEquiv (lp X p) (lp Y p) := by
@@ -355,7 +355,7 @@ variable [∀ i, Lattice (X i)] [∀ i, IsOrderedAddMonoid (X i)]
   [∀ i, BanachLattice (X i)]
 
 /-- Reindexing a family along an equivalence of index types induces a
-Banach-lattice isometry of its `ℓᵖ`-sums. -/
+Banach lattice isometry of its `ℓᵖ`-sums. -/
 def lpCongrLeft (e : ι ≃ κ) :
     BanachLatEquiv (lp X p) (lp (fun k => X (e.symm k)) p) := by
   let Φ (f : lp X p) : lp (fun k => X (e.symm k)) p :=
@@ -402,8 +402,8 @@ variable {κ : Type*} {X : ι → Type*} {Y : κ → Type*}
   [∀ k, NormedAddCommGroup (Y k)] [∀ k, Lattice (Y k)]
   [∀ k, IsOrderedAddMonoid (Y k)] [∀ k, BanachLattice (Y k)]
 
-/-- Reindexing a family and applying coordinatewise Banach-lattice isometries
-induces a Banach-lattice isometry between the corresponding `ℓᵖ`-sums. -/
+/-- Reindexing a family and applying coordinatewise Banach lattice isometries
+induces a Banach lattice isometry between the corresponding `ℓᵖ`-sums. -/
 noncomputable def lpCongr (e : ι ≃ κ)
     (φ : ∀ k, BanachLatEquiv (X (e.symm k)) (Y k)) :
     BanachLatEquiv (lp X p) (lp Y p) :=

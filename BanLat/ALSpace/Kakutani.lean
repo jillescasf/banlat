@@ -13,7 +13,7 @@ import BanLat.Examples.MofK.L1space
 /-!
 # Kakutani's representation theorem for AL-spaces
 
-Every AL-space is Banach-lattice isometrically isomorphic to an `L¹` space.
+Every AL-space is Banach lattice isometrically isomorphic to an `L¹` space.
 -/
 
 open MeasureTheory
@@ -499,7 +499,7 @@ private lemma exists_L1_banachLatEquiv_principalBand_of_ALSpace
     exact banachLatEquiv_of_subsingleton _ _
 
 /-- **Kakutani's representation theorem for AL-spaces.** Every AL-space is
-Banach-lattice isometrically isomorphic to `L¹(μ)` for some measure `μ`. -/
+Banach lattice isometrically isomorphic to `L¹(μ)` for some measure `μ`. -/
 theorem exists_L1_banachLatEquiv [ALSpace X] :
     ∃ (Ω : Type u) (_ : MeasurableSpace Ω) (μ : Measure Ω),
       Nonempty (BanachLatEquiv X (Lp ℝ 1 μ)) :=
@@ -507,7 +507,7 @@ theorem exists_L1_banachLatEquiv [ALSpace X] :
     fun x hx => exists_L1_banachLatEquiv_principalBand_of_ALSpace x hx
 
 /-- **Kakutani representation with a weak unit.** An AL-space with a weak order unit `e`
-is Banach-lattice isometric to `L¹(μ)` for a finite measure `μ`, in such a way that `e`
+is Banach lattice isometric to `L¹(μ)` for a finite measure `μ`, in such a way that `e`
 corresponds to the constant function `1`. -/
 theorem exists_L1_banachLatEquiv_isFiniteMeasure_of_weakOrderUnit [ALSpace X] {e : X}
     (he : WeakOrderUnit e) :

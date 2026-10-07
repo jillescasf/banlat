@@ -550,7 +550,7 @@ noncomputable def ellInfinityUnitSphereEquiv :
       map_inf' := (restrict (n := n)).map_inf' }
 
 /-!
-### `PosHomFunction n` as a Banach-lattice
+### `PosHomFunction n` as a Banach lattice
 -/
 
 /-- If `f ∈ PosHomFunction`, `‖f‖ := ‖restrict f‖_∞`. -/
@@ -604,7 +604,7 @@ noncomputable instance instBanachLattice :
   let e := ellInfinityUnitSphereIsometry (n := n)
   exact { toCompleteSpace := e.completeSpace }
 
-/-- `restriction` is a Banach-lattice isometric equivalence between
+/-- `restriction` is a Banach lattice isometric equivalence between
 `PosHomFunction n` and `C(ellInfinityUnitSphere n, ℝ)`. -/
 noncomputable def ellInfinityUnitSphereBanachLatEquiv :
     BanachLatEquiv (PosHomFunction n) C(ellInfinityUnitSphere n, ℝ) := by
@@ -955,7 +955,7 @@ theorem functionalCalculus_zero (f : PosHomFunction n) :
 /-- The positively homogeneous functional calculus on `C(K, ℝ)` is
 computed pointwise. -/
 theorem functionalCalculus_continuousMap_apply
-    {K : Type*} [TopologicalSpace K] [CompactSpace K]
+    {K : Type*} [TopologicalSpace K]
     [IsUniformlyCompleteVectorLattice C(K, ℝ)]
     (x : Fin n → C(K, ℝ)) (f : PosHomFunction n) (t : K) :
     functionalCalculus x f t = f (fun i => x i t) := by
@@ -1000,5 +1000,62 @@ theorem functionalCalculus_map
   have heq := eq_functionalCalculus_of_map_coordinate
     (X := Y) (fun i => T (x i)) (T.comp (functionalCalculus x)) hcomp
   simpa [VecLatHom.comp_apply] using DFunLike.congr_fun heq f
+
+end PosHomFunction
+
+/-! ### Composition and substitution in positively homogeneous functional calculus -/
+
+namespace PosHomFunction
+
+variable {m n : ℕ}
+
+/-- Composition of a positively homogeneous function with a tuple of positively
+homogeneous functions. -/
+def comp (f : PosHomFunction m) (g : Fin m → PosHomFunction n) :
+    PosHomFunction n := by
+  refine ⟨⟨fun x ↦ f (fun i ↦ g i x), ?_⟩, ?_⟩
+  · exact f.1.continuous.comp (continuous_pi fun i ↦ (g i).1.continuous)
+  · intro c hc x
+    change f (fun i ↦ g i (c • x)) = c • f (fun i ↦ g i x)
+    have hg : (fun i ↦ g i (c • x)) = c • (fun i ↦ g i x) := by
+      funext i
+      change g i (c • x) = c • g i x
+      exact map_smul_of_nonneg (g i) c hc x
+    rw [hg, map_smul_of_nonneg f c hc]
+
+/-- Pointwise evaluation of a composition of positively homogeneous functions. -/
+@[simp]
+theorem comp_apply (f : PosHomFunction m) (g : Fin m → PosHomFunction n)
+    (x : Fin n → ℝ) :
+    f.comp g x = f (fun i ↦ g i x) := by
+  rfl
+
+variable {X : Type u} [AddCommGroup X] [Lattice X]
+  [IsOrderedAddMonoid X] [VectorLattice X]
+  [IsUniformlyCompleteVectorLattice X]
+
+/-- Substitution of positively homogeneous functions commutes with their
+functional calculus. -/
+@[simp]
+theorem functionalCalculus_comp (x : Fin n → X)
+    (g : Fin m → PosHomFunction n) (f : PosHomFunction m) :
+    functionalCalculus (fun i ↦ functionalCalculus x (g i)) f =
+      functionalCalculus x (f.comp g) := by
+  letI := isUniformlyCompleteVectorLattice_of_banachLattice (PosHomFunction n)
+  let V : VecLatHom (PosHomFunction m) (PosHomFunction n) :=
+    { toFun := fun h ↦ h.comp g
+      map_add' := fun _ _ ↦ rfl
+      map_smul' := fun _ _ ↦ rfl
+      map_sup' := fun _ _ ↦ rfl
+      map_inf' := fun _ _ ↦ rfl }
+  have hV : ∀ i, V (coordinate i) = g i := by
+    intro i
+    ext r
+    change (coordinate i).comp g r = g i r
+    rw [comp_apply, coordinate_apply]
+  have hcalc : functionalCalculus g = V :=
+    (eq_functionalCalculus_of_map_coordinate g V hV).symm
+  rw [← functionalCalculus_map (functionalCalculus x) g f, hcalc]
+  rfl
 
 end PosHomFunction

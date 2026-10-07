@@ -80,8 +80,8 @@ private lemma hasSum_norm_principalBandProjection
       (BanachLattice.hasSum_principalBandProjection hΛ hΛ_pos x) hdisj
 
 /-- **Locally L¹ implies L¹.** If every principal band of an AL-space is
-Banach-lattice isometric to some `L¹(μ)`, then the whole space is
-Banach-lattice isometric to some `L¹(ν)`. -/
+Banach lattice isometric to some `L¹(μ)`, then the whole space is
+Banach lattice isometric to some `L¹(ν)`. -/
 theorem exists_L1_banachLatEquiv_of_principalBandModels [ALSpace X]
     (h : ∀ x : X, 0 ≤ x →
       ∃ (Ω : Type u) (_ : MeasurableSpace Ω) (μ : Measure Ω),
@@ -375,7 +375,7 @@ variable {K : Type u} [TopologicalSpace K] [T2Space K] [CompactSpace K]
   [MeasurableSpace K] [BorelSpace K]
 
 /-- **`M(K)` is an `L¹` space.** The Banach lattice of regular signed Borel
-measures on a compact Hausdorff space is Banach-lattice isometric to `L¹(ν)`
+measures on a compact Hausdorff space is Banach lattice isometric to `L¹(ν)`
 for some measure `ν`. -/
 theorem exists_L1_banachLatEquiv :
     ∃ (Ω : Type u) (_ : MeasurableSpace Ω) (ν : Measure Ω),

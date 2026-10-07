@@ -53,6 +53,7 @@ self-adjoint part whose gauge norm agrees with the original norm. -/
 class ComplexAMSpaceWithUnit (Z : Type*) [NormedAddCommGroup Z] [NormedSpace ℂ Z]
     [StarAddMonoid Z] [StarModule ℂ Z] [Lattice (selfAdjoint Z)]
     [IsOrderedAddMonoid (selfAdjoint Z)] extends ComplexAMSpace Z where
+  /-- The distinguished strong order unit. -/
   unit : selfAdjoint Z
   strongOrderUnit_unit : StrongOrderUnit unit
   norm_eq_gaugeNorm : ∀ x : selfAdjoint Z, ‖x‖ = OrderIdeal.gaugeNorm unit x

@@ -11,7 +11,7 @@ import Mathlib.Topology.ContinuousMap.StoneWeierstrass
 # Kakutani's representation theorem for AM-spaces with unit
 
 This file proves the Bohnenblust--Kakutani--Krein representation theorem:
-every non-trivial AM-space with unit is Banach-lattice isomorphic to the space
+every non-trivial AM-space with unit is Banach lattice isomorphic to the space
 of continuous real-valued functions on its compact character space.
 -/
 
