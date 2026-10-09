@@ -182,24 +182,32 @@ theorem selfAdjointBanachLatEquiv_apply_apply
     selfAdjointBanachLatEquiv f t = (f.1 t).re := by
   rfl
 
-/-! ### Complex Banach lattice structure -/
+/-! ### Complex Banach lattice structures -/
+
+section CanonicalModulus
+
+local instance instIsUniformlyCompleteVectorLatticeSelfAdjointCofK :
+    IsUniformlyCompleteVectorLattice (selfAdjoint C(K, ℂ)) :=
+  isUniformlyCompleteVectorLattice_of_banachLattice _
+
+local instance instIsUniformlyCompleteVectorLatticeCofK :
+    IsUniformlyCompleteVectorLattice C(K, ℝ) :=
+  isUniformlyCompleteVectorLattice_of_banachLattice _
 
 /-- The equivalence from `selfAdjoint C(K, ℂ)` to `C(K, ℝ)` sends the
-lattice-valued modulus to the pointwise complex norm. -/
-theorem selfAdjointRealEquiv_modulus_apply
+canonical complex modulus to the pointwise complex norm. -/
+private theorem selfAdjointRealEquiv_complexModulus_apply
     (f : C(K, ℂ)) (t : K) :
-    selfAdjointRealEquiv (ComplexBanachLattice.modulus f) t = ‖f t‖ := by
-  change selfAdjointRealEquiv
-      (BanachLattice.complexModulus (ℜ f) (ℑ f)) t = ‖f t‖
+    selfAdjointRealEquiv (VectorLattice.complexModulus (ℜ f) (ℑ f)) t = ‖f t‖ := by
   change selfAdjointBanachLatEquiv.toVecLatEquiv
-      (BanachLattice.complexModulus (ℜ f) (ℑ f)) t = ‖f t‖
+      (VectorLattice.complexModulus (ℜ f) (ℑ f)) t = ‖f t‖
   have h := congrArg (fun g : C(K, ℝ) => g t)
     (VecLatEquiv.map_complexModulus selfAdjointBanachLatEquiv.toVecLatEquiv
       (ℜ f) (ℑ f))
   rw [h]
-  change BanachLattice.complexModulus (selfAdjointBanachLatEquiv (ℜ f))
+  change VectorLattice.complexModulus (selfAdjointBanachLatEquiv (ℜ f))
       (selfAdjointBanachLatEquiv (ℑ f)) t = ‖f t‖
-  rw [BanachLattice.complexModulus_apply,
+  rw [VectorLattice.complexModulus_apply,
     selfAdjointBanachLatEquiv_apply_apply,
     selfAdjointBanachLatEquiv_apply_apply,
     realPart_apply_coe, imaginaryPart_apply_coe]
@@ -210,33 +218,47 @@ theorem selfAdjointRealEquiv_modulus_apply
 
 /-- `C(K, ℂ)` is a **complex Banach lattice.** -/
 noncomputable instance instComplexBanachLattice :
-    ComplexBanachLattice C(K, ℂ) := by
-  refine { coe_smul := ?_, norm_modulus := ?_ }
-  · intro r x
-    simp
-  · intro f
-    rw [← (selfAdjointRealEquiv (K := K)).norm_map]
-    rw [ContinuousMap.norm_eq_iSup_norm, ContinuousMap.norm_eq_iSup_norm]
-    apply iSup_congr
-    intro t
-    rw [selfAdjointRealEquiv_modulus_apply]
-    simp
+    ComplexBanachLattice C(K, ℂ) :=
+  ComplexBanachLattice.ofSelfAdjointBanachLattice
+    (by
+      intro r x
+      simp)
+    (by
+      intro f
+      rw [← (selfAdjointRealEquiv (K := K)).norm_map]
+      rw [ContinuousMap.norm_eq_iSup_norm, ContinuousMap.norm_eq_iSup_norm]
+      apply iSup_congr
+      intro t
+      rw [selfAdjointRealEquiv_complexModulus_apply]
+      simp)
+
+end CanonicalModulus
+
+/-- The equivalence from `selfAdjoint C(K, ℂ)` to `C(K, ℝ)` sends the
+lattice-valued modulus to the pointwise complex norm. -/
+theorem selfAdjointRealEquiv_modulus_apply
+    (f : C(K, ℂ)) (t : K) :
+    selfAdjointRealEquiv (ComplexVectorLattice.modulus f) t = ‖f t‖ := by
+  letI : IsUniformlyCompleteVectorLattice (selfAdjoint C(K, ℂ)) :=
+    isUniformlyCompleteVectorLattice_of_banachLattice _
+  rw [ComplexVectorLattice.modulus_eq_complexModulus]
+  exact selfAdjointRealEquiv_complexModulus_apply f t
 
 /-- The lattice-valued modulus of a complex-valued continuous function is its
 pointwise norm. -/
 @[simp]
 theorem modulus_apply
     (f : C(K, ℂ)) (t : K) :
-    ((ComplexBanachLattice.modulus f :
+    ((ComplexVectorLattice.modulus f :
         selfAdjoint C(K, ℂ)) : C(K, ℂ)) t =
       (‖f t‖ : ℂ) := by
   apply Complex.ext
   · exact selfAdjointRealEquiv_modulus_apply f t
-  · have hf := (ComplexBanachLattice.modulus f).2.star_eq
+  · have hf := (ComplexVectorLattice.modulus f).2.star_eq
     have h := congrArg (fun g : C(K, ℂ) => g t) hf
     apply Complex.conj_eq_iff_im.mp
-    change star ((ComplexBanachLattice.modulus f).1 t) =
-      (ComplexBanachLattice.modulus f).1 t at h
+    change star ((ComplexVectorLattice.modulus f).1 t) =
+      (ComplexVectorLattice.modulus f).1 t at h
     exact h
 
 /-! ### `C(K, ℂ) ≅ Complexification C(K, ℝ)` -/
@@ -249,7 +271,7 @@ noncomputable def complexificationEquiv :
       C(K, ℂ) := by
   exact ComplexBanachLatEquiv.ofSelfAdjointBanachLatEquiv
     (Complexification.selfAdjointBanachLatEquiv.trans
-      selfAdjointBanachLatEquiv.symm)
+      (selfAdjointBanachLatEquiv (K := K)).symm)
 
 /-- If `z = (f, g) ∈ Complexification C(K, ℝ)`, then
 `complexificationEquiv z= f + Complex.I * g`. -/
@@ -263,15 +285,15 @@ theorem complexificationEquiv_apply_apply
     ContinuousMap.add_apply, ContinuousMap.smul_apply]
   have hre :
       (Complexification.selfAdjointBanachLatEquiv.trans
-        selfAdjointBanachLatEquiv.symm) (ℜ z) =
-        selfAdjointRealEquiv.symm z.re := by
+        (selfAdjointBanachLatEquiv (K := K)).symm) (ℜ z) =
+        (selfAdjointRealEquiv (K := K)).symm z.re := by
     apply (selfAdjointRealEquiv (K := K)).injective
     change Complexification.selfAdjointEquiv (ℜ z) = z.re
     exact Complexification.selfAdjointEquiv_realPart z
   have him :
       (Complexification.selfAdjointBanachLatEquiv.trans
-        selfAdjointBanachLatEquiv.symm) (ℑ z) =
-        selfAdjointRealEquiv.symm z.im := by
+        (selfAdjointBanachLatEquiv (K := K)).symm) (ℑ z) =
+        (selfAdjointRealEquiv (K := K)).symm z.im := by
     apply (selfAdjointRealEquiv (K := K)).injective
     change Complexification.selfAdjointEquiv (ℑ z) = z.im
     exact Complexification.selfAdjointEquiv_imaginaryPart z

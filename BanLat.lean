@@ -108,8 +108,6 @@ import BanLat.Probability.Distributions.Stable.Moments
 import BanLat.QuasiInteriorPoint
 import BanLat.Quotient
 import BanLat.RieszDec
-import BanLat.SPR.Basic
-import BanLat.SPR.Characterization
 import BanLat.Substructures.Band.Basic
 import BanLat.Substructures.Band.Decomposition
 import BanLat.Substructures.Band.DisjointComplement
